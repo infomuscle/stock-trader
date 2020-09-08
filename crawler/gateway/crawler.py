@@ -5,37 +5,37 @@ import re
 import requests
 from bs4 import BeautifulSoup
 
-urlBody = "https://finance.naver.com/item"
-samsung_electronics = "005930"
-
 logger = logging.getLogger()
 
+url_body = "https://finance.naver.com/item"
+samsung_electronics = "005930"
 
-def get_url(tab_name, company_code):
-    url = urlBody
+
+def get_url(tab_name: str, params: dict):
+    url = url_body
     url += "/" + tab_name + ".nhn"
-    url += "?code=" + company_code
+
+    if (len(params.keys()) > 0):
+        for i, k in enumerate(params.keys()):
+            url += "?" if i == 0 else "&"
+            url += k + "=" + params[k]
 
     return url
 
 
-def get_soup(tab_name, company_code):
-    url = get_url(tab_name, company_code)
+def get_soup(url):
     html_doc = requests.get(url)
     soup = BeautifulSoup(html_doc.content, "html.parser")
 
     return soup
 
 
-def get_soup_by_url(url):
-    html_doc = requests.get(url)
-    soup = BeautifulSoup(html_doc.content, "html.parser")
+def get_current_price(company_code: str):
+    params = dict()
+    params["code"] = company_code
 
-    return soup
-
-
-def get_current_price(company_code):
-    soup = get_soup("sise", company_code)
+    url = get_url("sise", params)
+    soup = get_soup(url)
 
     current_price = soup.find("strong", {"id": "_nowVal"})
 
@@ -43,7 +43,7 @@ def get_current_price(company_code):
 
 
 def get_daily_prices_to_page(company_code, page):
-    daily_price_infos = {}
+    daily_price_infos = dict()
 
     for p in range(1, int(page) + 1):
         daily_price_infos.update(get_daily_prices_of_page(company_code, p))
@@ -52,31 +52,39 @@ def get_daily_prices_to_page(company_code, page):
 
 
 def get_daily_prices_of_page(company_code, page):
-    daily_price_infos = {}
+    params = dict()
+    params["code"] = company_code
+    params["page"] = str(page)
 
-    url = get_url("sise_day", company_code)
-    url += "&page=" + str(page)
-    soup = get_soup_by_url(url)
+    url = get_url("sise_day", params)
+    soup = get_soup(url)
 
     base_table = soup.find_all("tr")
     price_table = base_table[2:7] + base_table[10:-2]
+
+    daily_price_infos = dict()
     for daily_price_info in price_table:
-        price_datas = daily_price_info.find_all("span")
+        price_data = daily_price_info.find_all("span")
+
+        price_info = get_price_info(price_data)
 
         img = str(daily_price_info.find("img"))
-        rate = get_rate_sign(img) + re.sub('[\t\n]', '', price_datas[2].text)
-
-        price_info = {}
-        price_info["closing"] = price_datas[1].text
+        rate = get_rate_sign(img) + re.sub('[\t\n]', '', price_data[2].text)
         price_info["rate"] = rate
-        price_info["opening"] = price_datas[3].text
-        price_info["highest"] = price_datas[4].text
-        price_info["lowest"] = price_datas[5].text
-        price_info["volume"] = price_datas[6].text
 
-        daily_price_infos[price_datas[0].text] = price_info
+        daily_price_infos[price_data[0].text] = price_info
 
     return daily_price_infos
+
+
+def get_price_info(price_data):
+    price_info = dict()
+    price_info["closing"] = price_data[1].text
+    price_info["opening"] = price_data[3].text
+    price_info["highest"] = price_data[4].text
+    price_info["lowest"] = price_data[5].text
+    price_info["volume"] = price_data[6].text
+    return price_info
 
 
 def get_rate_sign(img):
@@ -89,7 +97,5 @@ def get_rate_sign(img):
     return sign
 
 
-# print(get_current_price(samsung_electronics))
-# print(get_daily_prices(samsung_electronics))
-# print(json.dumps(get_daily_prices(samsung_electronics)))
+print(get_current_price(samsung_electronics))
 print(json.dumps(get_daily_prices_to_page(samsung_electronics, 10)))
