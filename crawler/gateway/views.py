@@ -1,9 +1,9 @@
 from rest_framework import viewsets
 
-from gateway.models import Gateway
+from gateway.models import GatewayModel
 from gateway.serializers import GatewaySerializer
 
 
-class Gateway(viewsets.ModelViewSet):
-    queryset = Gateway.objects.all()
+class GatewayView(viewsets.ModelViewSet):
+    queryset = GatewayModel.objects.all()
     serializer_class = GatewaySerializer

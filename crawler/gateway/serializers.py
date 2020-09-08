@@ -1,7 +1,9 @@
-from .models import Gateway
 from rest_framework import serializers
 
+from .models import GatewayModel
+
+
 class GatewaySerializer(serializers.HyperlinkedModelSerializer):
-    class Test:
-        model = Gateway
+    class Crawl:
+        model = GatewayModel
         fields = ('no', 'name', 'price')
