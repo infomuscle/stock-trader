@@ -4,6 +4,6 @@ from .models import GatewayModel
 
 
 class GatewaySerializer(serializers.HyperlinkedModelSerializer):
-    class Crawl:
+    class Meta:
         model = GatewayModel
-        fields = ('no', 'name', 'price')
+        fields = ('no', 'company', 'page')

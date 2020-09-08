@@ -20,12 +20,17 @@ def get_url(tab_name: str, params: dict):
             url += "?" if i == 0 else "&"
             url += k + "=" + params[k]
 
+    print(url)
+
     return url
 
 
 def get_soup(url):
-    html_doc = requests.get(url)
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36'}
+    html_doc = requests.get(url, headers=headers)
     soup = BeautifulSoup(html_doc.content, "html.parser")
+    print(html_doc.content)
 
     return soup
 
@@ -97,5 +102,6 @@ def get_rate_sign(img):
     return sign
 
 
-print(get_current_price(samsung_electronics))
-print(json.dumps(get_daily_prices_to_page(samsung_electronics, 10)))
+if __name__ == '__main':
+    print(get_current_price(samsung_electronics))
+    print(json.dumps(get_daily_prices_to_page(samsung_electronics, 10)))
