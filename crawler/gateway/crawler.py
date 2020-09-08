@@ -1,13 +1,33 @@
-import pandas
 import requests
 from bs4 import BeautifulSoup
 
-html = requests.get('https://finance.naver.com/item/main.nhn?code=005930')
-bs_obj = BeautifulSoup(html.content, "html.parser")
+urlBody = "https://finance.naver.com/item"
 
-no_today = bs_obj.find("p", {"class": "no_today"})
-blind = no_today.find("span", {"class": "blind"})
+samsung_electronics = "005930"
 
-# print(bs_obj)
-print(no_today)
-# print(blind.text)
+
+def get_url(tab_name, company_code):
+    url = urlBody
+    url += "/" + tab_name + ".nhn"
+    url += "?code=" + company_code
+
+    return url
+
+
+def get_soup(url):
+    html_doc = requests.get(url)
+    soup = BeautifulSoup(html_doc, "html.parser")
+
+    return soup
+
+
+def get_current_price(company_code):
+    url = get_url("sise", company_code)
+    soup = get_soup(url)
+
+    current_price = soup.find("strong", {"id": "_nowVal"})
+
+    return current_price.text
+
+
+print(get_current_price(samsung_electronics))
