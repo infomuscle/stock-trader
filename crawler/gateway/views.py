@@ -1,5 +1,4 @@
 import json
-import urllib.parse
 
 from django.http import HttpResponse
 from rest_framework import viewsets
@@ -15,12 +14,16 @@ class GatewayViewSet(viewsets.ModelViewSet):
 
 
 def current(request):
-    c_price = crawler.get_current_price("005930")
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+    c_price = crawler.get_current_price(code)
     return HttpResponse(c_price)
 
 
 def daily(request):
-    prices = crawler.get_daily_prices_to_page("005930", 3)
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+    prices = crawler.get_daily_prices_to_page(code, 3)
     return HttpResponse(json.dumps(prices))
 
 
