@@ -1,9 +1,11 @@
-import json
 import logging
 import re
 
+import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+
+from gateway import constants
 
 logger = logging.getLogger()
 
@@ -25,16 +27,16 @@ def get_url(tab_name: str, params: dict):
 
 def get_soup(url):
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36'}
+        "User-Agent": constants.HEADER_VALUE_USER_AGENT}
     html_doc = requests.get(url, headers=headers)
     soup = BeautifulSoup(html_doc.content, "html.parser")
 
     return soup
 
 
-def get_current_price(company_code: str):
+def get_current_price(code: str):
     params = dict()
-    params["code"] = company_code
+    params["code"] = code
 
     url = get_url("sise", params)
     soup = get_soup(url)
@@ -44,18 +46,18 @@ def get_current_price(company_code: str):
     return current_price.text
 
 
-def get_daily_prices_to_page(company_code, page):
+def get_daily_prices_to_page(code, page):
     daily_price_infos = dict()
 
     for p in range(1, int(page) + 1):
-        daily_price_infos.update(get_daily_prices_of_page(company_code, p))
+        daily_price_infos.update(get_daily_prices_of_page(code, p))
 
     return daily_price_infos
 
 
-def get_daily_prices_of_page(company_code, page):
+def get_daily_prices_of_page(code, page):
     params = dict()
-    params["code"] = company_code
+    params["code"] = code
     params["page"] = str(page)
 
     url = get_url("sise_day", params)
@@ -71,7 +73,7 @@ def get_daily_prices_of_page(company_code, page):
         price_info = get_price_info(price_data)
 
         img = str(daily_price_info.find("img"))
-        rate = get_rate_sign(img) + re.sub('[\t\n]', '', price_data[2].text)
+        rate = get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
         price_info["rate"] = rate
 
         daily_price_infos[price_data[0].text] = price_info
@@ -99,6 +101,25 @@ def get_rate_sign(img):
     return sign
 
 
-if __name__ == '__main':
-    print(get_current_price(samsung_electronics))
-    print(json.dumps(get_daily_prices_to_page(samsung_electronics, 10)))
+def get_code_list():
+    df = pd.read_html(constants.URL_KRX_CODE_LIST, header=0)[0]
+    df.종목코드 = df.종목코드.map("{:06d}".format)
+    df = df[["회사명", "종목코드"]]
+    df = df.rename(columns={"회사명": "name", "종목코드": "code"})
+
+
+def get_per(code: str):
+    params = dict()
+    params["code"] = code
+
+    url = get_url("sise", params)
+    soup = get_soup(url)
+
+    per = soup.find("span", {"id": "_sise_per"})
+    per = re.sub("[\t\n]", "", per.text)
+    return per
+
+# if __name__ == "__main":
+# print(get_current_price(samsung_electronics))
+# print(json.dumps(get_daily_prices_to_page(samsung_electronics, 10)))
+# print(get_per(samsung_electronics))
