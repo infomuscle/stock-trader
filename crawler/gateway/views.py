@@ -27,15 +27,26 @@ def daily(request):
     return HttpResponse(json.dumps(prices))
 
 
-def codeof(request):
+def name(request):
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+    code_name = crawler.get_name_code()
+    name = code_name[code]
+    return name
 
-    return
+
+def code(request):
+    req_json = request.GET.dict()
+    name = req_json.get("name")
+    name_code = crawler.get_name_code()
+    code = name_code[name]
+    return code
 
 
-def codelist(request):
-    codelist = crawler.get_code_list()
+def codes(request):
+    code_list = crawler.get_code_list()
 
-    return codelist
+    return code_list
 
 
 def test_get(request):
