@@ -118,7 +118,6 @@ def get_code_name():
     for i in df.index:
         code_name[df.at[i, '종목코드']] = df.at[i, '회사명']
 
-    print(code_name)
     return code_name
 
 
@@ -129,7 +128,6 @@ def get_name_code():
     for i in df.index:
         name_code[df.at[i, '회사명']] = df.at[i, '종목코드']
 
-    print(name_code)
     return name_code
 
 
@@ -146,7 +144,4 @@ def get_per(code: str):
 
 
 # if __name__ == "__main":
-# print(get_current_price(samsung_electronics))
-# print(json.dumps(get_daily_prices_to_page(samsung_electronics, 10)))
-# print(get_per(samsung_electronics))
-get_tickers()
+# get_tickers()
