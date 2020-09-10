@@ -39,7 +39,7 @@ def name(request):
     code = req_json.get("code")
     code_name = crawler.get_name_code()
     name = code_name[code]
-    return name
+    return HttpResponse(name)
 
 
 def code(request):
@@ -47,13 +47,12 @@ def code(request):
     name = req_json.get("name")
     name_code = crawler.get_name_code()
     code = name_code[name]
-    return code
+    return HttpResponse(code)
 
 
 def tickers(request):
-    tickers = crawler.get_tickers()
-
-    return tickers
+    tickers_str = crawler.get_tickers()
+    return HttpResponse(tickers_str)
 
 
 def test_get(request):
