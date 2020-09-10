@@ -101,8 +101,8 @@ def get_rate_sign(img):
     return sign
 
 
-def get_tickers():
-    df = pd.read_html(consts.URL_KRX_CODE_LIST, header=0)[0]
+def get_companies():
+    df = pd.read_html(consts.URL_KRX_COMPANIES_LISTED, header=0)[0]
     df.종목코드 = df.종목코드.map("{:06d}".format)
     df = df[["회사명", "종목코드"]]
     df = df.rename(columns={"회사명": "name", "종목코드": "code"})
@@ -112,7 +112,7 @@ def get_tickers():
 
 
 def get_code_name():
-    df = pd.read_html(consts.URL_KRX_CODE_LIST, header=0)[0]
+    df = pd.read_html(consts.URL_KRX_COMPANIES_LISTED, header=0)[0]
 
     code_name = dict()
     for i in df.index:
@@ -122,7 +122,7 @@ def get_code_name():
 
 
 def get_name_code():
-    df = pd.read_html(consts.URL_KRX_CODE_LIST, header=0)[0]
+    df = pd.read_html(consts.URL_KRX_COMPANIES_LISTED, header=0)[0]
 
     name_code = dict()
     for i in df.index:
@@ -143,5 +143,5 @@ def get_per(code: str):
     return per
 
 
-# if __name__ == "__main":
-# get_tickers()
+# if __name__ == "__main__":
+    # get_companies()

@@ -31,6 +31,7 @@ def per(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
     per = crawler.get_per(code)
+    print(type(per))
     return HttpResponse(per)
 
 
@@ -50,9 +51,9 @@ def code(request):
     return HttpResponse(code)
 
 
-def tickers(request):
-    tickers_str = crawler.get_tickers()
-    return HttpResponse(tickers_str)
+def companies(request):
+    companies_str = crawler.get_companies()
+    return HttpResponse(companies_str)
 
 
 def test_get(request):

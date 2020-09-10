@@ -12,7 +12,7 @@ urlpatterns = [
     url(r'^api/daily', views.daily),
     url(r'^api/current', views.current),
     url(r'^api/per', views.per),
-    url(r'^api/tickers', views.tickers),
+    url(r'^api/companies', views.companies),
     url(r'^api/test/g', views.test_get),
     url(r'^api/test/p', views.test_post)
 ]
