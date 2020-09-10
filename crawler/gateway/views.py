@@ -26,6 +26,11 @@ def daily(request):
     prices = crawler.get_daily_prices_to_page(code, 3)
     return HttpResponse(json.dumps(prices))
 
+def per(request):
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+    per = crawler.get_per(code)
+    return HttpResponse(per)
 
 def name(request):
     req_json = request.GET.dict()

@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^api/daily', views.daily),
     url(r'^api/current/', views.current),
+    url(r'^api/per/', views.per),
     url(r'^api/test/g', views.test_get),
     url(r'^api/test/p', views.test_post)
 ]
