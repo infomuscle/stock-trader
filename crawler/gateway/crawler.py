@@ -34,6 +34,19 @@ def get_soup(url):
     return soup
 
 
+def get_per(code: str):
+    params = dict()
+    params["code"] = code
+
+    url = get_url("sise", params)
+    soup = get_soup(url)
+
+    per = soup.find("span", {"id": "_sise_per"})
+    per = re.sub("[\t\n]", "", per.text)
+
+    return per
+
+
 def get_current_price(code: str):
     params = dict()
     params["code"] = code
@@ -88,6 +101,7 @@ def get_price_info(price_data):
     price_info["highest"] = price_data[4].text
     price_info["lowest"] = price_data[5].text
     price_info["volume"] = price_data[6].text
+
     return price_info
 
 
@@ -101,47 +115,50 @@ def get_rate_sign(img):
     return sign
 
 
-def get_tickers():
-    df = pd.read_html(consts.URL_KRX_CODE_LIST, header=0)[0]
-    df.종목코드 = df.종목코드.map("{:06d}".format)
-    df = df[["회사명", "종목코드"]]
-    df = df.rename(columns={"회사명": "name", "종목코드": "code"})
+def get_companies(type: str):
+    url = consts.URL_BODY_KRX_COMPANIES + "&searchType="
+    url += consts.KRX_SEARCH_TYPE_CD_KOSPI if type == "kospi" else consts.KRX_SEARCH_TYPE_CD_LISTED
+
+    df = get_companies_df(url)
 
     df_json_str = df.to_json(force_ascii=False, orient="records")
+
     return df_json_str
 
 
 def get_code_name():
-    df = pd.read_html(consts.URL_KRX_CODE_LIST, header=0)[0]
+    url = consts.URL_BODY_KRX_COMPANIES
+    url += "&searchType=" + consts.KRX_SEARCH_TYPE_CD_LISTED
+
+    df = get_companies_df(url)
 
     code_name = dict()
     for i in df.index:
-        code_name[df.at[i, '종목코드']] = df.at[i, '회사명']
+        code_name[df.at[i, 'code']] = df.at[i, 'name']
 
     return code_name
 
 
 def get_name_code():
-    df = pd.read_html(consts.URL_KRX_CODE_LIST, header=0)[0]
+    url = consts.URL_BODY_KRX_COMPANIES
+    url += "&searchType=" + consts.KRX_SEARCH_TYPE_CD_LISTED
+
+    df = get_companies_df(url)
 
     name_code = dict()
     for i in df.index:
-        name_code[df.at[i, '회사명']] = df.at[i, '종목코드']
+        name_code[df.at[i, 'name']] = df.at[i, 'code']
 
     return name_code
 
 
-def get_per(code: str):
-    params = dict()
-    params["code"] = code
+def get_companies_df(url):
+    df = pd.read_html(url, header=0)[0]
+    df = df[["회사명", "종목코드"]]
+    df = df.rename(columns={"회사명": "name", "종목코드": "code"})
+    df.code = df.code.map("{:06d}".format)
 
-    url = get_url("sise", params)
-    soup = get_soup(url)
+    return df
 
-    per = soup.find("span", {"id": "_sise_per"})
-    per = re.sub("[\t\n]", "", per.text)
-    return per
-
-
-# if __name__ == "__main":
-# get_tickers()
+# if __name__ == "__main__":
+#     get_companies("kospi")
