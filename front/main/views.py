@@ -1,3 +1,5 @@
+import json
+
 import requests
 from main import constants as consts
 from django.http import HttpResponse
@@ -32,7 +34,7 @@ def per(request):
 
 def pers(request):
     url_tickers = consts.URL_BODY_CRAWLER + "/api/tickers"
-    tickers = requests.get(url_tickers)
+    tickers = json.loads(requests.get(url_tickers))
 
     pers = dict()
     for t in tickers:
