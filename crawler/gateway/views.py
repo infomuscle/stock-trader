@@ -34,10 +34,17 @@ def per(request):
     return HttpResponse(per)
 
 
+def companies(request):
+    req_json = request.GET.dict()
+    type = req_json.get("type")
+    companies_str = crawler.get_companies(type)
+    return HttpResponse(companies_str)
+
+
 def name(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
-    code_name = crawler.get_name_code()
+    code_name = crawler.get_code_name()
     name = code_name[code]
     return HttpResponse(name)
 
@@ -48,13 +55,6 @@ def code(request):
     name_code = crawler.get_name_code()
     code = name_code[name]
     return HttpResponse(code)
-
-
-def companies(request):
-    req_json = request.GET.dict()
-    type = req_json.get("type")
-    companies_str = crawler.get_companies(type)
-    return HttpResponse(companies_str)
 
 
 def test_get(request):
