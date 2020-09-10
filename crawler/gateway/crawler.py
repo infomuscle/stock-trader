@@ -5,7 +5,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-from gateway import constants
+from gateway import constants as consts
 
 logger = logging.getLogger()
 
@@ -27,7 +27,7 @@ def get_url(tab_name: str, params: dict):
 
 def get_soup(url):
     headers = {
-        "User-Agent": constants.HEADER_VALUE_USER_AGENT}
+        "User-Agent": consts.HEADER_VALUE_USER_AGENT}
     html_doc = requests.get(url, headers=headers)
     soup = BeautifulSoup(html_doc.content, "html.parser")
 
@@ -102,10 +102,36 @@ def get_rate_sign(img):
 
 
 def get_code_list():
-    df = pd.read_html(constants.URL_KRX_CODE_LIST, header=0)[0]
+    df = pd.read_html(consts.URL_KRX_CODE_LIST, header=0)[0]
     df.종목코드 = df.종목코드.map("{:06d}".format)
     df = df[["회사명", "종목코드"]]
     df = df.rename(columns={"회사명": "name", "종목코드": "code"})
+
+    df_json = df.to_json(force_ascii=False, orient="records")
+    print(df_json)
+    return df_json
+
+
+def get_code_name():
+    df = pd.read_html(consts.URL_KRX_CODE_LIST, header=0)[0]
+
+    code_name = dict()
+    for i in df.index:
+        code_name[df.at[i, '종목코드']] = df.at[i, '회사명']
+
+    print(code_name)
+    return code_name
+
+
+def get_name_code():
+    df = pd.read_html(consts.URL_KRX_CODE_LIST, header=0)[0]
+
+    name_code = dict()
+    for i in df.index:
+        name_code[df.at[i, '회사명']] = df.at[i, '종목코드']
+
+    print(name_code)
+    return name_code
 
 
 def get_per(code: str):
@@ -119,7 +145,9 @@ def get_per(code: str):
     per = re.sub("[\t\n]", "", per.text)
     return per
 
+
 # if __name__ == "__main":
 # print(get_current_price(samsung_electronics))
 # print(json.dumps(get_daily_prices_to_page(samsung_electronics, 10)))
 # print(get_per(samsung_electronics))
+# get_code_list()

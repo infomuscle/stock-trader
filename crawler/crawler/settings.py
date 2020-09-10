@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'gateway',
     'rest_framework',
     'pandas',
+    'numpy',
     'requests',
     'bs4',
     'django.contrib.admin',
