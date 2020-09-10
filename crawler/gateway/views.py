@@ -27,6 +27,13 @@ def daily(request):
     return HttpResponse(json.dumps(prices))
 
 
+def per(request):
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+    per = crawler.get_per(code)
+    return HttpResponse(per)
+
+
 def name(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
@@ -43,10 +50,10 @@ def code(request):
     return code
 
 
-def codes(request):
-    code_list = crawler.get_code_list()
+def tickers(request):
+    tickers = crawler.get_tickers()
 
-    return code_list
+    return tickers
 
 
 def test_get(request):
