@@ -16,4 +16,3 @@ urlpatterns = [
     url(r'^api/test/g', views.test_get),
     url(r'^api/test/p', views.test_post)
 ]
-print(urlpatterns)

@@ -107,9 +107,8 @@ def get_tickers():
     df = df[["회사명", "종목코드"]]
     df = df.rename(columns={"회사명": "name", "종목코드": "code"})
 
-    df_json = df.to_json(force_ascii=False, orient="records")
-    print(df_json)
-    return df_json
+    df_json_str = df.to_json(force_ascii=False, orient="records")
+    return df_json_str
 
 
 def get_code_name():
@@ -150,4 +149,4 @@ def get_per(code: str):
 # print(get_current_price(samsung_electronics))
 # print(json.dumps(get_daily_prices_to_page(samsung_electronics, 10)))
 # print(get_per(samsung_electronics))
-# get_code_list()
+get_tickers()
