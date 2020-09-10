@@ -31,13 +31,14 @@ def per(request):
 
 
 def pers(request):
-    tickers = consts.URL_BODY_CRAWLER + "/api/tickers"
+    url_tickers = consts.URL_BODY_CRAWLER + "/api/tickers"
+    tickers = requests.get(url_tickers)
 
     pers = dict()
     for t in tickers:
-        url = consts.URL_BODY_CRAWLER + "/api/per"
-        url += "?code=" + t["code"]
-        per = requests.get(url)
+        url_pers = consts.URL_BODY_CRAWLER + "/api/per"
+        url_pers += "?code=" + t["code"]
+        per = requests.get(url_pers)
         pers[t["code"]] = per
 
     print(pers)
