@@ -31,6 +31,14 @@ def per(request):
 
 
 def pers(request):
-    url = consts.URL_BODY_CRAWLER + "/api/pers"
-    pers = requests.get(url)
+    tickers = consts.URL_BODY_CRAWLER + "/api/tickers"
+
+    pers = dict()
+    for t in tickers:
+        url = consts.URL_BODY_CRAWLER + "/api/per"
+        url += "?code=" + t["code"]
+        per = requests.get(url)
+        pers[t["code"]] = per
+
+    print(pers)
     return HttpResponse(pers)
