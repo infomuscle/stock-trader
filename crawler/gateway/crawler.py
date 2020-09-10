@@ -101,8 +101,11 @@ def get_rate_sign(img):
     return sign
 
 
-def get_companies():
-    df = pd.read_html(consts.URL_KRX_COMPANIES_LISTED, header=0)[0]
+def get_companies(type: str):
+    url = consts.URL_BODY_KRX_COMPANIES + "&searchType="
+    url += consts.KRX_SEARCH_TYPE_CD_LISTED if type == "listed" else consts.KRX_SEARCH_TYPE_CD_KOSPI if type == "kospi" else ""
+
+    df = pd.read_html(url, header=0)[0]
     df.종목코드 = df.종목코드.map("{:06d}".format)
     df = df[["회사명", "종목코드"]]
     df = df.rename(columns={"회사명": "name", "종목코드": "code"})
@@ -112,7 +115,10 @@ def get_companies():
 
 
 def get_code_name():
-    df = pd.read_html(consts.URL_KRX_COMPANIES_LISTED, header=0)[0]
+    url = consts.URL_BODY_KRX_COMPANIES
+    url += "searchType=" + consts.KRX_SEARCH_TYPE_CD_LISTED
+
+    df = pd.read_html(url, header=0)[0]
 
     code_name = dict()
     for i in df.index:
@@ -122,7 +128,10 @@ def get_code_name():
 
 
 def get_name_code():
-    df = pd.read_html(consts.URL_KRX_COMPANIES_LISTED, header=0)[0]
+    url = consts.URL_BODY_KRX_COMPANIES
+    url += "searchType=" + consts.KRX_SEARCH_TYPE_CD_LISTED
+
+    df = pd.read_html(url, header=0)[0]
 
     name_code = dict()
     for i in df.index:
@@ -142,6 +151,5 @@ def get_per(code: str):
     per = re.sub("[\t\n]", "", per.text)
     return per
 
-
 # if __name__ == "__main__":
-    # get_companies()
+#     get_companies("kospi")
