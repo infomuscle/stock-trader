@@ -32,7 +32,7 @@ def per(request):
 
 def pers(request):
     url_tickers = consts.URL_BODY_CRAWLER + "/api/tickers"
-    tickers = request.get(url_tickers)
+    tickers = requests.get(url_tickers)
 
     pers = dict()
     for t in tickers:
