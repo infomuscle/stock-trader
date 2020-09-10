@@ -101,7 +101,7 @@ def get_rate_sign(img):
     return sign
 
 
-def get_code_list():
+def get_tickers():
     df = pd.read_html(consts.URL_KRX_CODE_LIST, header=0)[0]
     df.종목코드 = df.종목코드.map("{:06d}".format)
     df = df[["회사명", "종목코드"]]
