@@ -15,9 +15,12 @@ def current(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
     url = consts.URL_BODY_CRAWLER + "/api/current"
-    url += '?code=' + code
+    # url += '?code=' + code
+    url += '?code=' + consts.CODE_SAMSUNG_ELECTRONICS
     current_price = requests.get(url)
-    return HttpResponse(current_price)
+
+    context = {}
+    return render(request, 'main/current.html', context)
 
 
 def daily(request):
