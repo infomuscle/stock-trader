@@ -29,10 +29,12 @@ def daily(request):
     url = consts.URL_BODY_CRAWLER + "/api/daily"
     url += '?code=' + code
     daily_price = requests.get(url)
-    return HttpResponse(daily_price)
+
+    context = {}
+    return render(request, 'main/daily.html', context)
 
 
-def per(request):
+def per_deprecated(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
     url = consts.URL_BODY_CRAWLER + "/api/per"
@@ -41,7 +43,7 @@ def per(request):
     return HttpResponse(per)
 
 
-def pers(request):
+def per(request):
     url_tickers = consts.URL_BODY_CRAWLER + "/api/companies/list"
     res_tickers = requests.get(url_tickers)
     tickers = json.loads(res_tickers.content)
@@ -55,4 +57,10 @@ def pers(request):
         res_per = requests.get(url_per)
         pers[ticker["name"]] = res_per.text
 
-    return HttpResponse(str(pers))
+    context = {}
+    return render(request, 'main/per.html', context)
+
+
+def summary(request):
+    context = {}
+    return render(request, 'main/summary.html', context)
