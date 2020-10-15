@@ -11,3 +11,13 @@
   * 메인: Django
   * API: Flask
 
+
+
+### 데이터베이스
+
+- PER
+  - COMPANY_CD / PER / DATE
+- COMPANY
+  - COMPANY_CD / COMPANY_NM / STARRED
+- PRICE
+  - COMPANY_CD / HIGHEST / LOWEST / OPENING / CLOSING / DATE
