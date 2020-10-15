@@ -9,12 +9,9 @@ from gateway import constants as consts
 
 logger = logging.getLogger()
 
-url_body = "https://finance.naver.com/item"
-samsung_electronics = "005930"
-
 
 def get_url(tab_name: str, params: dict):
-    url = url_body
+    url = consts.URL_BODY_NAVER
     url += "/" + tab_name + ".nhn"
 
     if (len(params.keys()) > 0):
