@@ -8,14 +8,14 @@ class GatewayModel(models.Model):
 
 
 class Company(models.Model):
-    company_code = models.CharField(db_column='COMPANY_CODE', primary_key=True)
-    company_name = models.CharField(db_column='COMPANY_NAME')
-    starred = models.CharField(db_column='STARRED')
+    company_code = models.CharField(db_column='COMPANY_CODE', primary_key=True, max_length=6)
+    company_name = models.CharField(db_column='COMPANY_NAME', max_length=30)
+    starred = models.CharField(db_column='STARRED', max_length=1)
 
 
 class DailyInfoForCompany(models.Model):
-    company_code = models.CharField(db_column='COMPANY_CODE', primary_key=True)
-    date = models.DateField(db_column='DATE', primary_key=True)
+    company_code = models.CharField(db_column='COMPANY_CODE', primary_key=True, max_length=6)
+    date = models.DateField(db_column='DATE')
     opening_price = models.IntegerField(db_column='OPENING_PRICE')
     closing_price = models.IntegerField(db_column='CLOSING_PRICE')
     highest_price = models.IntegerField(db_column='HIGHEST_PRICE')
