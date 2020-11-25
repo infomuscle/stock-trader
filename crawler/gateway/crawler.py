@@ -11,6 +11,10 @@ logger = logging.getLogger()
 
 
 def get_url(tab_name: str, params: dict):
+    """
+    네이버 증권 URI에 탭 이름과 파라미터를 붙어 네이버 증권 URL 생성
+    @return url: str
+    """
     url = consts.URL_BODY_NAVER
     url += "/" + tab_name + ".nhn"
 
@@ -23,8 +27,11 @@ def get_url(tab_name: str, params: dict):
 
 
 def get_soup(url):
-    headers = {
-        "User-Agent": consts.HEADER_VALUE_USER_AGENT}
+    """
+    User-Agent가 포함된 HTTP 헤더와 URL로 BeautifulSoup 생성
+    @return soup: BeautifulSoup
+    """
+    headers = {"User-Agent": consts.HEADER_VALUE_USER_AGENT}
     html_doc = requests.get(url, headers=headers)
     soup = BeautifulSoup(html_doc.content, "html.parser")
 
@@ -32,6 +39,10 @@ def get_soup(url):
 
 
 def get_per(code: str):
+    """
+    종목코드의 현재 시점 PER 조회
+    @return per: str
+    """
     params = dict()
     params["code"] = code
 
@@ -45,6 +56,10 @@ def get_per(code: str):
 
 
 def get_current_price(code: str):
+    """
+    종목코드의 현재 가격 조회
+    @return current_price: str
+    """
     params = dict()
     params["code"] = code
 
@@ -57,6 +72,10 @@ def get_current_price(code: str):
 
 
 def get_daily_prices_to_page(code, page):
+    """
+    종목코드의 1부터 n 페이지까지의 {"날짜": {가격 정보}} 모두 조회
+    @return daily_price_infos: dict
+    """
     daily_price_infos = dict()
 
     for p in range(1, int(page) + 1):
@@ -66,6 +85,10 @@ def get_daily_prices_to_page(code, page):
 
 
 def get_daily_prices_of_page(code, page):
+    """
+    종목코드의 n 페이지의 {"날짜": {가격 정보}} 조회
+    @return daily_price_info: dict
+    """
     params = dict()
     params["code"] = code
     params["page"] = str(page)
@@ -87,6 +110,7 @@ def get_daily_prices_of_page(code, page):
         price_info["rate"] = rate
 
         daily_price_infos[price_data[0].text] = price_info
+        print(daily_price_infos)
 
     return daily_price_infos
 
@@ -156,6 +180,3 @@ def get_companies_df(url):
     df.code = df.code.map("{:06d}".format)
 
     return df
-
-# if __name__ == "__main__":
-#     get_companies("kospi")
