@@ -6,7 +6,7 @@ from gateway import views
 app_name = 'gateway'
 
 router = routers.DefaultRouter()
-router.register('gateway', views.GatewayViewSet)
+# router.register('gateway', views.GatewayViewSet)
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^api/daily', views.daily),
