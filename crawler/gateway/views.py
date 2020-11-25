@@ -23,7 +23,9 @@ def current(request):
 def daily(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
-    prices = crawler.get_daily_prices_to_page(code, 3)
+
+    daily_crawler = crawler.DailyInfoCrawler()
+    prices = daily_crawler.get_daily_prices_to_page(code, 3)
     return HttpResponse(json.dumps(prices))
 
 
@@ -37,14 +39,16 @@ def per(request):
 def companies(request):
     req_json = request.GET.dict()
     type = req_json.get("type")
-    companies_str = crawler.get_companies(type)
+    krs_companies_crawler = crawler.KrxCompaniesCrawler()
+    companies_str = krs_companies_crawler.get_companies(type)
     return HttpResponse(companies_str)
 
 
 def name(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
-    code_name = crawler.get_code_name()
+    krs_companies_crawler = crawler.KrxCompaniesCrawler()
+    code_name = krs_companies_crawler.get_code_name()
     name = code_name[code]
     return HttpResponse(name)
 
@@ -52,7 +56,8 @@ def name(request):
 def code(request):
     req_json = request.GET.dict()
     name = req_json.get("name")
-    name_code = crawler.get_name_code()
+    krs_companies_crawler = crawler.KrxCompaniesCrawler()
+    name_code = krs_companies_crawler.get_name_code()
     code = name_code[name]
     return HttpResponse(code)
 
