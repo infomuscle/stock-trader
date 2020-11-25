@@ -4,13 +4,13 @@ from django.http import HttpResponse
 from rest_framework import viewsets
 
 from gateway import crawler
-from gateway.models import GatewayModel
-from gateway.serializers import GatewaySerializer
+# from gateway.models import GatewayModel
+# from gateway.serializers import GatewaySerializer
 
 
-class GatewayViewSet(viewsets.ModelViewSet):
-    queryset = GatewayModel.objects.all()
-    serializer_class = GatewaySerializer
+# class GatewayViewSet(viewsets.ModelViewSet):
+    # queryset = GatewayModel.objects.all()
+    # serializer_class = GatewaySerializer
 
 
 def current(request):
