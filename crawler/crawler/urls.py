@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^api/daily', views.daily),
     url(r'^api/current', views.current),
     url(r'^api/per', views.per),
+    url(r'^api/indicators', views.indicators),
     url(r'^api/companies/list', views.companies),
     url(r'^api/companies/name', views.name),
     url(r'^api/companies/code', views.code),

@@ -24,7 +24,7 @@ def daily(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
 
-    daily_crawler = crawler.DailyInfoCrawler()
+    daily_crawler = crawler.DailyPriceCrawler()
     prices = daily_crawler.get_daily_prices_to_page(code, 3)
     return HttpResponse(json.dumps(prices))
 
@@ -32,8 +32,21 @@ def daily(request):
 def per(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
-    per = crawler.get_per(code)
+
+    company_detail_crawler = crawler.CompanyDetailCrawler()
+    per = company_detail_crawler.get_per(code)
+
     return HttpResponse(per)
+
+
+def indicators(request):
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+
+    company_detail_crawler = crawler.CompanyDetailCrawler()
+    indicators = company_detail_crawler.get_indicators(code)
+
+    return HttpResponse(str(indicators))
 
 
 def companies(request):
