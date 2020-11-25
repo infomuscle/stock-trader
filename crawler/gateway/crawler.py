@@ -38,23 +38,6 @@ def get_soup(url):
     return soup
 
 
-def get_per(code: str):
-    """
-    종목코드의 현재 시점 PER 조회
-    @return per: str
-    """
-    params = dict()
-    params["code"] = code
-
-    url = get_url("sise", params)
-    soup = get_soup(url)
-
-    per = soup.find("span", {"id": "_sise_per"})
-    per = re.sub("[\t\n]", "", per.text)
-
-    return per
-
-
 def get_current_price(code: str):
     """
     종목코드의 현재 가격 조회
@@ -71,7 +54,56 @@ def get_current_price(code: str):
     return current_price.text
 
 
-class DailyInfoCrawler:
+class CompanyDetailCrawler:
+    def get_per(self, code: str):
+        """
+        종목코드의 현재 시점 PER 조회
+        @return per: str
+        """
+        params = dict()
+        params["code"] = code
+
+        url = get_url("sise", params)
+        soup = get_soup(url)
+        print(soup)
+
+        per = soup.find("span", {"id": "_sise_per"})
+        per = re.sub("[\t\n]", "", per.text)
+
+        return per
+
+    def get_indicators(self, code: str):
+
+        url = consts.URL_BODY_NAVER_COMPANY + code
+        soup = get_soup(url)
+
+        table = soup.find("td", {"class": "td0301"})
+        lines = table.find_all("dt")
+
+        indicators_to_bring = ["EPS", "PER", "BPS", "PBR", "업종PER"]
+        indicators = dict()
+        for line in lines:
+            indicator = line.text.split(" ")
+            if indicator[0] in indicators_to_bring:
+                indicators[indicator[0]] = indicator[1]
+
+        return indicators
+
+    def __get_price_info(self, price_data):
+        """
+        일간 정보를 딕셔너리로 생성: 종가, 시가, 고가, 저가, 거래량
+        @return price_info: dict
+        """
+        price_info = dict()
+        price_info["eps"] = price_data[1].text
+        price_info["per"] = price_data[3].text
+        price_info["bps"] = price_data[4].text
+        price_info["pbr"] = price_data[5].text
+        price_info["roe"] = price_data[6].text
+        price_info["rob"] = price_data[6].text
+
+
+class DailyPriceCrawler:
 
     def get_daily_prices_to_page(self, code, page):
         """
