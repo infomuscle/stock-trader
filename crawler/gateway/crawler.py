@@ -71,112 +71,137 @@ def get_current_price(code: str):
     return current_price.text
 
 
-def get_daily_prices_to_page(code, page):
-    """
-    종목코드의 1부터 n 페이지까지의 {"날짜": {가격 정보}} 모두 조회
-    @return daily_price_infos: dict
-    """
-    daily_price_infos = dict()
+class DailyInfoCrawler:
 
-    for p in range(1, int(page) + 1):
-        daily_price_infos.update(get_daily_prices_of_page(code, p))
+    def get_daily_prices_to_page(self, code, page):
+        """
+        종목코드의 1부터 n 페이지까지의 {"날짜": {가격 정보}} 모두 조회
+        @return daily_price_infos: dict
+        """
+        daily_price_infos = dict()
 
-    return daily_price_infos
+        for p in range(1, int(page) + 1):
+            daily_price_infos.update(self.__get_daily_prices_of_page(code, p))
 
+        return daily_price_infos
 
-def get_daily_prices_of_page(code, page):
-    """
-    종목코드의 n 페이지의 {"날짜": {가격 정보}} 조회
-    @return daily_price_info: dict
-    """
-    params = dict()
-    params["code"] = code
-    params["page"] = str(page)
+    def __get_daily_prices_of_page(self, code, page):
+        """
+        종목코드의 n 페이지의 {"날짜": {가격 정보}} 조회
+        @return daily_price_info: dict
+        """
+        params = dict()
+        params["code"] = code
+        params["page"] = str(page)
 
-    url = get_url("sise_day", params)
-    soup = get_soup(url)
+        url = get_url("sise_day", params)
+        soup = get_soup(url)
 
-    base_table = soup.find_all("tr")
-    price_table = base_table[2:7] + base_table[10:-2]
+        base_table = soup.find_all("tr")
+        price_table = base_table[2:7] + base_table[10:-2]
 
-    daily_price_infos = dict()
-    for daily_price_info in price_table:
-        price_data = daily_price_info.find_all("span")
+        daily_price_infos = dict()
+        for daily_price_info in price_table:
+            price_data = daily_price_info.find_all("span")
 
-        price_info = get_price_info(price_data)
+            price_info = self.__get_price_info(price_data)
 
-        img = str(daily_price_info.find("img"))
-        rate = get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
-        price_info["rate"] = rate
+            img = str(daily_price_info.find("img"))
+            rate = self.__get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
+            price_info["rate"] = rate
 
-        daily_price_infos[price_data[0].text] = price_info
-        print(daily_price_infos)
+            daily_price_infos[price_data[0].text] = price_info
+            print(daily_price_infos)
 
-    return daily_price_infos
+        return daily_price_infos
 
+    def __get_price_info(self, price_data):
+        """
+        일간 정보를 딕셔너리로 생성: 종가, 시가, 고가, 저가, 거래량
+        @return price_info: dict
+        """
+        price_info = dict()
+        price_info["closing"] = price_data[1].text
+        price_info["opening"] = price_data[3].text
+        price_info["highest"] = price_data[4].text
+        price_info["lowest"] = price_data[5].text
+        price_info["volume"] = price_data[6].text
 
-def get_price_info(price_data):
-    price_info = dict()
-    price_info["closing"] = price_data[1].text
-    price_info["opening"] = price_data[3].text
-    price_info["highest"] = price_data[4].text
-    price_info["lowest"] = price_data[5].text
-    price_info["volume"] = price_data[6].text
+        return price_info
 
-    return price_info
+    def __get_rate_sign(self, img):
+        """
+        상승/하락 기호 표시
+        @return sign: str
+        """
+        sign = ""
+        if "ico_up" in img:
+            sign = "+"
+        elif "ico_down" in img:
+            sign = "-"
 
-
-def get_rate_sign(img):
-    sign = ""
-    if "ico_up" in img:
-        sign = "+"
-    elif "ico_down" in img:
-        sign = "-"
-
-    return sign
-
-
-def get_companies(type: str):
-    url = consts.URL_BODY_KRX_COMPANIES + "&searchType="
-    url += consts.KRX_SEARCH_TYPE_CD_KOSPI if type == "kospi" else consts.KRX_SEARCH_TYPE_CD_LISTED
-
-    df = get_companies_df(url)
-
-    df_json_str = df.to_json(force_ascii=False, orient="records")
-
-    return df_json_str
+        return sign
 
 
-def get_code_name():
-    url = consts.URL_BODY_KRX_COMPANIES
-    url += "&searchType=" + consts.KRX_SEARCH_TYPE_CD_LISTED
+class KrxCompaniesCrawler:
 
-    df = get_companies_df(url)
+    def __init__(self):
+        self.url_body_krx = consts.URL_BODY_KRX_COMPANIES
+        self.cd_kospi = consts.KRX_SEARCH_TYPE_CD_KOSPI
+        self.cd_listed = consts.KRX_SEARCH_TYPE_CD_LISTED
 
-    code_name = dict()
-    for i in df.index:
-        code_name[df.at[i, 'code']] = df.at[i, 'name']
+    def get_companies(self, type: str):
+        """
+        KRX에서 모든 회사명/종목코드 조회
+        type 지정에 따라 코스피/상장사 조회 가능
+        @return companies_info: json
+        """
+        url = self.url_body_krx + "&searchType=" + self.cd_kospi if type == "kospi" else self.cd_listed
 
-    return code_name
+        df_companies_info = self.__get_df_companies_info(url)
 
+        companies_info = df_companies_info.to_json(force_ascii=False, orient="records")
 
-def get_name_code():
-    url = consts.URL_BODY_KRX_COMPANIES
-    url += "&searchType=" + consts.KRX_SEARCH_TYPE_CD_LISTED
+        return companies_info
 
-    df = get_companies_df(url)
+    def get_code_name(self):
+        """
+        {"종목코드": "회사명"} 포맷의 딕셔너리 생성
+        @return code_name: dict
+        """
+        url = self.url_body_krx + "&searchType=" + self.cd_listed
 
-    name_code = dict()
-    for i in df.index:
-        name_code[df.at[i, 'name']] = df.at[i, 'code']
+        df_companies_info = self.__get_df_companies_info(url)
 
-    return name_code
+        code_name = dict()
+        for i in df_companies_info.index:
+            code_name[df_companies_info.at[i, 'code']] = df_companies_info.at[i, 'name']
 
+        return code_name
 
-def get_companies_df(url):
-    df = pd.read_html(url, header=0)[0]
-    df = df[["회사명", "종목코드"]]
-    df = df.rename(columns={"회사명": "name", "종목코드": "code"})
-    df.code = df.code.map("{:06d}".format)
+    def get_name_code(self):
+        """
+        {"회사명": "종목코드"} 포맷의 딕셔너리 생성
+        @return name_code: dict
+        """
+        url = self.url_body_krx + "&searchType=" + self.cd_listed
 
-    return df
+        df_companies_info = self.__get_df_companies_info(url)
+
+        name_code = dict()
+        for i in df_companies_info.index:
+            name_code[df_companies_info.at[i, 'name']] = df_companies_info.at[i, 'code']
+
+        return name_code
+
+    def __get_df_companies_info(self, url):
+        """
+        KRX에서 기업 정보 조회하여 회사명/종목코드만 남긴 데이터 프레임 리턴
+        @return df_companies_info: Dataframe
+        """
+        df_companies_info = pd.read_html(url, header=0)[0]
+        df_companies_info = df_companies_info[["회사명", "종목코드"]]
+        df_companies_info = df_companies_info.rename(columns={"회사명": "name", "종목코드": "code"})
+        df_companies_info.code = df_companies_info.code.map("{:06d}".format)
+
+        return df_companies_info
