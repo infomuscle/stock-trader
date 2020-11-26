@@ -9,9 +9,10 @@ router = routers.DefaultRouter()
 # router.register('gateway', views.GatewayViewSet)
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^api/daily', views.daily),
+    # url(r'^api/daily/(?P<date>.+)/price', views.daily),
+    url(r'^api/daily/price', views.daily_price),
+    url(r'^api/daily/indicator', views.daily_indicator),
     url(r'^api/current', views.current),
-    url(r'^api/per', views.per),
     url(r'^api/indicators', views.indicators),
     url(r'^api/companies/list', views.companies),
     url(r'^api/companies/name', views.name),

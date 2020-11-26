@@ -1,16 +1,17 @@
 import json
 
 from django.http import HttpResponse
-from rest_framework import viewsets
 
 from gateway import crawler
+
+
 # from gateway.models import GatewayModel
 # from gateway.serializers import GatewaySerializer
 
 
 # class GatewayViewSet(viewsets.ModelViewSet):
-    # queryset = GatewayModel.objects.all()
-    # serializer_class = GatewaySerializer
+# queryset = GatewayModel.objects.all()
+# serializer_class = GatewaySerializer
 
 
 def current(request):
@@ -20,23 +21,25 @@ def current(request):
     return HttpResponse(c_price)
 
 
-def daily(request):
+def daily_price(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
+    date = req_json.get("date")
 
     daily_crawler = crawler.DailyPriceCrawler()
     prices = daily_crawler.get_daily_prices_to_page(code, 5)
     return HttpResponse(json.dumps(prices))
 
 
-def per(request):
+def daily_indicator(request):
+    # 수정 필요
     req_json = request.GET.dict()
     code = req_json.get("code")
+    date = req_json.get("date")
 
-    company_detail_crawler = crawler.CompanyDetailCrawler()
-    per = company_detail_crawler.get_per(code)
-
-    return HttpResponse(per)
+    daily_crawler = crawler.DailyPriceCrawler()
+    prices = daily_crawler.get_daily_prices_to_page(code, 5)
+    return HttpResponse(json.dumps(prices))
 
 
 def indicators(request):

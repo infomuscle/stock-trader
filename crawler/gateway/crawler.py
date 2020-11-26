@@ -6,6 +6,7 @@ from datetime import datetime
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+from django.db import IntegrityError
 
 from gateway import constants as consts
 from gateway.models import *
@@ -58,22 +59,6 @@ def get_current_price(code: str):
 
 
 class CompanyDetailCrawler:
-    def get_per(self, code: str):
-        """
-        종목코드의 현재 시점 PER 조회
-        @return per: str
-        """
-        params = dict()
-        params["code"] = code
-
-        url = get_url("sise", params)
-        soup = get_soup(url)
-        print(soup)
-
-        per = soup.find("span", {"id": "_sise_per"})
-        per = re.sub("[\t\n]", "", per.text)
-
-        return per
 
     def get_indicators(self, code: str):
 
@@ -95,6 +80,7 @@ class CompanyDetailCrawler:
         company_indicator.date = date.today()
         company_indicator.eps = indicators["EPS"]
         company_indicator.per = indicators["PER"]
+        company_indicator.iper = indicators["업종PER"]
         company_indicator.bps = indicators["BPS"]
         company_indicator.pbr = indicators["PBR"]
         company_indicator.save()
@@ -136,7 +122,11 @@ class DailyPriceCrawler:
             company_daily_price.highest = daily_price_infos[day]["highest"]
             company_daily_price.lowest = daily_price_infos[day]["lowest"]
             company_daily_price.volume = daily_price_infos[day]["volume"]
-            company_daily_price.save()
+            company_daily_price.rate = daily_price_infos[day]["rate"]
+            try:
+                company_daily_price.save(force_insert=True)
+            except IntegrityError as e:
+                logger.info(e)
 
         return daily_price_infos
 
@@ -163,7 +153,7 @@ class DailyPriceCrawler:
 
             img = str(daily_price_info.find("img"))
             rate = self.__get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
-            price_info["rate"] = rate
+            price_info["rate"] = int(rate.replace(",", ""))
 
             daily_price_infos[price_data[0].text] = price_info
 
@@ -221,7 +211,6 @@ class KrxCompaniesCrawler:
             company = Company()
             company.code = df_companies_info.at[i, 'code']
             company.name = df_companies_info.at[i, 'name']
-            print(company.code, company.name, company.starred)
             company.save()
 
         return companies_info

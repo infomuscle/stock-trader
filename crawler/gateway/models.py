@@ -11,17 +11,20 @@ class Company(models.Model):
 
 
 class CompanyDailyPrice(models.Model):
+    class Meta:
+        db_table = "company_daily_price"
+        constraints = [
+            models.UniqueConstraint(fields=['code', 'date'], name='company_daily_price_pk')
+        ]
+
     code = models.CharField(db_column="code", primary_key=True, max_length=6)
     date = models.DateField(db_column="date")
     opening = models.IntegerField(db_column="opening")
     closing = models.IntegerField(db_column="closing")
     highest = models.IntegerField(db_column="highest")
     lowest = models.IntegerField(db_column="lowest")
+    rate = models.IntegerField(db_column="rate")
     volume = models.IntegerField(db_column="volume")
-
-    class Meta:
-        db_table = "company_daily_price"
-        unique_together = (("code", "date"),)
 
 
 class CompanyIndicator(models.Model):
@@ -29,6 +32,7 @@ class CompanyIndicator(models.Model):
     date = models.DateField(db_column="date")
     eps = models.FloatField(db_column="eps")
     per = models.FloatField(db_column="per")
+    iper = models.FloatField(db_column="iper")
     bps = models.FloatField(db_column="bps")
     pbr = models.FloatField(db_column="pbr")
     roe = models.FloatField(db_column="roe")
