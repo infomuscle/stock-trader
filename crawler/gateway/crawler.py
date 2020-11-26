@@ -1,12 +1,13 @@
 import logging
 import re
+from datetime import date
 
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
 from gateway import constants as consts
-from gateway.models import Company
+from gateway.models import *
 
 logger = logging.getLogger()
 
@@ -86,7 +87,16 @@ class CompanyDetailCrawler:
         for line in lines:
             indicator = line.text.split(" ")
             if indicator[0] in indicators_to_bring:
-                indicators[indicator[0]] = indicator[1]
+                indicators[indicator[0]] = float(indicator[1].replace(",", ""))
+
+        company_indicator = CompanyIndicator()
+        company_indicator.code = code
+        company_indicator.date = date.today()
+        company_indicator.eps = indicators["EPS"]
+        company_indicator.per = indicators["PER"]
+        company_indicator.bps = indicators["BPS"]
+        company_indicator.pbr = indicators["PBR"]
+        company_indicator.save()
 
         return indicators
 
