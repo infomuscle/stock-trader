@@ -1,9 +1,8 @@
-import json
-
 import requests
-from main import constants as consts
-from django.http import HttpResponse
 from django.shortcuts import render
+
+from main import constants as consts
+from main.models import *
 
 
 def index(request):
@@ -15,8 +14,13 @@ def crawl(request):
     context = {}
     return render(request, 'main/crawl.html', context)
 
+
 def companies(request):
     context = {}
+
+    companies = Company.objects.all()
+    context["companies"] = companies
+
     return render(request, 'main/companies.html', context)
 
 
