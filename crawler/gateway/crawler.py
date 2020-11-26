@@ -201,6 +201,7 @@ class KrxCompaniesCrawler:
             company.code = df_companies_info.at[i, 'code']
             company.name = df_companies_info.at[i, 'name']
             print(company.code, company.name, company.starred)
+            company.save()
 
         return companies_info
 

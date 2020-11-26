@@ -8,21 +8,23 @@ from django.db import models
 
 
 class Company(models.Model):
-    code = models.CharField(db_column='CODE', primary_key=True, max_length=6)
-    name = models.CharField(db_column='NAME', max_length=30)
-    starred = models.CharField(db_column='STARRED', max_length=1, default="N")
+    code = models.CharField(db_column='code', primary_key=True, max_length=6)
+    name = models.CharField(db_column='name', max_length=30)
+    starred = models.CharField(db_column='starred', max_length=1, default="N")
 
     class Meta:
         db_table = "company"
 
 
-class DailyInfoForCompany(models.Model):
-    company_code = models.CharField(db_column='COMPANY_CODE', primary_key=True, max_length=6)
-    date = models.DateField(db_column='DATE')
-    opening_price = models.IntegerField(db_column='OPENING_PRICE')
-    closing_price = models.IntegerField(db_column='CLOSING_PRICE')
-    highest_price = models.IntegerField(db_column='HIGHEST_PRICE')
-    lowest_price = models.IntegerField(db_column='LOWEST_PRICE')
-    volume = models.IntegerField(db_column='VOLUME')
-    # per
-    # market_capitalization
+class CompanyDailyPrice(models.Model):
+    code = models.CharField(db_column='code', primary_key=True, max_length=6)
+    date = models.DateField(db_column='date')
+    opening = models.IntegerField(db_column='opening')
+    closing = models.IntegerField(db_column='closing')
+    highest = models.IntegerField(db_column='highest')
+    lowest = models.IntegerField(db_column='lowest')
+    volume = models.IntegerField(db_column='volume')
+
+    class Meta:
+        db_table = "company_daily_price"
+        unique_together = (("code", "date"),)
