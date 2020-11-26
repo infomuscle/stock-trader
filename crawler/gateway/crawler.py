@@ -59,22 +59,6 @@ def get_current_price(code: str):
 
 
 class CompanyDetailCrawler:
-    def get_per(self, code: str):
-        """
-        종목코드의 현재 시점 PER 조회
-        @return per: str
-        """
-        params = dict()
-        params["code"] = code
-
-        url = get_url("sise", params)
-        soup = get_soup(url)
-        print(soup)
-
-        per = soup.find("span", {"id": "_sise_per"})
-        per = re.sub("[\t\n]", "", per.text)
-
-        return per
 
     def get_indicators(self, code: str):
 
