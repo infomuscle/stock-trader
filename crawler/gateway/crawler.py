@@ -1,6 +1,7 @@
 import logging
 import re
 from datetime import date
+from datetime import datetime
 
 import pandas as pd
 import requests
@@ -126,6 +127,17 @@ class DailyPriceCrawler:
         for p in range(1, int(page) + 1):
             daily_price_infos.update(self.__get_daily_prices_of_page(code, p))
 
+        for day in daily_price_infos.keys():
+            company_daily_price = CompanyDailyPrice()
+            company_daily_price.code = code
+            company_daily_price.date = datetime.strptime(day, "%Y.%m.%d")
+            company_daily_price.closing = daily_price_infos[day]["closing"]
+            company_daily_price.opening = daily_price_infos[day]["opening"]
+            company_daily_price.highest = daily_price_infos[day]["highest"]
+            company_daily_price.lowest = daily_price_infos[day]["lowest"]
+            company_daily_price.volume = daily_price_infos[day]["volume"]
+            company_daily_price.save()
+
         return daily_price_infos
 
     def __get_daily_prices_of_page(self, code, page):
@@ -154,7 +166,6 @@ class DailyPriceCrawler:
             price_info["rate"] = rate
 
             daily_price_infos[price_data[0].text] = price_info
-            print(daily_price_infos)
 
         return daily_price_infos
 
@@ -164,11 +175,11 @@ class DailyPriceCrawler:
         @return price_info: dict
         """
         price_info = dict()
-        price_info["closing"] = price_data[1].text
-        price_info["opening"] = price_data[3].text
-        price_info["highest"] = price_data[4].text
-        price_info["lowest"] = price_data[5].text
-        price_info["volume"] = price_data[6].text
+        price_info["closing"] = int(price_data[1].text.replace(",", ""))
+        price_info["opening"] = int(price_data[3].text.replace(",", ""))
+        price_info["highest"] = int(price_data[4].text.replace(",", ""))
+        price_info["lowest"] = int(price_data[5].text.replace(",", ""))
+        price_info["volume"] = int(price_data[6].text.replace(",", ""))
 
         return price_info
 
