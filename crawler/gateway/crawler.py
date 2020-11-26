@@ -6,6 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from gateway import constants as consts
+from gateway.models import Company
 
 logger = logging.getLogger()
 
@@ -193,6 +194,13 @@ class KrxCompaniesCrawler:
         df_companies_info = self.__get_df_companies_info(url)
 
         companies_info = df_companies_info.to_json(force_ascii=False, orient="records")
+
+        companies = []
+        for i in df_companies_info.index:
+            company = Company()
+            company.code = df_companies_info.at[i, 'code']
+            company.name = df_companies_info.at[i, 'name']
+            print(company.code, company.name, company.starred)
 
         return companies_info
 

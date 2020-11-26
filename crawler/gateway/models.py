@@ -8,9 +8,12 @@ from django.db import models
 
 
 class Company(models.Model):
-    company_code = models.CharField(db_column='COMPANY_CODE', primary_key=True, max_length=6)
-    company_name = models.CharField(db_column='COMPANY_NAME', max_length=30)
-    starred = models.CharField(db_column='STARRED', max_length=1)
+    code = models.CharField(db_column='CODE', primary_key=True, max_length=6)
+    name = models.CharField(db_column='NAME', max_length=30)
+    starred = models.CharField(db_column='STARRED', max_length=1, default="N")
+
+    class Meta:
+        db_table = "company"
 
 
 class DailyInfoForCompany(models.Model):
