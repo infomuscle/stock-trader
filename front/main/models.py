@@ -1,7 +1,6 @@
 from django.db import models
 
 
-# Create your models here.
 class Company(models.Model):
     code = models.CharField(db_column="code", primary_key=True, max_length=6)
     name = models.CharField(db_column="name", max_length=30)
