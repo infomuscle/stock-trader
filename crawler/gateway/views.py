@@ -21,9 +21,21 @@ def current(request):
     return HttpResponse(c_price)
 
 
-def daily(request):
+def daily_price(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
+    date = req_json.get("date")
+
+    daily_crawler = crawler.DailyPriceCrawler()
+    prices = daily_crawler.get_daily_prices_to_page(code, 5)
+    return HttpResponse(json.dumps(prices))
+
+
+def daily_indicator(request):
+    # 수정 필요
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+    date = req_json.get("date")
 
     daily_crawler = crawler.DailyPriceCrawler()
     prices = daily_crawler.get_daily_prices_to_page(code, 5)
