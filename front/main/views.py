@@ -15,6 +15,10 @@ def crawl(request):
     context = {}
     return render(request, 'main/crawl.html', context)
 
+def companies(request):
+    context = {}
+    return render(request, 'main/companies.html', context)
+
 
 def current(request):
     req_json = request.GET.dict()
