@@ -6,6 +6,7 @@ from datetime import datetime
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+from django.db import IntegrityError
 
 from gateway import constants as consts
 from gateway.models import *
@@ -136,7 +137,10 @@ class DailyPriceCrawler:
             company_daily_price.highest = daily_price_infos[day]["highest"]
             company_daily_price.lowest = daily_price_infos[day]["lowest"]
             company_daily_price.volume = daily_price_infos[day]["volume"]
-            company_daily_price.save()
+            try:
+                company_daily_price.save(force_insert=True)
+            except IntegrityError as e:
+                logger.info(e)
 
         return daily_price_infos
 
