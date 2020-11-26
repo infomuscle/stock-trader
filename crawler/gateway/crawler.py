@@ -137,6 +137,7 @@ class DailyPriceCrawler:
             company_daily_price.highest = daily_price_infos[day]["highest"]
             company_daily_price.lowest = daily_price_infos[day]["lowest"]
             company_daily_price.volume = daily_price_infos[day]["volume"]
+            company_daily_price.rate = daily_price_infos[day]["rate"]
             try:
                 company_daily_price.save(force_insert=True)
             except IntegrityError as e:
@@ -167,7 +168,7 @@ class DailyPriceCrawler:
 
             img = str(daily_price_info.find("img"))
             rate = self.__get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
-            price_info["rate"] = rate
+            price_info["rate"] = int(rate.replace(",", ""))
 
             daily_price_infos[price_data[0].text] = price_info
 
@@ -225,7 +226,6 @@ class KrxCompaniesCrawler:
             company = Company()
             company.code = df_companies_info.at[i, 'code']
             company.name = df_companies_info.at[i, 'name']
-            print(company.code, company.name, company.starred)
             company.save()
 
         return companies_info
