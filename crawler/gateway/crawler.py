@@ -80,6 +80,7 @@ class CompanyDetailCrawler:
         company_indicator.date = date.today()
         company_indicator.eps = indicators["EPS"]
         company_indicator.per = indicators["PER"]
+        company_indicator.iper = indicators["업종PER"]
         company_indicator.bps = indicators["BPS"]
         company_indicator.pbr = indicators["PBR"]
         company_indicator.save()

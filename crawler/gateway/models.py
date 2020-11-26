@@ -32,6 +32,7 @@ class CompanyIndicator(models.Model):
     date = models.DateField(db_column="date")
     eps = models.FloatField(db_column="eps")
     per = models.FloatField(db_column="per")
+    iper = models.FloatField(db_column="iper")
     bps = models.FloatField(db_column="bps")
     pbr = models.FloatField(db_column="pbr")
     roe = models.FloatField(db_column="roe")
