@@ -103,6 +103,20 @@ class CompanyDetailCrawler:
 
 class DailyPriceCrawler:
 
+    def get_daily_prices_of_company(self, code: str, start_dt: str, end_dt: str):
+
+        daily_prices = dict()
+
+        page = 1
+        while True:
+            daily_prices_of_page = self.__get_daily_prices_of_page(code, page)
+            daily_prices.update(daily_prices_of_page)
+            if start_dt in daily_prices_of_page.keys():
+                break
+            page += 1
+
+        return daily_prices
+
     def get_daily_prices_to_page(self, code, page):
         """
         종목코드의 1부터 n 페이지까지의 {"날짜": {가격 정보}} 모두 조회
@@ -256,3 +270,8 @@ class KrxCompaniesCrawler:
         df_companies_info.code = df_companies_info.code.map("{:06d}".format)
 
         return df_companies_info
+
+
+if __name__ == "__main__":
+    print("TEST")
+
