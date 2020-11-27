@@ -1,10 +1,16 @@
 from django.test import TestCase
+
 from gateway.crawler import *
+
 
 class CrawlerTestCase(TestCase):
     def test_daily_price_crawler(self):
-
-        daily_price_crawler= DailyPriceCrawler()
+        daily_price_crawler = DailyPriceCrawler()
         print("TEST")
 
-        # self.assertTrue(len(g.lottos) > 20) #성공실패 테스트 루틴은 assert 메소드를 사용한다.
+        code = "005930"
+        start_dt = "2020.11.01"
+        end_dt = "2020.11.27"
+        daily_prices = daily_price_crawler.get_daily_prices_of_company(code, start_dt, end_dt)
+        print(daily_prices)
+

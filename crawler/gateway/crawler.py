@@ -105,15 +105,40 @@ class DailyPriceCrawler:
 
     def get_daily_prices_of_company(self, code: str, start_dt: str, end_dt: str):
 
-        daily_prices = dict()
+        tmp_daily_prices = dict()
 
         page = 1
         while True:
             daily_prices_of_page = self.__get_daily_prices_of_page(code, page)
-            daily_prices.update(daily_prices_of_page)
-            if start_dt in daily_prices_of_page.keys():
+            tmp_daily_prices.update(daily_prices_of_page)
+
+            dates_in_page = list(daily_prices_of_page.keys())
+            if start_dt >= dates_in_page[-1]:
                 break
             page += 1
+
+        daily_prices = dict()
+        company_daily_prices = []
+        for key_date in tmp_daily_prices.keys():
+            if start_dt <= key_date <= end_dt:
+                daily_prices[key_date] = tmp_daily_prices[key_date]
+
+                company_daily_price = CompanyDailyPrice()
+                company_daily_price.code = code
+                company_daily_price.date = datetime.strptime(key_date, "%Y.%m.%d")
+                company_daily_price.closing = daily_prices[key_date]["closing"]
+                company_daily_price.opening = daily_prices[key_date]["opening"]
+                company_daily_price.highest = daily_prices[key_date]["highest"]
+                company_daily_price.lowest = daily_prices[key_date]["lowest"]
+                company_daily_price.volume = daily_prices[key_date]["volume"]
+                company_daily_price.rate = daily_prices[key_date]["rate"]
+                company_daily_prices.append(company_daily_price)
+                # try:
+                #     company_daily_price.save(force_insert=True)
+                # except IntegrityError as e:
+                #     logger.info(e)
+        # print(company_daily_prices)
+        # CompanyDailyPrice.objects.bulk_create(company_daily_prices, ignore_conflicts=True)
 
         return daily_prices
 
@@ -270,8 +295,3 @@ class KrxCompaniesCrawler:
         df_companies_info.code = df_companies_info.code.map("{:06d}".format)
 
         return df_companies_info
-
-
-if __name__ == "__main__":
-    print("TEST")
-
