@@ -133,41 +133,10 @@ class DailyPriceCrawler:
                 company_daily_price.volume = daily_prices[key_date]["volume"]
                 company_daily_price.rate = daily_prices[key_date]["rate"]
                 company_daily_prices.append(company_daily_price)
-                # try:
-                #     company_daily_price.save(force_insert=True)
-                # except IntegrityError as e:
-                #     logger.info(e)
-        # print(company_daily_prices)
-        # CompanyDailyPrice.objects.bulk_create(company_daily_prices, ignore_conflicts=True)
+
+        CompanyDailyPrice.objects.bulk_create(company_daily_prices, ignore_conflicts=True)
 
         return daily_prices
-
-    def get_daily_prices_to_page(self, code, page):
-        """
-        종목코드의 1부터 n 페이지까지의 {"날짜": {가격 정보}} 모두 조회
-        @return daily_price_infos: dict
-        """
-        daily_price_infos = dict()
-
-        for p in range(1, int(page) + 1):
-            daily_price_infos.update(self.__get_daily_prices_of_page(code, p))
-
-        for day in daily_price_infos.keys():
-            company_daily_price = CompanyDailyPrice()
-            company_daily_price.code = code
-            company_daily_price.date = datetime.strptime(day, "%Y.%m.%d")
-            company_daily_price.closing = daily_price_infos[day]["closing"]
-            company_daily_price.opening = daily_price_infos[day]["opening"]
-            company_daily_price.highest = daily_price_infos[day]["highest"]
-            company_daily_price.lowest = daily_price_infos[day]["lowest"]
-            company_daily_price.volume = daily_price_infos[day]["volume"]
-            company_daily_price.rate = daily_price_infos[day]["rate"]
-            try:
-                company_daily_price.save(force_insert=True)
-            except IntegrityError as e:
-                logger.info(e)
-
-        return daily_price_infos
 
     def __get_daily_prices_of_page(self, code, page):
         """

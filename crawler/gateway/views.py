@@ -5,15 +5,6 @@ from django.http import HttpResponse
 from gateway import crawler
 
 
-# from gateway.models import GatewayModel
-# from gateway.serializers import GatewaySerializer
-
-
-# class GatewayViewSet(viewsets.ModelViewSet):
-# queryset = GatewayModel.objects.all()
-# serializer_class = GatewaySerializer
-
-
 def current(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
@@ -24,10 +15,12 @@ def current(request):
 def daily_price(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
-    date = req_json.get("date")
+    start_dt = req_json.get("start_dt")
+    end_dt = req_json.get("end_dt")
+    print(code, start_dt, end_dt)
 
     daily_crawler = crawler.DailyPriceCrawler()
-    prices = daily_crawler.get_daily_prices_to_page(code, 5)
+    prices = daily_crawler.get_daily_prices_of_company(code, start_dt, end_dt)
     return HttpResponse(json.dumps(prices))
 
 
