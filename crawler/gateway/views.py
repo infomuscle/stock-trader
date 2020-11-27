@@ -1,5 +1,6 @@
 import json
 
+from django.core import serializers
 from django.http import HttpResponse
 
 from gateway import crawler
@@ -17,12 +18,11 @@ def daily_price(request):
     code = req_json.get("code")
     start_dt = req_json.get("start_dt")
     end_dt = req_json.get("end_dt")
-    print(code, start_dt, end_dt)
 
     daily_crawler = crawler.DailyPriceCrawler()
     prices = daily_crawler.get_daily_prices_of_company(code, start_dt, end_dt)
-    return HttpResponse("success")
-    # return HttpResponse(json.dumps(prices))
+
+    return HttpResponse(serializers.serialize("json", prices))
 
 
 def daily_indicator(request):

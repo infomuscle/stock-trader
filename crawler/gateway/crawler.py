@@ -108,20 +108,17 @@ class DailyPriceCrawler:
         end_dt = datetime.strptime(end_dt_str, "%Y.%m.%d")
 
         tmp_daily_prices = list()
-
         page = 1
         while True:
             daily_prices_of_page = self.__get_daily_prices_of_page(code, page)
             tmp_daily_prices.extend(daily_prices_of_page)
-            dates_in_page = daily_prices_of_page
-            if start_dt >= dates_in_page[-1].date:
+            if start_dt >= daily_prices_of_page[-1].date:
                 break
             page += 1
 
         company_daily_prices = []
         for daily_price in tmp_daily_prices:
             if start_dt <= daily_price.date <= end_dt:
-                daily_price.code = code
                 company_daily_prices.append(daily_price)
 
         CompanyDailyPrice.objects.bulk_create(company_daily_prices, ignore_conflicts=True)
@@ -150,10 +147,13 @@ class DailyPriceCrawler:
             company_daily_price = self.__get_price_info(price_data)
 
             img = str(daily_price_info.find("img"))
-            rate = self.__get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
-            company_daily_price.rate = int(rate.replace(",", ""))
+            change_amount = self.__get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
+            company_daily_price.change_amount = int(change_amount.replace(",", ""))
 
-            company_daily_price.date = datetime.strptime(price_data[0].text, "%Y.%m.%d")
+            company_daily_price.code = code
+            date_str = price_data[0].text.replace(".", "")
+            company_daily_price.id = code + "-" + date_str
+            company_daily_price.date = datetime.strptime(date_str, "%Y%m%d")
             company_daily_prices.append(company_daily_price)
 
         return company_daily_prices
