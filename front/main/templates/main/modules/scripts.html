@@ -30,17 +30,16 @@
 <script type="text/javascript">
     function crawlCompanyDailyPrice() {
 
-        var queryString = $("form[name=formCompanyDailyPrice]").serialize();
-        alert(queryString);
+        var params = $("form[name=formCompanyDailyPrice]").serialize();
 
         $.ajax({
-            url: "{% url 'main:crawl_daily_price' %}",
-            dataType: "json",
+            url: "{% url 'main:crawl_daily_price' %}" + "?" + params,
             success: function (data) {
-                alert('성공');
+                alert(data);
             },
             error: function (request, status, error) {
                 alert('실패');
+                console.log(request, status, error)
             }
         });
     }

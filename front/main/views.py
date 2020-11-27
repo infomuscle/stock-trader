@@ -39,15 +39,20 @@ def crawl(request):
     return render(request, 'main/crawl.html', context)
 
 
-def crawl_daily_price(request, code, start_dt, end_dt):
-    context = {}
+def crawl_daily_price(request):
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+    start_dt = req_json.get("start_dt")
+    end_dt = req_json.get("end_dt")
 
-    url = "localhost:8081/api/daily/price"
+    url = "http://localhost:8001/api/daily/price"
     url += '?code=' + code
     url += '&start_dt=' + start_dt
     url += '&end_dt=' + end_dt
+
     daily_price = requests.get(url)
-    return HttpResponse()
+
+    return HttpResponse(daily_price.text)
 
 
 def trade(request):
