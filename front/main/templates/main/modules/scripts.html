@@ -26,3 +26,58 @@
 <script src="{% static 'main/js/demo/chart-pie-demo.js' %}"></script>
 <script src="{% static 'main/js/demo/chart-bar-demo.js' %}"></script>
 <script src="{% static 'main/js/demo/datatables-demo.js' %}"></script>
+
+<script type="text/javascript">
+    function crawlCompanyDailyPrice() {
+
+        var params = "";
+
+        var start_dt = $('#formCompanyDailyPrice [name="start_dt"]').val().trim()
+        var end_dt = $('#formCompanyDailyPrice [name="end_dt"]').val().trim()
+        var code = $('#formCompanyDailyPrice [name="code"]').val().trim()
+
+        if (start_dt === "" || end_dt === "" || code === "") {
+            let today = new Date()
+
+            if (start_dt === "" && end_dt === "") {
+                start_dt = today.toLocaleDateString().slice(0, -1);
+                end_dt = today.toLocaleDateString().slice(0, -1);
+            } else if (start_dt === "") {
+                start_dt = end_dt;
+            } else if (end_dt === "") {
+                end_dt = today.toLocaleDateString().slice(0, -1);
+            }
+
+            if (code === "") {
+                code = "all"
+            }
+
+            params = "start_dt=" + start_dt + "&end_dt=" + end_dt + "&code=" + code
+
+        } else {
+            params = $("form[name=formCompanyDailyPrice]").serialize();
+        }
+
+        alert(params);
+
+
+        $.ajax({
+            url: "{% url 'main:crawl_daily_price' %}" + "?" + params,
+            success: function (data) {
+                alert(data);
+            },
+            error: function (request, status, error) {
+                alert('실패');
+                console.log(request, status, error)
+            }
+        });
+    }
+
+    function crawlCompanyDailyIndicator() {
+        alert("crawlCompanyDailyIndicator");
+    }
+
+    function crawlCompany() {
+        alert("crawlCompany");
+    }
+</script>
