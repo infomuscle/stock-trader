@@ -26,3 +26,22 @@
 <script src="{% static 'main/js/demo/chart-pie-demo.js' %}"></script>
 <script src="{% static 'main/js/demo/chart-bar-demo.js' %}"></script>
 <script src="{% static 'main/js/demo/datatables-demo.js' %}"></script>
+
+<script type="text/javascript">
+    function crawlCompanyDailyPrice() {
+
+        var queryString = $("form[name=formCompanyDailyPrice]").serialize();
+        alert(queryString);
+
+        $.ajax({
+            url: "{% url 'main:crawl_daily_price' %}",
+            dataType: "json",
+            success: function (data) {
+                alert('성공');
+            },
+            error: function (request, status, error) {
+                alert('실패');
+            }
+        });
+    }
+</script>

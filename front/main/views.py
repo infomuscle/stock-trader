@@ -1,3 +1,5 @@
+import requests
+from django.http import HttpResponse
 from django.shortcuts import render
 
 from main.models import *
@@ -35,6 +37,17 @@ def indicator(request):
 def crawl(request):
     context = {}
     return render(request, 'main/crawl.html', context)
+
+
+def crawl_daily_price(request, code, start_dt, end_dt):
+    context = {}
+
+    url = "localhost:8081/api/daily/price"
+    url += '?code=' + code
+    url += '&start_dt=' + start_dt
+    url += '&end_dt=' + end_dt
+    daily_price = requests.get(url)
+    return HttpResponse()
 
 
 def trade(request):
