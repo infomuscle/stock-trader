@@ -38,24 +38,21 @@
         <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Stock Info:</h6>
-                <a class="collapse-item" href="{% url 'main:crawl' %}">Crawl</a>
-                <a class="collapse-item" href="{% url 'main:current' %}">Current</a>
-                <a class="collapse-item" href="{% url 'main:daily' %}">Daily</a>
-                <div class="collapse-divider"></div>
-                <h6 class="collapse-header">Companies Info:</h6>
                 <a class="collapse-item" href="{% url 'main:companies' %}">Companies</a>
                 <a class="collapse-item" href="{% url 'main:summary' %}">Summary</a>
-                <a class="collapse-item" href="../references/404.html">Code</a>
-                <a class="collapse-item" href="../references/blank.html">Name</a>
+                <div class="collapse-divider"></div>
+                <h6 class="collapse-header">Daily Info:</h6>
+                <a class="collapse-item" href="{% url 'main:price' %}">Price</a>
+                <a class="collapse-item" href="{% url 'main:indicator' %}">indicator</a>
             </div>
         </div>
     </li>
 
-    <!-- Nav Item - Charts -->
+    <!-- Nav Item - Crawl -->
     <li class="nav-item">
-        <a class="nav-link" href="../references/charts.html">
+        <a class="nav-link" href="{% url 'main:crawl' %}">
             <i class="fas fa-fw fa-chart-area"></i>
-            <span>Charts</span></a>
+            <span>Crawl</span></a>
     </li>
 
     <!-- Nav Item - Tables -->
