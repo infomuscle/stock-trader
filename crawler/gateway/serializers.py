@@ -7,3 +7,9 @@ from rest_framework import serializers
 #     class Meta:
 #         model = GatewayModel
 #         fields = ('no', 'company', 'page')
+
+# class CompanyDailyPriceSerializer(serializers.HyperlinkedModelSerializer):
+#     class Meta:
+
+
+

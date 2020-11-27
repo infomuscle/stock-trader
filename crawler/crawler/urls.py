@@ -15,8 +15,6 @@ urlpatterns = [
     url(r'^api/current', views.current),
     url(r'^api/indicators', views.indicators),
     url(r'^api/companies/list', views.companies),
-    url(r'^api/companies/name', views.name),
-    url(r'^api/companies/code', views.code),
     url(r'^api/test/g', views.test_get),
     url(r'^api/test/p', views.test_post)
 ]

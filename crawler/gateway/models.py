@@ -17,13 +17,15 @@ class CompanyDailyPrice(models.Model):
             models.UniqueConstraint(fields=['code', 'date'], name='company_daily_price_pk')
         ]
 
-    code = models.CharField(db_column="code", primary_key=True, max_length=6)
+    id = models.CharField(db_column="id", primary_key=True, max_length=15)
+    code = models.CharField(db_column="code", max_length=6)
     date = models.DateField(db_column="date")
     opening = models.IntegerField(db_column="opening")
     closing = models.IntegerField(db_column="closing")
     highest = models.IntegerField(db_column="highest")
     lowest = models.IntegerField(db_column="lowest")
-    rate = models.IntegerField(db_column="rate")
+    change_amount = models.IntegerField(db_column="change_amount")
+    change_rate = models.FloatField(db_column="change_rate")
     volume = models.IntegerField(db_column="volume")
 
 

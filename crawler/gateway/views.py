@@ -1,17 +1,9 @@
 import json
 
+from django.core import serializers
 from django.http import HttpResponse
 
 from gateway import crawler
-
-
-# from gateway.models import GatewayModel
-# from gateway.serializers import GatewaySerializer
-
-
-# class GatewayViewSet(viewsets.ModelViewSet):
-# queryset = GatewayModel.objects.all()
-# serializer_class = GatewaySerializer
 
 
 def current(request):
@@ -24,11 +16,13 @@ def current(request):
 def daily_price(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
-    date = req_json.get("date")
+    start_dt = req_json.get("start_dt")
+    end_dt = req_json.get("end_dt")
 
     daily_crawler = crawler.DailyPriceCrawler()
-    prices = daily_crawler.get_daily_prices_to_page(code, 5)
-    return HttpResponse(json.dumps(prices))
+    prices = daily_crawler.get_daily_prices_of_company(code, start_dt, end_dt)
+
+    return HttpResponse(serializers.serialize("json", prices))
 
 
 def daily_indicator(request):
@@ -38,8 +32,9 @@ def daily_indicator(request):
     date = req_json.get("date")
 
     daily_crawler = crawler.DailyPriceCrawler()
-    prices = daily_crawler.get_daily_prices_to_page(code, 5)
-    return HttpResponse(json.dumps(prices))
+    # prices = daily_crawler.get_daily_prices_to_page(code, 5)
+    return HttpResponse("success")
+    # return HttpResponse(json.dumps(prices))
 
 
 def indicators(request):
@@ -58,24 +53,6 @@ def companies(request):
     krs_companies_crawler = crawler.KrxCompaniesCrawler()
     companies_str = krs_companies_crawler.get_companies(type)
     return HttpResponse(companies_str)
-
-
-def name(request):
-    req_json = request.GET.dict()
-    code = req_json.get("code")
-    krs_companies_crawler = crawler.KrxCompaniesCrawler()
-    code_name = krs_companies_crawler.get_code_name()
-    name = code_name[code]
-    return HttpResponse(name)
-
-
-def code(request):
-    req_json = request.GET.dict()
-    name = req_json.get("name")
-    krs_companies_crawler = crawler.KrxCompaniesCrawler()
-    name_code = krs_companies_crawler.get_name_code()
-    code = name_code[name]
-    return HttpResponse(code)
 
 
 def test_get(request):

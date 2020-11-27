@@ -6,7 +6,6 @@ from datetime import datetime
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from django.db import IntegrityError
 
 from gateway import constants as consts
 from gateway.models import *
@@ -103,32 +102,28 @@ class CompanyDetailCrawler:
 
 class DailyPriceCrawler:
 
-    def get_daily_prices_to_page(self, code, page):
-        """
-        종목코드의 1부터 n 페이지까지의 {"날짜": {가격 정보}} 모두 조회
-        @return daily_price_infos: dict
-        """
-        daily_price_infos = dict()
+    def get_daily_prices_of_company(self, code: str, start_dt_str: str, end_dt_str: str):
 
-        for p in range(1, int(page) + 1):
-            daily_price_infos.update(self.__get_daily_prices_of_page(code, p))
+        start_dt = datetime.strptime(start_dt_str, "%Y.%m.%d")
+        end_dt = datetime.strptime(end_dt_str, "%Y.%m.%d")
 
-        for day in daily_price_infos.keys():
-            company_daily_price = CompanyDailyPrice()
-            company_daily_price.code = code
-            company_daily_price.date = datetime.strptime(day, "%Y.%m.%d")
-            company_daily_price.closing = daily_price_infos[day]["closing"]
-            company_daily_price.opening = daily_price_infos[day]["opening"]
-            company_daily_price.highest = daily_price_infos[day]["highest"]
-            company_daily_price.lowest = daily_price_infos[day]["lowest"]
-            company_daily_price.volume = daily_price_infos[day]["volume"]
-            company_daily_price.rate = daily_price_infos[day]["rate"]
-            try:
-                company_daily_price.save(force_insert=True)
-            except IntegrityError as e:
-                logger.info(e)
+        tmp_daily_prices = list()
+        page = 0
+        while True:
+            page += 1
+            daily_prices_of_page = self.__get_daily_prices_of_page(code, page)
+            tmp_daily_prices.extend(daily_prices_of_page)
+            if start_dt >= daily_prices_of_page[-1].date:
+                break
 
-        return daily_price_infos
+        company_daily_prices = []
+        for daily_price in tmp_daily_prices:
+            if start_dt <= daily_price.date <= end_dt:
+                company_daily_prices.append(daily_price)
+
+        CompanyDailyPrice.objects.bulk_create(company_daily_prices, ignore_conflicts=True)
+
+        return company_daily_prices
 
     def __get_daily_prices_of_page(self, code, page):
         """
@@ -145,33 +140,38 @@ class DailyPriceCrawler:
         base_table = soup.find_all("tr")
         price_table = base_table[2:7] + base_table[10:-2]
 
-        daily_price_infos = dict()
+        company_daily_prices = list()
         for daily_price_info in price_table:
             price_data = daily_price_info.find_all("span")
-
-            price_info = self.__get_price_info(price_data)
-
+            date_str = price_data[0].text.replace(".", "")
             img = str(daily_price_info.find("img"))
-            rate = self.__get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
-            price_info["rate"] = int(rate.replace(",", ""))
 
-            daily_price_infos[price_data[0].text] = price_info
+            company_daily_price = self.__get_company_daily_price(price_data, code, date_str, img)
+            company_daily_prices.append(company_daily_price)
 
-        return daily_price_infos
+        return company_daily_prices
 
-    def __get_price_info(self, price_data):
+    def __get_company_daily_price(self, price_data, code, date_str, img):
         """
         일간 정보를 딕셔너리로 생성: 종가, 시가, 고가, 저가, 거래량
         @return price_info: dict
         """
-        price_info = dict()
-        price_info["closing"] = int(price_data[1].text.replace(",", ""))
-        price_info["opening"] = int(price_data[3].text.replace(",", ""))
-        price_info["highest"] = int(price_data[4].text.replace(",", ""))
-        price_info["lowest"] = int(price_data[5].text.replace(",", ""))
-        price_info["volume"] = int(price_data[6].text.replace(",", ""))
+        company_daily_price = CompanyDailyPrice()
 
-        return price_info
+        company_daily_price.code = code
+        company_daily_price.id = code + "-" + date_str
+        company_daily_price.date = datetime.strptime(date_str, "%Y%m%d")
+
+        company_daily_price.closing = int(price_data[1].text.replace(",", ""))
+        company_daily_price.opening = int(price_data[3].text.replace(",", ""))
+        company_daily_price.highest = int(price_data[4].text.replace(",", ""))
+        company_daily_price.lowest = int(price_data[5].text.replace(",", ""))
+        company_daily_price.volume = int(price_data[6].text.replace(",", ""))
+
+        change_amount = self.__get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
+        company_daily_price.change_amount = int(change_amount.replace(",", ""))
+
+        return company_daily_price
 
     def __get_rate_sign(self, img):
         """
@@ -214,36 +214,6 @@ class KrxCompaniesCrawler:
             company.save()
 
         return companies_info
-
-    def get_code_name(self):
-        """
-        {"종목코드": "회사명"} 포맷의 딕셔너리 생성
-        @return code_name: dict
-        """
-        url = self.url_body_krx + "&searchType=" + self.cd_listed
-
-        df_companies_info = self.__get_df_companies_info(url)
-
-        code_name = dict()
-        for i in df_companies_info.index:
-            code_name[df_companies_info.at[i, 'code']] = df_companies_info.at[i, 'name']
-
-        return code_name
-
-    def get_name_code(self):
-        """
-        {"회사명": "종목코드"} 포맷의 딕셔너리 생성
-        @return name_code: dict
-        """
-        url = self.url_body_krx + "&searchType=" + self.cd_listed
-
-        df_companies_info = self.__get_df_companies_info(url)
-
-        name_code = dict()
-        for i in df_companies_info.index:
-            name_code[df_companies_info.at[i, 'name']] = df_companies_info.at[i, 'code']
-
-        return name_code
 
     def __get_df_companies_info(self, url):
         """
