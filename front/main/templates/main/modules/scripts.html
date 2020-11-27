@@ -30,7 +30,9 @@
 <script type="text/javascript">
     function crawlCompanyDailyPrice() {
 
-        var params = $("form[name=formCompanyDailyPrice]").serialize();
+        let params = $("form[name=formCompanyDailyPrice]").serialize();
+
+        // 값이 비어있을 경우에 대한 로직 추가
 
         $.ajax({
             url: "{% url 'main:crawl_daily_price' %}" + "?" + params,
@@ -42,5 +44,13 @@
                 console.log(request, status, error)
             }
         });
+    }
+
+    function crawlCompanyDailyIndicator() {
+        alert("crawlCompanyDailyIndicator");
+    }
+
+    function crawlCompany() {
+        alert("crawlCompany");
     }
 </script>
