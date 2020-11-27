@@ -55,24 +55,6 @@ def companies(request):
     return HttpResponse(companies_str)
 
 
-def name(request):
-    req_json = request.GET.dict()
-    code = req_json.get("code")
-    krs_companies_crawler = crawler.KrxCompaniesCrawler()
-    code_name = krs_companies_crawler.get_code_name()
-    name = code_name[code]
-    return HttpResponse(name)
-
-
-def code(request):
-    req_json = request.GET.dict()
-    name = req_json.get("name")
-    krs_companies_crawler = crawler.KrxCompaniesCrawler()
-    name_code = krs_companies_crawler.get_name_code()
-    code = name_code[name]
-    return HttpResponse(code)
-
-
 def test_get(request):
     req_dict = request.GET.dict()
     return HttpResponse(str(req_dict))

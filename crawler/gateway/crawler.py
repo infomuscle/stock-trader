@@ -215,36 +215,6 @@ class KrxCompaniesCrawler:
 
         return companies_info
 
-    def get_code_name(self):
-        """
-        {"종목코드": "회사명"} 포맷의 딕셔너리 생성
-        @return code_name: dict
-        """
-        url = self.url_body_krx + "&searchType=" + self.cd_listed
-
-        df_companies_info = self.__get_df_companies_info(url)
-
-        code_name = dict()
-        for i in df_companies_info.index:
-            code_name[df_companies_info.at[i, 'code']] = df_companies_info.at[i, 'name']
-
-        return code_name
-
-    def get_name_code(self):
-        """
-        {"회사명": "종목코드"} 포맷의 딕셔너리 생성
-        @return name_code: dict
-        """
-        url = self.url_body_krx + "&searchType=" + self.cd_listed
-
-        df_companies_info = self.__get_df_companies_info(url)
-
-        name_code = dict()
-        for i in df_companies_info.index:
-            name_code[df_companies_info.at[i, 'name']] = df_companies_info.at[i, 'code']
-
-        return name_code
-
     def __get_df_companies_info(self, url):
         """
         KRX에서 기업 정보 조회하여 회사명/종목코드만 남긴 데이터 프레임 리턴
