@@ -108,13 +108,13 @@ class DailyPriceCrawler:
         end_dt = datetime.strptime(end_dt_str, "%Y.%m.%d")
 
         tmp_daily_prices = list()
-        page = 1
+        page = 0
         while True:
+            page += 1
             daily_prices_of_page = self.__get_daily_prices_of_page(code, page)
             tmp_daily_prices.extend(daily_prices_of_page)
             if start_dt >= daily_prices_of_page[-1].date:
                 break
-            page += 1
 
         company_daily_prices = []
         for daily_price in tmp_daily_prices:
@@ -143,32 +143,33 @@ class DailyPriceCrawler:
         company_daily_prices = list()
         for daily_price_info in price_table:
             price_data = daily_price_info.find_all("span")
-
-            company_daily_price = self.__get_price_info(price_data)
-
-            img = str(daily_price_info.find("img"))
-            change_amount = self.__get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
-            company_daily_price.change_amount = int(change_amount.replace(",", ""))
-
-            company_daily_price.code = code
             date_str = price_data[0].text.replace(".", "")
-            company_daily_price.id = code + "-" + date_str
-            company_daily_price.date = datetime.strptime(date_str, "%Y%m%d")
+            img = str(daily_price_info.find("img"))
+
+            company_daily_price = self.__get_company_daily_price(price_data, code, date_str, img)
             company_daily_prices.append(company_daily_price)
 
         return company_daily_prices
 
-    def __get_price_info(self, price_data):
+    def __get_company_daily_price(self, price_data, code, date_str, img):
         """
         일간 정보를 딕셔너리로 생성: 종가, 시가, 고가, 저가, 거래량
         @return price_info: dict
         """
         company_daily_price = CompanyDailyPrice()
+
+        company_daily_price.code = code
+        company_daily_price.id = code + "-" + date_str
+        company_daily_price.date = datetime.strptime(date_str, "%Y%m%d")
+
         company_daily_price.closing = int(price_data[1].text.replace(",", ""))
         company_daily_price.opening = int(price_data[3].text.replace(",", ""))
         company_daily_price.highest = int(price_data[4].text.replace(",", ""))
         company_daily_price.lowest = int(price_data[5].text.replace(",", ""))
         company_daily_price.volume = int(price_data[6].text.replace(",", ""))
+
+        change_amount = self.__get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
+        company_daily_price.change_amount = int(change_amount.replace(",", ""))
 
         return company_daily_price
 
