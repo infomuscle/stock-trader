@@ -14,6 +14,10 @@ def crawl(request):
     context = {}
     return render(request, 'main/crawl.html', context)
 
+def trade(request):
+    context = {}
+    return render(request, 'main/trade.html', context)
+
 
 def companies(request):
     context = {}
