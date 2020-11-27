@@ -14,6 +14,6 @@ RUN pip install -r requirements.txt
 
 ADD . /stock-crawler
 
-CMD ["python3", "manage.py", "runserver", "0:8001"]
+CMD ["python3", "manage.py", "runserver", "0:8001", "--settings=crawler.settings_dev"]
 
 EXPOSE 8001
