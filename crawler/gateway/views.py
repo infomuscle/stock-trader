@@ -21,7 +21,8 @@ def daily_price(request):
 
     daily_crawler = crawler.DailyPriceCrawler()
     prices = daily_crawler.get_daily_prices_of_company(code, start_dt, end_dt)
-    return HttpResponse(json.dumps(prices))
+    return HttpResponse("success")
+    # return HttpResponse(json.dumps(prices))
 
 
 def daily_indicator(request):
@@ -31,8 +32,9 @@ def daily_indicator(request):
     date = req_json.get("date")
 
     daily_crawler = crawler.DailyPriceCrawler()
-    prices = daily_crawler.get_daily_prices_to_page(code, 5)
-    return HttpResponse(json.dumps(prices))
+    # prices = daily_crawler.get_daily_prices_to_page(code, 5)
+    return HttpResponse("success")
+    # return HttpResponse(json.dumps(prices))
 
 
 def indicators(request):

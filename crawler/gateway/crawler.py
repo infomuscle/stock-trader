@@ -6,7 +6,6 @@ from datetime import datetime
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from django.db import IntegrityError
 
 from gateway import constants as consts
 from gateway.models import *
@@ -103,40 +102,31 @@ class CompanyDetailCrawler:
 
 class DailyPriceCrawler:
 
-    def get_daily_prices_of_company(self, code: str, start_dt: str, end_dt: str):
+    def get_daily_prices_of_company(self, code: str, start_dt_str: str, end_dt_str: str):
 
-        tmp_daily_prices = dict()
+        start_dt = datetime.strptime(start_dt_str, "%Y.%m.%d")
+        end_dt = datetime.strptime(end_dt_str, "%Y.%m.%d")
+
+        tmp_daily_prices = list()
 
         page = 1
         while True:
             daily_prices_of_page = self.__get_daily_prices_of_page(code, page)
-            tmp_daily_prices.update(daily_prices_of_page)
-
-            dates_in_page = list(daily_prices_of_page.keys())
-            if start_dt >= dates_in_page[-1]:
+            tmp_daily_prices.extend(daily_prices_of_page)
+            dates_in_page = daily_prices_of_page
+            if start_dt >= dates_in_page[-1].date:
                 break
             page += 1
 
-        daily_prices = dict()
         company_daily_prices = []
-        for key_date in tmp_daily_prices.keys():
-            if start_dt <= key_date <= end_dt:
-                daily_prices[key_date] = tmp_daily_prices[key_date]
-
-                company_daily_price = CompanyDailyPrice()
-                company_daily_price.code = code
-                company_daily_price.date = datetime.strptime(key_date, "%Y.%m.%d")
-                company_daily_price.closing = daily_prices[key_date]["closing"]
-                company_daily_price.opening = daily_prices[key_date]["opening"]
-                company_daily_price.highest = daily_prices[key_date]["highest"]
-                company_daily_price.lowest = daily_prices[key_date]["lowest"]
-                company_daily_price.volume = daily_prices[key_date]["volume"]
-                company_daily_price.rate = daily_prices[key_date]["rate"]
-                company_daily_prices.append(company_daily_price)
+        for daily_price in tmp_daily_prices:
+            if start_dt <= daily_price.date <= end_dt:
+                daily_price.code = code
+                company_daily_prices.append(daily_price)
 
         CompanyDailyPrice.objects.bulk_create(company_daily_prices, ignore_conflicts=True)
 
-        return daily_prices
+        return company_daily_prices
 
     def __get_daily_prices_of_page(self, code, page):
         """
@@ -153,33 +143,34 @@ class DailyPriceCrawler:
         base_table = soup.find_all("tr")
         price_table = base_table[2:7] + base_table[10:-2]
 
-        daily_price_infos = dict()
+        company_daily_prices = list()
         for daily_price_info in price_table:
             price_data = daily_price_info.find_all("span")
 
-            price_info = self.__get_price_info(price_data)
+            company_daily_price = self.__get_price_info(price_data)
 
             img = str(daily_price_info.find("img"))
             rate = self.__get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
-            price_info["rate"] = int(rate.replace(",", ""))
+            company_daily_price.rate = int(rate.replace(",", ""))
 
-            daily_price_infos[price_data[0].text] = price_info
+            company_daily_price.date = datetime.strptime(price_data[0].text, "%Y.%m.%d")
+            company_daily_prices.append(company_daily_price)
 
-        return daily_price_infos
+        return company_daily_prices
 
     def __get_price_info(self, price_data):
         """
         일간 정보를 딕셔너리로 생성: 종가, 시가, 고가, 저가, 거래량
         @return price_info: dict
         """
-        price_info = dict()
-        price_info["closing"] = int(price_data[1].text.replace(",", ""))
-        price_info["opening"] = int(price_data[3].text.replace(",", ""))
-        price_info["highest"] = int(price_data[4].text.replace(",", ""))
-        price_info["lowest"] = int(price_data[5].text.replace(",", ""))
-        price_info["volume"] = int(price_data[6].text.replace(",", ""))
+        company_daily_price = CompanyDailyPrice()
+        company_daily_price.closing = int(price_data[1].text.replace(",", ""))
+        company_daily_price.opening = int(price_data[3].text.replace(",", ""))
+        company_daily_price.highest = int(price_data[4].text.replace(",", ""))
+        company_daily_price.lowest = int(price_data[5].text.replace(",", ""))
+        company_daily_price.volume = int(price_data[6].text.replace(",", ""))
 
-        return price_info
+        return company_daily_price
 
     def __get_rate_sign(self, img):
         """
