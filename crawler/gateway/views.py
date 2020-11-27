@@ -4,6 +4,7 @@ from django.core import serializers
 from django.http import HttpResponse
 
 from gateway import crawler
+from gateway.models import Company
 
 
 def current(request):
@@ -19,8 +20,16 @@ def daily_price(request):
     start_dt = req_json.get("start_dt")
     end_dt = req_json.get("end_dt")
 
-    daily_crawler = crawler.DailyPriceCrawler()
-    prices = daily_crawler.get_daily_prices_of_company(code, start_dt, end_dt)
+    codes = []
+    if code == "all":
+        codes.extend(list(Company.objects.all().values_list('code', flat=True)))
+    else:
+        codes.append(code)
+
+    daily_price_crawler = crawler.DailyPriceCrawler()
+    prices = []
+    for code in codes:
+        prices.extend(daily_price_crawler.get_daily_prices_of_company(code, start_dt, end_dt))
 
     return HttpResponse(serializers.serialize("json", prices))
 
