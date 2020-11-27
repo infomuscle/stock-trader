@@ -2,7 +2,7 @@
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
     <!-- Sidebar - Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="../index.html">
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'main:index' %}">
         <div class="sidebar-brand-icon rotate-n-15">
             <i class="fas fa-laugh-wink"></i>
         </div>
@@ -14,7 +14,7 @@
 
     <!-- Nav Item - Dashboard -->
     <li class="nav-item active">
-        <a class="nav-link" href="../index.html">
+        <a class="nav-link" href="{% url 'main:index' %}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span></a>
     </li>
@@ -38,31 +38,28 @@
         <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Stock Info:</h6>
-                <a class="collapse-item" href="{% url 'main:crawl' %}">Crawl</a>
-                <a class="collapse-item" href="{% url 'main:current' %}">Current</a>
-                <a class="collapse-item" href="{% url 'main:daily' %}">Daily</a>
-                <div class="collapse-divider"></div>
-                <h6 class="collapse-header">Companies Info:</h6>
                 <a class="collapse-item" href="{% url 'main:companies' %}">Companies</a>
                 <a class="collapse-item" href="{% url 'main:summary' %}">Summary</a>
-                <a class="collapse-item" href="../references/404.html">Code</a>
-                <a class="collapse-item" href="../references/blank.html">Name</a>
+                <div class="collapse-divider"></div>
+                <h6 class="collapse-header">Daily Info:</h6>
+                <a class="collapse-item" href="{% url 'main:price' %}">Price</a>
+                <a class="collapse-item" href="{% url 'main:indicator' %}">Indicator</a>
             </div>
         </div>
     </li>
 
-    <!-- Nav Item - Charts -->
+    <!-- Nav Item - Crawl -->
     <li class="nav-item">
-        <a class="nav-link" href="../references/charts.html">
+        <a class="nav-link" href="{% url 'main:crawl' %}">
             <i class="fas fa-fw fa-chart-area"></i>
-            <span>Charts</span></a>
+            <span>Crawl</span></a>
     </li>
 
     <!-- Nav Item - Tables -->
     <li class="nav-item">
-        <a class="nav-link" href="../references/tables.html">
+        <a class="nav-link" href="{% url 'main:trade' %}">
             <i class="fas fa-fw fa-table"></i>
-            <span>Tables</span></a>
+            <span>Trade</span></a>
     </li>
     <!-- Divider -->
     <hr class="sidebar-divider">

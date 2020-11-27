@@ -5,11 +5,11 @@ from . import views
 app_name = "main"
 
 urlpatterns = [
-    path("", views.index),
-    path("crawl", views.crawl, name="crawl"),
+    path("", views.index, name="index"),
     path("companies", views.companies, name="companies"),
-    path("current", views.current, name="current"),
-    path("daily", views.daily, name="daily"),
-    # path("pers", views.per, name="per"),
-    path("summary", views.summary, name="summary")
+    path("summary", views.summary, name="summary"),
+    path("price", views.price, name="price"),
+    path("indicator", views.indicator, name="indicator"),
+    path("crawl", views.crawl, name="crawl"),
+    path("trade", views.trade, name="trade")
 ]
