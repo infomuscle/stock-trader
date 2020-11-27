@@ -51,7 +51,6 @@ def crawl_daily_price(request):
     url += '&end_dt=' + end_dt
 
     daily_price = requests.get(url)
-
     return HttpResponse(daily_price.text)
 
 
