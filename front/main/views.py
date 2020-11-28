@@ -21,16 +21,25 @@ def companies(request):
 
 def summary(request):
     context = {}
+
     return render(request, 'main/summary.html', context)
 
 
 def price(request):
     context = {}
+
+    prices = DailyPrice.objects.all()
+    context["prices"] = prices
+
     return render(request, 'main/price.html', context)
 
 
 def indicator(request):
     context = {}
+
+    indicators = DailyIndicator.objects.all()
+    context["indicators"] = indicators
+
     return render(request, 'main/indicator.html', context)
 
 
@@ -49,6 +58,17 @@ def crawl_daily_price(request):
     url += '?code=' + code
     url += '&start_dt=' + start_dt
     url += '&end_dt=' + end_dt
+
+    response = requests.get(url)
+    return HttpResponse(response.text)
+
+
+def crawl_daily_indicator(request):
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+
+    url = "http://localhost:8001/api/daily/indicator"
+    url += '?code=' + code
 
     response = requests.get(url)
     return HttpResponse(response.text)

@@ -4,4 +4,61 @@
 
 {% block content %}
 
+    <!-- Page Heading -->
+    <h1 class="h3 mb-2 text-gray-800">Indicator</h1>
+    <p class="mb-4">Daily Indicators: EPS, PER, BPS, PBR, ROE, ROA, IPER.</p>
+
+    <!-- Company Datatables -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Daily Indicators</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered w-100" id="dataTable">
+                    <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>EPS</th>
+                        <th>PER</th>
+                        <th>BPS</th>
+                        <th>PBR</th>
+                        <th>ROE</th>
+                        <th>ROA</th>
+                        <th>IPER</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>EPS</th>
+                        <th>PER</th>
+                        <th>BPS</th>
+                        <th>PBR</th>
+                        <th>ROE</th>
+                        <th>ROA</th>
+                        <th>IPER</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    {% for indicator in indicators %}
+                        <tr>
+                            <td>{{ indicator.code }}</td>
+                            <td>{{ indicator.date }}</td>
+                            <td>{{ indicator.eps }}</td>
+                            <td>{{ indicator.per }}</td>
+                            <td>{{ indicator.bps }}</td>
+                            <td>{{ indicator.pbr }}</td>
+                            <td>{{ indicator.roe }}</td>
+                            <td>{{ indicator.roa }}</td>
+                            <td>{{ indicator.iper }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 {% endblock %}

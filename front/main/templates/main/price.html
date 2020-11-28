@@ -4,4 +4,61 @@
 
 {% block content %}
 
+    <!-- Page Heading -->
+    <h1 class="h3 mb-2 text-gray-800">Prices</h1>
+    <p class="mb-4">Daily Price Information of Companies</p>
+
+    <!-- Company Datatables -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Daily Prices</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered w-100" id="dataTable">
+                    <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Opening</th>
+                        <th>Closing</th>
+                        <th>Highest</th>
+                        <th>Lowest</th>
+                        <th>Change Amount</th>
+                        <th>Change Rate</th>
+                        <th>Volume</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Opening</th>
+                        <th>Closing</th>
+                        <th>Highest</th>
+                        <th>Lowest</th>
+                        <th>Change Amount</th>
+                        <th>Change Rate</th>
+                        <th>Volume</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    {% for price in prices %}
+                        <tr>
+                            <td>{{ price.code }}</td>
+                            <td>{{ price.date }}</td>
+                            <td>{{ price.opening }}</td>
+                            <td>{{ price.closing }}</td>
+                            <td>{{ price.highest }}</td>
+                            <td>{{ price.lowest }}</td>
+                            <td>{{ price.change_amount }}</td>
+                            <td>{{ price.change_rate }}</td>
+                            <td>{{ price.volume }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 {% endblock %}
