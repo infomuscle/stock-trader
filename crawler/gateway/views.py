@@ -22,11 +22,9 @@ def daily_price(request):
         codes.append(code)
 
     daily_price_crawler = crawler.DailyPriceCrawler()
-    prices = []
-    for code in codes:
-        prices.extend(daily_price_crawler.get_daily_prices_of_company(code, start_dt, end_dt))
+    daily_prices = daily_price_crawler.crawl_daily_prices(codes, start_dt, end_dt)
 
-    return HttpResponse(serializers.serialize("json", prices))
+    return HttpResponse(serializers.serialize("json", daily_prices))
 
 
 def daily_indicator(request):
