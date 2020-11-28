@@ -7,13 +7,6 @@ from gateway import crawler
 from gateway.models import Company
 
 
-def current(request):
-    req_json = request.GET.dict()
-    code = req_json.get("code")
-    c_price = crawler.get_current_price(code)
-    return HttpResponse(c_price)
-
-
 def daily_price(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
@@ -34,6 +27,23 @@ def daily_price(request):
     return HttpResponse(serializers.serialize("json", prices))
 
 
+def companies(request):
+    req_json = request.GET.dict()
+    market = req_json.get("market")
+
+    markets = []
+    if market == "all":
+        markets.extend(["kospi", "kosdaq"])
+    else:
+        markets.append(market)
+
+    companies_crawler = crawler.CompanyCrawler()
+    companies = []
+    for market in markets:
+        companies.extend(companies_crawler.crawl_companies(market))
+    return HttpResponse(serializers.serialize("json", companies))
+
+
 def daily_indicator(request):
     # 수정 필요
     req_json = request.GET.dict()
@@ -46,33 +56,6 @@ def daily_indicator(request):
     # return HttpResponse(json.dumps(prices))
 
 
-def indicators(request):
-    req_json = request.GET.dict()
-    code = req_json.get("code")
-
-    company_detail_crawler = crawler.CompanyDetailCrawler()
-    indicators = company_detail_crawler.get_indicators(code)
-
-    return HttpResponse(str(indicators))
-
-
-def companies(request):
-    req_json = request.GET.dict()
-    market = req_json.get("market")
-
-    markets = []
-    if market == "all":
-        markets.extend(["kospi", "kosdaq"])
-    else:
-        markets.append(market)
-
-    companies_crawler = crawler.CompaniesCrawler()
-    companies = []
-    for market in markets:
-        companies.extend(companies_crawler.crawl_companies(market))
-    return HttpResponse(serializers.serialize("json", companies))
-
-
 def test_get(request):
     req_dict = request.GET.dict()
     return HttpResponse(str(req_dict))
@@ -81,3 +64,10 @@ def test_get(request):
 def test_post(request):
     req_dict = json.loads(request.body)
     return HttpResponse(str(req_dict))
+
+
+def current(request):
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+    c_price = crawler.get_current_price(code)
+    return HttpResponse(c_price)

@@ -18,7 +18,7 @@ def get_url(tab_name: str, params: dict):
     @return url: str
     """
     url = consts.URL_BODY_NAVER
-    url += "/" + tab_name + ".nhn"
+    url += tab_name + ".nhn"
 
     if (len(params.keys()) > 0):
         for i, k in enumerate(params.keys()):
@@ -48,7 +48,7 @@ def get_current_price(code: str):
     params = dict()
     params["code"] = code
 
-    url = get_url("sise", params)
+    url = get_url("item/sise", params)
     soup = get_soup(url)
 
     current_price = soup.find("strong", {"id": "_nowVal"})
@@ -133,7 +133,7 @@ class DailyPriceCrawler:
         params["code"] = code
         params["page"] = str(page)
 
-        url = get_url("sise_day", params)
+        url = get_url("item/sise_day", params)
         soup = get_soup(url)
 
         base_table = soup.find_all("tr")
@@ -186,7 +186,7 @@ class DailyPriceCrawler:
         return sign
 
 
-class CompaniesCrawler:
+class CompanyCrawler:
 
     def crawl_companies(self, market: str):
         companies = []
@@ -202,12 +202,14 @@ class CompaniesCrawler:
         return companies
 
     def __crawl_companies_of_page(self, market, page):
-        url = "https://finance.naver.com/sise/sise_market_sum.nhn?&sosok="
+        params = dict()
         if market == "kospi":
-            url += "0"
+            params["sosok"] = "0"
         elif market == "kosdaq":
-            url += "1"
-        url += "&page=" + str(page)
+            params["sosok"] = "1"
+        params["page"] = str(page)
+
+        url = get_url("sise/sise_market_sum", params)
         print(url)
 
         soup = get_soup(url)
