@@ -27,14 +27,18 @@ def summary(request):
 
 def price(request):
     context = {}
+
+    prices = DailyPrice.objects.all()
+    context["prices"] = prices
+
     return render(request, 'main/price.html', context)
 
 
 def indicator(request):
     context = {}
 
-    daily_indicators = DailyIndicator.objects.all()
-    context["indicators"] = daily_indicators
+    indicators = DailyIndicator.objects.all()
+    context["indicators"] = indicators
 
     return render(request, 'main/indicator.html', context)
 
