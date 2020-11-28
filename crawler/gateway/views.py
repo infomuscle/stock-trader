@@ -40,9 +40,7 @@ def daily_indicator(request):
         codes.append(code)
 
     daily_indicator_crawler = crawler.DailyIndicatorCrawler()
-    indicators = []
-    for code in codes:
-        indicators.append(daily_indicator_crawler.crawl_daily_indicators_of_company(code))
+    indicators = daily_indicator_crawler.crawl_daily_indicators(codes)
 
     return HttpResponse(serializers.serialize("json", indicators))
 

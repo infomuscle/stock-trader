@@ -106,36 +106,50 @@ class DailyPriceCrawler:
 
 class DailyIndicatorCrawler:
 
+    def crawl_daily_indicators(self, codes):
+        indicators = []
+        for code in codes:
+            indicators.append(self.crawl_daily_indicators_of_company(code))
+
+        return indicators
+
     def crawl_daily_indicators_of_company(self, code: str):
-
         daily_indicator = DailyIndicator()
-        try:
-            url = consts.URL_BODY_NAVER_REPORT + code
-            soup = _get_soup(url)
+        daily_indicator.code = code
+        daily_indicator.date = date.today()
+        daily_indicator.id = code + "-" + str(daily_indicator.date).replace("-", "")
 
+        url = consts.URL_BODY_NAVER_REPORT + code
+        soup = _get_soup(url)
+
+        try:
             table = soup.find("td", {"class": "td0301"})
             lines = table.find_all("dt")
-
-            indicators_to_bring = ["EPS", "PER", "BPS", "PBR", "업종PER"]
-            indicators = dict()
-            for line in lines:
-                indicator = line.text.split(" ")
-                if indicator[0] in indicators_to_bring:
-                    indicators[indicator[0]] = float(indicator[1].replace(",", ""))
-
-            daily_indicator.code = code
-            daily_indicator.date = date.today()
-            daily_indicator.id = code + "-" + str(daily_indicator.date).replace("-", "")
-            daily_indicator.eps = indicators["EPS"]
-            daily_indicator.per = indicators["PER"]
-            daily_indicator.bps = indicators["BPS"]
-            daily_indicator.pbr = indicators["PBR"]
-            daily_indicator.iper = indicators["업종PER"]
-            daily_indicator.save()
         except Exception as e:
-            logger.info(code, e)
+            logger.error("code: %s error: %s" % (code, e))
+            return daily_indicator
+
+        indicators_dict = self.__get_indicators_dict(lines, code)
+        daily_indicator.eps = indicators_dict.get("EPS", None)
+        daily_indicator.per = indicators_dict.get("PER", None)
+        daily_indicator.bps = indicators_dict.get("BPS", None)
+        daily_indicator.pbr = indicators_dict.get("PBR", None)
+        daily_indicator.iper = indicators_dict.get("업종PER", None)
 
         return daily_indicator
+
+    def __get_indicators_dict(self, lines, code):
+        indicators_dict = dict()
+        for line in lines:
+            indicator = line.text.split(" ")
+            if indicator[0] in consts.INDICATORS:
+                try:
+                    indicators_dict[indicator[0]] = float(indicator[1].replace(",", ""))
+                except ValueError as e:
+                    logger.error("code: %s error: %s" % (code, e))
+                    pass
+
+        return indicators_dict
 
 
 class CompanyCrawler:
