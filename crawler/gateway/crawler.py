@@ -116,14 +116,14 @@ class DailyPriceCrawler:
             if start_dt >= daily_prices_of_page[-1].date:
                 break
 
-        company_daily_prices = []
+        daily_prices = []
         for daily_price in tmp_daily_prices:
             if start_dt <= daily_price.date <= end_dt:
-                company_daily_prices.append(daily_price)
+                daily_prices.append(daily_price)
 
-        CompanyDailyPrice.objects.bulk_create(company_daily_prices, ignore_conflicts=True)
+        CompanyDailyPrice.objects.bulk_create(daily_prices, ignore_conflicts=True)
 
-        return company_daily_prices
+        return daily_prices
 
     def __get_daily_prices_of_page(self, code, page):
         """
@@ -146,32 +146,32 @@ class DailyPriceCrawler:
             date_str = price_data[0].text.replace(".", "")
             img = str(daily_price_info.find("img"))
 
-            company_daily_price = self.__get_company_daily_price(price_data, code, date_str, img)
+            company_daily_price = self.__get_daily_price(price_data, code, date_str, img)
             company_daily_prices.append(company_daily_price)
 
         return company_daily_prices
 
-    def __get_company_daily_price(self, price_data, code, date_str, img):
+    def __get_daily_price(self, price_data, code, date_str, img):
         """
         일간 정보를 딕셔너리로 생성: 종가, 시가, 고가, 저가, 거래량
         @return price_info: dict
         """
-        company_daily_price = CompanyDailyPrice()
+        daily_price = CompanyDailyPrice()
 
-        company_daily_price.code = code
-        company_daily_price.id = code + "-" + date_str
-        company_daily_price.date = datetime.strptime(date_str, "%Y%m%d")
+        daily_price.code = code
+        daily_price.id = code + "-" + date_str
+        daily_price.date = datetime.strptime(date_str, "%Y%m%d")
 
-        company_daily_price.closing = int(price_data[1].text.replace(",", ""))
-        company_daily_price.opening = int(price_data[3].text.replace(",", ""))
-        company_daily_price.highest = int(price_data[4].text.replace(",", ""))
-        company_daily_price.lowest = int(price_data[5].text.replace(",", ""))
-        company_daily_price.volume = int(price_data[6].text.replace(",", ""))
+        daily_price.closing = int(price_data[1].text.replace(",", ""))
+        daily_price.opening = int(price_data[3].text.replace(",", ""))
+        daily_price.highest = int(price_data[4].text.replace(",", ""))
+        daily_price.lowest = int(price_data[5].text.replace(",", ""))
+        daily_price.volume = int(price_data[6].text.replace(",", ""))
 
         change_amount = self.__get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
-        company_daily_price.change_amount = int(change_amount.replace(",", ""))
+        daily_price.change_amount = int(change_amount.replace(",", ""))
 
-        return company_daily_price
+        return daily_price
 
     def __get_rate_sign(self, img):
         """
