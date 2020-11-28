@@ -50,8 +50,19 @@ def crawl_daily_price(request):
     url += '&start_dt=' + start_dt
     url += '&end_dt=' + end_dt
 
-    daily_price = requests.get(url)
-    return HttpResponse(daily_price.text)
+    response = requests.get(url)
+    return HttpResponse(response.text)
+
+
+def crawl_company(request):
+    req_json = request.GET.dict()
+    market = req_json.get("market")
+    url = "http://localhost:8001/api/companies/list"
+    url += "?market=" + market
+    print(url)
+
+    response = requests.get(url)
+    return HttpResponse(response.text)
 
 
 def trade(request):

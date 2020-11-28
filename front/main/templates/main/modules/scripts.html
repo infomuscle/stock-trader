@@ -78,6 +78,26 @@
     }
 
     function crawlCompany() {
-        alert("crawlCompany");
+
+        var params = "";
+        var market = $('#formCompany [name="market"]').val().trim()
+        if (market === "") {
+            market = "all"
+            params = "&market=" + market
+        } else {
+            params = $("form[name=formCompany]").serialize();
+        }
+        alert(params)
+
+        $.ajax({
+            url: "{% url 'main:crawl_company' %}" + "?" + params,
+            success: function (data) {
+                alert(data);
+            },
+            error: function (request, status, error) {
+                alert('실패');
+                console.log(request, status, error)
+            }
+        });
     }
 </script>
