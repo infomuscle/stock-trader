@@ -58,10 +58,10 @@ def indicators(request):
 
 def companies(request):
     req_json = request.GET.dict()
-    type = req_json.get("type")
-    krs_companies_crawler = crawler.KrxCompaniesCrawler()
-    companies_str = krs_companies_crawler.get_companies(type)
-    return HttpResponse(companies_str)
+    market = req_json.get("market")
+    companies_crawler = crawler.CompaniesCrawler()
+    companies = companies_crawler.crawl_companies(market)
+    return HttpResponse(serializers.serialize("json", companies))
 
 
 def test_get(request):

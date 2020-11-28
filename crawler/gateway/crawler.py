@@ -3,7 +3,6 @@ import re
 from datetime import date
 from datetime import datetime
 
-import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
@@ -187,42 +186,40 @@ class DailyPriceCrawler:
         return sign
 
 
-class KrxCompaniesCrawler:
+class CompaniesCrawler:
 
-    def __init__(self):
-        self.url_body_krx = consts.URL_BODY_KRX_COMPANIES
-        self.cd_kospi = consts.KRX_SEARCH_TYPE_CD_KOSPI
-        self.cd_listed = consts.KRX_SEARCH_TYPE_CD_LISTED
-
-    def get_companies(self, type: str):
-        """
-        KRX에서 모든 회사명/종목코드 조회
-        type 지정에 따라 코스피/상장사 조회 가능
-        @return companies_info: json
-        """
-        url = self.url_body_krx + "&searchType=" + self.cd_kospi if type == "kospi" else self.cd_listed
-
-        df_companies_info = self.__get_df_companies_info(url)
-
-        companies_info = df_companies_info.to_json(force_ascii=False, orient="records")
+    def crawl_companies(self, market: str):
 
         companies = []
-        for i in df_companies_info.index:
-            company = Company()
-            company.code = df_companies_info.at[i, 'code']
-            company.name = df_companies_info.at[i, 'name']
-            company.save()
+        for i in range(1, 2):
+            companies.extend(self.crawl_companies_of_page(market, i))
+        print(len(companies))
 
-        return companies_info
+        return companies
 
-    def __get_df_companies_info(self, url):
-        """
-        KRX에서 기업 정보 조회하여 회사명/종목코드만 남긴 데이터 프레임 리턴
-        @return df_companies_info: Dataframe
-        """
-        df_companies_info = pd.read_html(url, header=0)[0]
-        df_companies_info = df_companies_info[["회사명", "종목코드"]]
-        df_companies_info = df_companies_info.rename(columns={"회사명": "name", "종목코드": "code"})
-        df_companies_info.code = df_companies_info.code.map("{:06d}".format)
+    def crawl_companies_of_page(self, market, page):
+        url = "https://finance.naver.com/sise/sise_market_sum.nhn?&sosok="
+        if market == "kospi":
+            url += "0"
+        elif market == "kosdaq":
+            url += "1"
+        url += "&page=" + str(page)
+        print(url)
 
-        return df_companies_info
+        soup = get_soup(url)
+        table = soup.find("table", {"class": "type_2"})
+        rows = table.find_all("tr")
+
+        companies = []
+        for row in rows:
+            name = row.find("a", {"class": "tltle"})
+            if name == None:
+                continue
+            else:
+                company = Company()
+                company.name = name.text
+                company.code = name.get("href").replace("/item/main.nhn?code=", "")
+                company.market = market.upper()
+                companies.append(company)
+
+        return companies
