@@ -189,15 +189,19 @@ class DailyPriceCrawler:
 class CompaniesCrawler:
 
     def crawl_companies(self, market: str):
-
         companies = []
-        for i in range(1, 2):
-            companies.extend(self.crawl_companies_of_page(market, i))
-        print(len(companies))
+        page = 0
+        while True:
+            page += 1
+            companies_of_page = self.__crawl_companies_of_page(market, page)
+            companies.extend(companies_of_page)
+            if len(companies_of_page) == 0:
+                break
+        Company.objects.bulk_create(companies, ignore_conflicts=True)
 
         return companies
 
-    def crawl_companies_of_page(self, market, page):
+    def __crawl_companies_of_page(self, market, page):
         url = "https://finance.naver.com/sise/sise_market_sum.nhn?&sosok="
         if market == "kospi":
             url += "0"

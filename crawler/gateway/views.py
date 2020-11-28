@@ -59,8 +59,17 @@ def indicators(request):
 def companies(request):
     req_json = request.GET.dict()
     market = req_json.get("market")
+
+    markets = []
+    if market == "all":
+        markets.extend(["kospi", "kosdaq"])
+    else:
+        markets.append(market)
+
     companies_crawler = crawler.CompaniesCrawler()
-    companies = companies_crawler.crawl_companies(market)
+    companies = []
+    for market in markets:
+        companies.extend(companies_crawler.crawl_companies(market))
     return HttpResponse(serializers.serialize("json", companies))
 
 
