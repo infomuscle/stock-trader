@@ -28,13 +28,13 @@
 <script src="{% static 'main/js/demo/datatables-demo.js' %}"></script>
 
 <script type="text/javascript">
-    function crawlCompanyDailyPrice() {
+    function crawlDailyPrice() {
 
         var params = "";
 
-        var start_dt = $('#formCompanyDailyPrice [name="start_dt"]').val().trim()
-        var end_dt = $('#formCompanyDailyPrice [name="end_dt"]').val().trim()
-        var code = $('#formCompanyDailyPrice [name="code"]').val().trim()
+        var start_dt = $('#formDailyPrice [name="start_dt"]').val().trim()
+        var end_dt = $('#formDailyPrice [name="end_dt"]').val().trim()
+        var code = $('#formDailyPrice [name="code"]').val().trim()
 
         if (start_dt === "" || end_dt === "" || code === "") {
             let today = new Date()
@@ -55,7 +55,7 @@
             params = "start_dt=" + start_dt + "&end_dt=" + end_dt + "&code=" + code
 
         } else {
-            params = $("form[name=formCompanyDailyPrice]").serialize();
+            params = $("form[name=formDailyPrice]").serialize();
         }
 
         alert(params);
@@ -78,6 +78,26 @@
     }
 
     function crawlCompany() {
-        alert("crawlCompany");
+
+        var params = "";
+        var market = $('#formCompany [name="market"]').val().trim()
+        if (market === "") {
+            market = "all"
+            params = "&market=" + market
+        } else {
+            params = $("form[name=formCompany]").serialize();
+        }
+        alert(params)
+
+        $.ajax({
+            url: "{% url 'main:crawl_company' %}" + "?" + params,
+            success: function (data) {
+                alert(data);
+            },
+            error: function (request, status, error) {
+                alert('실패');
+                console.log(request, status, error)
+            }
+        });
     }
 </script>

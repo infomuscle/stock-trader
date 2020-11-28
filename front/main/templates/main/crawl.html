@@ -18,12 +18,12 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Daily Price Crawler</h6>
-                    <button class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" onclick="crawlCompanyDailyPrice()">
+                    <button class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" onclick="crawlDailyPrice()">
                         <i class="fas fa-download fa-sm text-white-50"></i> Crawl
                     </button>
                 </div>
                 <div class="card-body">
-                    <form name="formCompanyDailyPrice" id="formCompanyDailyPrice">
+                    <form name="formDailyPrice" id="formDailyPrice">
                         <label>Start Date
                             <input type="text" name="start_dt" class="form-control form-control-sm" placeholder="yyyy.mm.dd">
                         </label>
@@ -68,9 +68,11 @@
                     </button>
                 </div>
                 <div class="card-body">
-                    <label>Type
-                        <input type="search" class="form-control form-control-sm" placeholder="">
-                    </label>
+                    <form name="formCompany" id="formCompany">
+                        <label>Market
+                            <input type="text" name="market" class="form-control form-control-sm" placeholder="all || kospi || kosdaq">
+                        </label>
+                    </form>
                 </div>
             </div>
 
@@ -84,10 +86,10 @@
                 </div>
                 <div class="card-body">
                     <label>Variable1
-                        <input type="search" class="form-control form-control-sm" placeholder="">
+                        <input type="text" class="form-control form-control-sm" placeholder="">
                     </label>
                     <label>Variable2
-                        <input type="search" class="form-control form-control-sm" placeholder="">
+                        <input type="text" class="form-control form-control-sm" placeholder="">
                     </label>
                 </div>
             </div>
