@@ -12,6 +12,8 @@ def daily_price(request):
     code = req_json.get("code")
     start_dt = req_json.get("start_dt")
     end_dt = req_json.get("end_dt")
+    if code == "test":
+        return HttpResponse("SUCCESS")
 
     codes = []
     if code == "all":
@@ -27,9 +29,23 @@ def daily_price(request):
     return HttpResponse(serializers.serialize("json", prices))
 
 
+def daily_indicator(request):
+    # 수정 필요
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+    date = req_json.get("date")
+
+    daily_crawler = crawler.DailyPriceCrawler()
+    # prices = daily_crawler.get_daily_prices_to_page(code, 5)
+    return HttpResponse("success")
+    # return HttpResponse(json.dumps(prices))
+
+
 def companies(request):
     req_json = request.GET.dict()
     market = req_json.get("market")
+    if market == "test":
+        return HttpResponse("SUCCESS")
 
     markets = []
     if market == "all":
@@ -42,18 +58,6 @@ def companies(request):
     for market in markets:
         companies.extend(companies_crawler.crawl_companies(market))
     return HttpResponse(serializers.serialize("json", companies))
-
-
-def daily_indicator(request):
-    # 수정 필요
-    req_json = request.GET.dict()
-    code = req_json.get("code")
-    date = req_json.get("date")
-
-    daily_crawler = crawler.DailyPriceCrawler()
-    # prices = daily_crawler.get_daily_prices_to_page(code, 5)
-    return HttpResponse("success")
-    # return HttpResponse(json.dumps(prices))
 
 
 def test_get(request):
@@ -69,5 +73,6 @@ def test_post(request):
 def current(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
-    c_price = crawler.get_current_price(code)
+    current_price_crawler = crawler.CurrentPriceCrawler()
+    c_price = current_price_crawler.get_current_price(code)
     return HttpResponse(c_price)

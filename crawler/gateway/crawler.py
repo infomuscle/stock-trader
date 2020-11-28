@@ -12,56 +12,12 @@ from gateway.models import *
 logger = logging.getLogger()
 
 
-def generate_url(tab_name: str, params: dict):
-    """
-    네이버 증권 URI에 탭 이름과 파라미터를 붙어 네이버 증권 URL 생성
-    @return url: str
-    """
-    url = consts.URL_BODY_NAVER
-    url += tab_name + ".nhn"
-
-    if (len(params.keys()) > 0):
-        for i, k in enumerate(params.keys()):
-            url += "?" if i == 0 else "&"
-            url += k + "=" + params[k]
-
-    return url
-
-
-def get_soup(url):
-    """
-    User-Agent가 포함된 HTTP 헤더와 URL로 BeautifulSoup 생성
-    @return soup: BeautifulSoup
-    """
-    headers = {"User-Agent": consts.HEADER_VALUE_USER_AGENT}
-    html_doc = requests.get(url, headers=headers)
-    soup = BeautifulSoup(html_doc.content, "html.parser")
-
-    return soup
-
-
-def get_current_price(code: str):
-    """
-    종목코드의 현재 가격 조회
-    @return current_price: str
-    """
-    params = dict()
-    params["code"] = code
-
-    url = generate_url("item/sise", params)
-    soup = get_soup(url)
-
-    current_price = soup.find("strong", {"id": "_nowVal"})
-
-    return current_price.text
-
-
-class CompanyDetailCrawler:
+class IndicatorCrawler:
 
     def get_indicators(self, code: str):
 
         url = consts.URL_BODY_NAVER_COMPANY + code
-        soup = get_soup(url)
+        soup = _get_soup(url)
 
         table = soup.find("td", {"class": "td0301"})
         lines = table.find_all("dt")
@@ -130,7 +86,7 @@ class DailyPriceCrawler:
         @return daily_price_info: dict
         """
         url = self.__get_url_for_daily_price(code, page)
-        soup = get_soup(url)
+        soup = _get_soup(url)
 
         base_table = soup.find_all("tr")
         price_table = base_table[2:7] + base_table[10:-2]
@@ -151,7 +107,7 @@ class DailyPriceCrawler:
         params["code"] = code
         params["page"] = str(page)
 
-        url = generate_url("item/sise_day", params)
+        url = _generate_url("item/sise_day", params)
 
         return url
 
@@ -209,7 +165,7 @@ class CompanyCrawler:
     def __crawl_companies_of_page(self, market, page):
 
         url = self.__get_url_for_company(market, page)
-        soup = get_soup(url)
+        soup = _get_soup(url)
 
         table = soup.find("table", {"class": "type_2"})
         rows = table.find_all("tr")
@@ -236,6 +192,52 @@ class CompanyCrawler:
             params["sosok"] = "1"
         params["page"] = str(page)
 
-        url = generate_url("sise/sise_market_sum", params)
+        url = _generate_url("sise/sise_market_sum", params)
 
         return url
+
+
+class CurrentPriceCrawler:
+
+    def get_current_price(self, code: str):
+        """
+        종목코드의 현재 가격 조회
+        @return current_price: str
+        """
+        params = dict()
+        params["code"] = code
+
+        url = _generate_url("item/sise", params)
+        soup = _get_soup(url)
+
+        current_price = soup.find("strong", {"id": "_nowVal"})
+
+        return current_price.text
+
+
+def _generate_url(tab_name: str, params: dict):
+    """
+    네이버 증권 URI에 탭 이름과 파라미터를 붙어 네이버 증권 URL 생성
+    @return url: str
+    """
+    url = consts.URL_BODY_NAVER
+    url += tab_name + ".nhn"
+
+    if (len(params.keys()) > 0):
+        for i, k in enumerate(params.keys()):
+            url += "?" if i == 0 else "&"
+            url += k + "=" + params[k]
+
+    return url
+
+
+def _get_soup(url):
+    """
+    User-Agent가 포함된 HTTP 헤더와 URL로 BeautifulSoup 생성
+    @return soup: BeautifulSoup
+    """
+    headers = {"User-Agent": consts.HEADER_VALUE_USER_AGENT}
+    html_doc = requests.get(url, headers=headers)
+    soup = BeautifulSoup(html_doc.content, "html.parser")
+
+    return soup
