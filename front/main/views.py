@@ -21,6 +21,7 @@ def companies(request):
 
 def summary(request):
     context = {}
+
     return render(request, 'main/summary.html', context)
 
 
@@ -31,6 +32,10 @@ def price(request):
 
 def indicator(request):
     context = {}
+
+    daily_indicators = DailyIndicator.objects.all()
+    context["indicators"] = daily_indicators
+
     return render(request, 'main/indicator.html', context)
 
 

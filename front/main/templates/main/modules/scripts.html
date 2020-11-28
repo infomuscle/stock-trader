@@ -32,12 +32,12 @@
 
         var params = "";
 
-        var start_dt = $('#formDailyPrice [name="start_dt"]').val().trim()
-        var end_dt = $('#formDailyPrice [name="end_dt"]').val().trim()
-        var code = $('#formDailyPrice [name="code"]').val().trim()
+        var start_dt = $('#formDailyPrice [name="start_dt"]').val().trim();
+        var end_dt = $('#formDailyPrice [name="end_dt"]').val().trim();
+        var code = $('#formDailyPrice [name="code"]').val().trim();
 
         if (start_dt === "" || end_dt === "" || code === "") {
-            let today = new Date()
+            let today = new Date();
 
             if (start_dt === "" && end_dt === "") {
                 start_dt = today.toLocaleDateString().slice(0, -1);
@@ -49,10 +49,10 @@
             }
 
             if (code === "") {
-                code = "all"
+                code = "all";
             }
 
-            params = "start_dt=" + start_dt + "&end_dt=" + end_dt + "&code=" + code
+            params = "start_dt=" + start_dt + "&end_dt=" + end_dt + "&code=" + code;
 
         } else {
             params = $("form[name=formDailyPrice]").serialize();
@@ -67,14 +67,14 @@
     function crawlDailyIndicator() {
 
         var params = "";
-        var code = $('#formCompany [name="code"]').val().trim()
+        var code = $('#formCompany [name="code"]').val().trim();
         if (code === "") {
             code = "test";
             params = "&code=" + code;
         } else {
             params = $("form[name=formDailyIndicator]").serialize();
         }
-        alert(params)
+        alert(params);
 
         var url = "{% url 'main:crawl_daily_indicator' %}" + "?" + params;
         ajax(url);
@@ -83,7 +83,7 @@
     function crawlCompany() {
 
         var params = "";
-        var market = $('#formCompany [name="market"]').val().trim()
+        var market = $('#formCompany [name="market"]').val().trim();
         if (market === "") {
             market = "all";
             params = "&market=" + market;
