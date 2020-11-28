@@ -3,7 +3,6 @@ import re
 from datetime import date
 from datetime import datetime
 
-import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
@@ -13,13 +12,13 @@ from gateway.models import *
 logger = logging.getLogger()
 
 
-def get_url(tab_name: str, params: dict):
+def generate_url(tab_name: str, params: dict):
     """
     네이버 증권 URI에 탭 이름과 파라미터를 붙어 네이버 증권 URL 생성
     @return url: str
     """
     url = consts.URL_BODY_NAVER
-    url += "/" + tab_name + ".nhn"
+    url += tab_name + ".nhn"
 
     if (len(params.keys()) > 0):
         for i, k in enumerate(params.keys()):
@@ -49,7 +48,7 @@ def get_current_price(code: str):
     params = dict()
     params["code"] = code
 
-    url = get_url("sise", params)
+    url = generate_url("item/sise", params)
     soup = get_soup(url)
 
     current_price = soup.find("strong", {"id": "_nowVal"})
@@ -116,25 +115,21 @@ class DailyPriceCrawler:
             if start_dt >= daily_prices_of_page[-1].date:
                 break
 
-        company_daily_prices = []
+        daily_prices = []
         for daily_price in tmp_daily_prices:
             if start_dt <= daily_price.date <= end_dt:
-                company_daily_prices.append(daily_price)
+                daily_prices.append(daily_price)
 
-        CompanyDailyPrice.objects.bulk_create(company_daily_prices, ignore_conflicts=True)
+        CompanyDailyPrice.objects.bulk_create(daily_prices, ignore_conflicts=True)
 
-        return company_daily_prices
+        return daily_prices
 
     def __get_daily_prices_of_page(self, code, page):
         """
         종목코드의 n 페이지의 {"날짜": {가격 정보}} 조회
         @return daily_price_info: dict
         """
-        params = dict()
-        params["code"] = code
-        params["page"] = str(page)
-
-        url = get_url("sise_day", params)
+        url = self.__get_url_for_daily_price(code, page)
         soup = get_soup(url)
 
         base_table = soup.find_all("tr")
@@ -146,32 +141,41 @@ class DailyPriceCrawler:
             date_str = price_data[0].text.replace(".", "")
             img = str(daily_price_info.find("img"))
 
-            company_daily_price = self.__get_company_daily_price(price_data, code, date_str, img)
+            company_daily_price = self.__get_daily_price(price_data, code, date_str, img)
             company_daily_prices.append(company_daily_price)
 
         return company_daily_prices
 
-    def __get_company_daily_price(self, price_data, code, date_str, img):
+    def __get_url_for_daily_price(self, code, page):
+        params = dict()
+        params["code"] = code
+        params["page"] = str(page)
+
+        url = generate_url("item/sise_day", params)
+
+        return url
+
+    def __get_daily_price(self, price_data, code, date_str, img):
         """
         일간 정보를 딕셔너리로 생성: 종가, 시가, 고가, 저가, 거래량
         @return price_info: dict
         """
-        company_daily_price = CompanyDailyPrice()
+        daily_price = CompanyDailyPrice()
 
-        company_daily_price.code = code
-        company_daily_price.id = code + "-" + date_str
-        company_daily_price.date = datetime.strptime(date_str, "%Y%m%d")
+        daily_price.code = code
+        daily_price.id = code + "-" + date_str
+        daily_price.date = datetime.strptime(date_str, "%Y%m%d")
 
-        company_daily_price.closing = int(price_data[1].text.replace(",", ""))
-        company_daily_price.opening = int(price_data[3].text.replace(",", ""))
-        company_daily_price.highest = int(price_data[4].text.replace(",", ""))
-        company_daily_price.lowest = int(price_data[5].text.replace(",", ""))
-        company_daily_price.volume = int(price_data[6].text.replace(",", ""))
+        daily_price.closing = int(price_data[1].text.replace(",", ""))
+        daily_price.opening = int(price_data[3].text.replace(",", ""))
+        daily_price.highest = int(price_data[4].text.replace(",", ""))
+        daily_price.lowest = int(price_data[5].text.replace(",", ""))
+        daily_price.volume = int(price_data[6].text.replace(",", ""))
 
         change_amount = self.__get_rate_sign(img) + re.sub("[\t\n]", "", price_data[2].text)
-        company_daily_price.change_amount = int(change_amount.replace(",", ""))
+        daily_price.change_amount = int(change_amount.replace(",", ""))
 
-        return company_daily_price
+        return daily_price
 
     def __get_rate_sign(self, img):
         """
@@ -187,42 +191,51 @@ class DailyPriceCrawler:
         return sign
 
 
-class KrxCompaniesCrawler:
+class CompanyCrawler:
 
-    def __init__(self):
-        self.url_body_krx = consts.URL_BODY_KRX_COMPANIES
-        self.cd_kospi = consts.KRX_SEARCH_TYPE_CD_KOSPI
-        self.cd_listed = consts.KRX_SEARCH_TYPE_CD_LISTED
+    def crawl_companies(self, market: str):
+        companies = []
+        page = 0
+        while True:
+            page += 1
+            companies_of_page = self.__crawl_companies_of_page(market, page)
+            companies.extend(companies_of_page)
+            if len(companies_of_page) == 0:
+                break
+        Company.objects.bulk_create(companies, ignore_conflicts=True)
 
-    def get_companies(self, type: str):
-        """
-        KRX에서 모든 회사명/종목코드 조회
-        type 지정에 따라 코스피/상장사 조회 가능
-        @return companies_info: json
-        """
-        url = self.url_body_krx + "&searchType=" + self.cd_kospi if type == "kospi" else self.cd_listed
+        return companies
 
-        df_companies_info = self.__get_df_companies_info(url)
+    def __crawl_companies_of_page(self, market, page):
 
-        companies_info = df_companies_info.to_json(force_ascii=False, orient="records")
+        url = self.__get_url_for_company(market, page)
+        soup = get_soup(url)
+
+        table = soup.find("table", {"class": "type_2"})
+        rows = table.find_all("tr")
 
         companies = []
-        for i in df_companies_info.index:
-            company = Company()
-            company.code = df_companies_info.at[i, 'code']
-            company.name = df_companies_info.at[i, 'name']
-            company.save()
+        for row in rows:
+            name = row.find("a", {"class": "tltle"})
+            if name == None:
+                continue
+            else:
+                company = Company()
+                company.name = name.text
+                company.code = name.get("href").replace("/item/main.nhn?code=", "")
+                company.market = market.upper()
+                companies.append(company)
 
-        return companies_info
+        return companies
 
-    def __get_df_companies_info(self, url):
-        """
-        KRX에서 기업 정보 조회하여 회사명/종목코드만 남긴 데이터 프레임 리턴
-        @return df_companies_info: Dataframe
-        """
-        df_companies_info = pd.read_html(url, header=0)[0]
-        df_companies_info = df_companies_info[["회사명", "종목코드"]]
-        df_companies_info = df_companies_info.rename(columns={"회사명": "name", "종목코드": "code"})
-        df_companies_info.code = df_companies_info.code.map("{:06d}".format)
+    def __get_url_for_company(self, market, page):
+        params = dict()
+        if market == "kospi":
+            params["sosok"] = "0"
+        elif market == "kosdaq":
+            params["sosok"] = "1"
+        params["page"] = str(page)
 
-        return df_companies_info
+        url = generate_url("sise/sise_market_sum", params)
+
+        return url
