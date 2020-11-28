@@ -107,11 +107,13 @@ class DailyPriceCrawler:
 class DailyIndicatorCrawler:
 
     def crawl_daily_indicators(self, codes):
-        indicators = []
-        for code in codes:
-            indicators.append(self.crawl_daily_indicators_of_company(code))
+        daily_indicators = []
+        for i, code in enumerate(codes):
+            daily_indicators.append(self.crawl_daily_indicators_of_company(code))
+            print("PROGRESS: %d / %d" % (i, len(codes)))
+        DailyIndicator.objects.bulk_create(daily_indicators, ignore_conflicts=True)
 
-        return indicators
+        return daily_indicators
 
     def crawl_daily_indicators_of_company(self, code: str):
         daily_indicator = DailyIndicator()
