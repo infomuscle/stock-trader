@@ -24,7 +24,7 @@ class DailyPrice(models.Model):
     volume = models.IntegerField(db_column="volume")
 
     class Meta:
-        db_table = "company_daily_price"
+        db_table = "daily_price"
 
 
 class DailyIndicator(models.Model):
@@ -40,4 +40,4 @@ class DailyIndicator(models.Model):
     iper = models.FloatField(db_column="iper")
 
     class Meta:
-        db_table = "company_indicator"
+        db_table = "daily_indicator"

@@ -108,29 +108,32 @@ class DailyIndicatorCrawler:
 
     def crawl_daily_indicators_of_company(self, code: str):
 
-        url = consts.URL_BODY_NAVER_REPORT + code
-        soup = _get_soup(url)
-
-        table = soup.find("td", {"class": "td0301"})
-        lines = table.find_all("dt")
-
-        indicators_to_bring = ["EPS", "PER", "BPS", "PBR", "업종PER"]
-        indicators = dict()
-        for line in lines:
-            indicator = line.text.split(" ")
-            if indicator[0] in indicators_to_bring:
-                indicators[indicator[0]] = float(indicator[1].replace(",", ""))
-
         daily_indicator = DailyIndicator()
-        daily_indicator.code = code
-        daily_indicator.date = date.today()
-        daily_indicator.id = code + "-" + str(daily_indicator.date).replace("-", "")
-        daily_indicator.eps = indicators["EPS"]
-        daily_indicator.per = indicators["PER"]
-        daily_indicator.bps = indicators["BPS"]
-        daily_indicator.pbr = indicators["PBR"]
-        daily_indicator.iper = indicators["업종PER"]
-        # daily_indicator.save()
+        try:
+            url = consts.URL_BODY_NAVER_REPORT + code
+            soup = _get_soup(url)
+
+            table = soup.find("td", {"class": "td0301"})
+            lines = table.find_all("dt")
+
+            indicators_to_bring = ["EPS", "PER", "BPS", "PBR", "업종PER"]
+            indicators = dict()
+            for line in lines:
+                indicator = line.text.split(" ")
+                if indicator[0] in indicators_to_bring:
+                    indicators[indicator[0]] = float(indicator[1].replace(",", ""))
+
+            daily_indicator.code = code
+            daily_indicator.date = date.today()
+            daily_indicator.id = code + "-" + str(daily_indicator.date).replace("-", "")
+            daily_indicator.eps = indicators["EPS"]
+            daily_indicator.per = indicators["PER"]
+            daily_indicator.bps = indicators["BPS"]
+            daily_indicator.pbr = indicators["PBR"]
+            daily_indicator.iper = indicators["업종PER"]
+            daily_indicator.save()
+        except Exception as e:
+            logger.info(code, e)
 
         return daily_indicator
 
