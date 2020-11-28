@@ -31,27 +31,25 @@
                             <input type="text" name="end_dt" class="form-control form-control-sm" placeholder="yyyy.mm.dd">
                         </label>
                         <label>Company
-                            <input type="text" name="code" class="form-control form-control-sm" placeholder="all || code">
+                            <input type="text" name="code" class="form-control form-control-sm" placeholder="all, code">
                         </label>
                     </form>
                 </div>
             </div>
             <!-- Daily Indicator Crawler -->
             <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" onclick="crawlCompanyDailyIndicator()">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" onclick="crawlDailyIndicator()">
                     <h6 class="m-0 font-weight-bold text-primary">Daily Indicator Crawler</h6>
                     <button class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                         <i class="fas fa-download fa-sm text-white-50"></i> Crawl
                     </button>
                 </div>
                 <div class="card-body">
-                    <label>Start Date
-                        <input type="search" class="form-control form-control-sm" placeholder="">
-                    </label>
-                    <label>End Date
-                        <input type="search" class="form-control form-control-sm" placeholder="">
-                    </label>
-
+                    <form name="formDailyIndicator" id="formDailyIndicator">
+                        <label>Company
+                            <input type="text" name="code" class="form-control form-control-sm" placeholder="all, code">
+                        </label>
+                    </form>
                 </div>
             </div>
         </div>
@@ -70,7 +68,7 @@
                 <div class="card-body">
                     <form name="formCompany" id="formCompany">
                         <label>Market
-                            <input type="text" name="market" class="form-control form-control-sm" placeholder="all || kospi || kosdaq">
+                            <input type="text" name="market" class="form-control form-control-sm" placeholder="all, kospi, kosdaq">
                         </label>
                     </form>
                 </div>

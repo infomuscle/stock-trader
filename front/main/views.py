@@ -54,6 +54,17 @@ def crawl_daily_price(request):
     return HttpResponse(response.text)
 
 
+def crawl_daily_indicator(request):
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+
+    url = "http://localhost:8001/api/daily/indicator"
+    url += '?code=' + code
+
+    response = requests.get(url)
+    return HttpResponse(response.text)
+
+
 def crawl_company(request):
     req_json = request.GET.dict()
     market = req_json.get("market")

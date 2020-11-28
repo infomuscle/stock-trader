@@ -60,21 +60,24 @@
 
         alert(params);
 
-
-        $.ajax({
-            url: "{% url 'main:crawl_daily_price' %}" + "?" + params,
-            success: function (data) {
-                alert(data);
-            },
-            error: function (request, status, error) {
-                alert('실패');
-                console.log(request, status, error)
-            }
-        });
+        var url = "{% url 'main:crawl_daily_price' %}" + "?" + params;
+        ajax(url);
     }
 
-    function crawlCompanyDailyIndicator() {
-        alert("crawlCompanyDailyIndicator");
+    function crawlDailyIndicator() {
+
+        var params = "";
+        var code = $('#formCompany [name="code"]').val().trim()
+        if (code === "") {
+            code = "test";
+            params = "&code=" + code;
+        } else {
+            params = $("form[name=formDailyIndicator]").serialize();
+        }
+        alert(params)
+
+        var url = "{% url 'main:crawl_daily_indicator' %}" + "?" + params;
+        ajax(url);
     }
 
     function crawlCompany() {
@@ -82,21 +85,26 @@
         var params = "";
         var market = $('#formCompany [name="market"]').val().trim()
         if (market === "") {
-            market = "all"
-            params = "&market=" + market
+            market = "all";
+            params = "&market=" + market;
         } else {
             params = $("form[name=formCompany]").serialize();
         }
-        alert(params)
+        alert(params);
 
+        var url = "{% url 'main:crawl_company' %}" + "?" + params;
+        ajax(url);
+    }
+
+    function ajax(url) {
         $.ajax({
-            url: "{% url 'main:crawl_company' %}" + "?" + params,
+            url: url,
             success: function (data) {
                 alert(data);
             },
             error: function (request, status, error) {
                 alert('실패');
-                console.log(request, status, error)
+                console.log(request, status, error);
             }
         });
     }
