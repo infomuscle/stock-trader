@@ -12,7 +12,7 @@ from gateway.models import *
 logger = logging.getLogger()
 
 
-def get_url(tab_name: str, params: dict):
+def generate_url(tab_name: str, params: dict):
     """
     네이버 증권 URI에 탭 이름과 파라미터를 붙어 네이버 증권 URL 생성
     @return url: str
@@ -48,7 +48,7 @@ def get_current_price(code: str):
     params = dict()
     params["code"] = code
 
-    url = get_url("item/sise", params)
+    url = generate_url("item/sise", params)
     soup = get_soup(url)
 
     current_price = soup.find("strong", {"id": "_nowVal"})
@@ -129,11 +129,7 @@ class DailyPriceCrawler:
         종목코드의 n 페이지의 {"날짜": {가격 정보}} 조회
         @return daily_price_info: dict
         """
-        params = dict()
-        params["code"] = code
-        params["page"] = str(page)
-
-        url = get_url("item/sise_day", params)
+        url = self.__get_url_for_daily_price(code, page)
         soup = get_soup(url)
 
         base_table = soup.find_all("tr")
@@ -149,6 +145,15 @@ class DailyPriceCrawler:
             company_daily_prices.append(company_daily_price)
 
         return company_daily_prices
+
+    def __get_url_for_daily_price(self, code, page):
+        params = dict()
+        params["code"] = code
+        params["page"] = str(page)
+
+        url = generate_url("item/sise_day", params)
+
+        return url
 
     def __get_daily_price(self, price_data, code, date_str, img):
         """
@@ -202,17 +207,10 @@ class CompanyCrawler:
         return companies
 
     def __crawl_companies_of_page(self, market, page):
-        params = dict()
-        if market == "kospi":
-            params["sosok"] = "0"
-        elif market == "kosdaq":
-            params["sosok"] = "1"
-        params["page"] = str(page)
 
-        url = get_url("sise/sise_market_sum", params)
-        print(url)
-
+        url = self.__get_url_for_company(market, page)
         soup = get_soup(url)
+
         table = soup.find("table", {"class": "type_2"})
         rows = table.find_all("tr")
 
@@ -229,3 +227,15 @@ class CompanyCrawler:
                 companies.append(company)
 
         return companies
+
+    def __get_url_for_company(self, market, page):
+        params = dict()
+        if market == "kospi":
+            params["sosok"] = "0"
+        elif market == "kosdaq":
+            params["sosok"] = "1"
+        params["page"] = str(page)
+
+        url = generate_url("sise/sise_market_sum", params)
+
+        return url
