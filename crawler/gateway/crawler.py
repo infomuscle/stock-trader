@@ -204,8 +204,17 @@ class DailyIndicatorCrawler:
 
 
 class CompanyCrawler:
+    def crawl_companies(self, markets: list):
+        """
+        리스트 내 각 시장의 종목 데이터 크롤링
+        @param markets:
+        @return:
+        """
+        companies = []
+        for market in markets:
+            companies.extend(self.__crawl_companies_of_market(market))
 
-    def crawl_companies(self, market: str):
+    def __crawl_companies_of_market(self, market: str):
         """
         해당 시장의 종목 데이터 크롤링: 코드, 이름
         @param market:
