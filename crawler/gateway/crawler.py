@@ -12,37 +12,6 @@ from gateway.models import *
 logger = logging.getLogger()
 
 
-class DailyIndicatorCrawler:
-
-    def crawl_daily_indicators_of_company(self, code: str):
-
-        url = consts.URL_BODY_NAVER_REPORT + code
-        soup = _get_soup(url)
-
-        table = soup.find("td", {"class": "td0301"})
-        lines = table.find_all("dt")
-
-        indicators_to_bring = ["EPS", "PER", "BPS", "PBR", "업종PER"]
-        indicators = dict()
-        for line in lines:
-            indicator = line.text.split(" ")
-            if indicator[0] in indicators_to_bring:
-                indicators[indicator[0]] = float(indicator[1].replace(",", ""))
-
-        daily_indicator = CompanyDailyIndicator()
-        daily_indicator.code = code
-        daily_indicator.date = date.today()
-        daily_indicator.id = code + "-" + str(daily_indicator.date).replace("-", "")
-        daily_indicator.eps = indicators["EPS"]
-        daily_indicator.per = indicators["PER"]
-        daily_indicator.bps = indicators["BPS"]
-        daily_indicator.pbr = indicators["PBR"]
-        daily_indicator.iper = indicators["업종PER"]
-        daily_indicator.save()
-
-        return daily_indicator
-
-
 class DailyPriceCrawler:
 
     def get_daily_prices_of_company(self, code: str, start_dt_str: str, end_dt_str: str):
@@ -64,7 +33,7 @@ class DailyPriceCrawler:
             if start_dt <= daily_price.date <= end_dt:
                 daily_prices.append(daily_price)
 
-        CompanyDailyPrice.objects.bulk_create(daily_prices, ignore_conflicts=True)
+        DailyPrice.objects.bulk_create(daily_prices, ignore_conflicts=True)
 
         return daily_prices
 
@@ -79,16 +48,16 @@ class DailyPriceCrawler:
         base_table = soup.find_all("tr")
         price_table = base_table[2:7] + base_table[10:-2]
 
-        company_daily_prices = list()
+        daily_prices = list()
         for daily_price_info in price_table:
             price_data = daily_price_info.find_all("span")
             date_str = price_data[0].text.replace(".", "")
             img = str(daily_price_info.find("img"))
 
-            company_daily_price = self.__get_daily_price(price_data, code, date_str, img)
-            company_daily_prices.append(company_daily_price)
+            daily_price = self.__get_daily_price(price_data, code, date_str, img)
+            daily_prices.append(daily_price)
 
-        return company_daily_prices
+        return daily_prices
 
     def __get_url_for_daily_price(self, code, page):
         params = dict()
@@ -104,7 +73,7 @@ class DailyPriceCrawler:
         일간 정보를 딕셔너리로 생성: 종가, 시가, 고가, 저가, 거래량
         @return price_info: dict
         """
-        daily_price = CompanyDailyPrice()
+        daily_price = DailyPrice()
 
         daily_price.code = code
         daily_price.id = code + "-" + date_str
@@ -133,6 +102,37 @@ class DailyPriceCrawler:
             sign = "-"
 
         return sign
+
+
+class DailyIndicatorCrawler:
+
+    def crawl_daily_indicators_of_company(self, code: str):
+
+        url = consts.URL_BODY_NAVER_REPORT + code
+        soup = _get_soup(url)
+
+        table = soup.find("td", {"class": "td0301"})
+        lines = table.find_all("dt")
+
+        indicators_to_bring = ["EPS", "PER", "BPS", "PBR", "업종PER"]
+        indicators = dict()
+        for line in lines:
+            indicator = line.text.split(" ")
+            if indicator[0] in indicators_to_bring:
+                indicators[indicator[0]] = float(indicator[1].replace(",", ""))
+
+        daily_indicator = DailyIndicator()
+        daily_indicator.code = code
+        daily_indicator.date = date.today()
+        daily_indicator.id = code + "-" + str(daily_indicator.date).replace("-", "")
+        daily_indicator.eps = indicators["EPS"]
+        daily_indicator.per = indicators["PER"]
+        daily_indicator.bps = indicators["BPS"]
+        daily_indicator.pbr = indicators["PBR"]
+        daily_indicator.iper = indicators["업종PER"]
+        # daily_indicator.save()
+
+        return daily_indicator
 
 
 class CompanyCrawler:

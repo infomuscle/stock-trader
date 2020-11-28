@@ -11,7 +11,7 @@ class Company(models.Model):
         db_table = "company"
 
 
-class CompanyDailyPrice(models.Model):
+class DailyPrice(models.Model):
     id = models.CharField(db_column="id", primary_key=True, max_length=15)
     code = models.CharField(db_column="code", max_length=6)
     date = models.DateField(db_column="date")
@@ -27,7 +27,7 @@ class CompanyDailyPrice(models.Model):
         db_table = "company_daily_price"
 
 
-class CompanyDailyIndicator(models.Model):
+class DailyIndicator(models.Model):
     id = models.CharField(db_column="id", primary_key=True, max_length=15)
     code = models.CharField(db_column="code", max_length=6)
     date = models.DateField(db_column="date")
