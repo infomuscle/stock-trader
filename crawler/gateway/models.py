@@ -12,12 +12,6 @@ class Company(models.Model):
 
 
 class CompanyDailyPrice(models.Model):
-    class Meta:
-        db_table = "company_daily_price"
-        constraints = [
-            models.UniqueConstraint(fields=['code', 'date'], name='company_daily_price_pk')
-        ]
-
     id = models.CharField(db_column="id", primary_key=True, max_length=15)
     code = models.CharField(db_column="code", max_length=6)
     date = models.DateField(db_column="date")
@@ -29,18 +23,21 @@ class CompanyDailyPrice(models.Model):
     change_rate = models.FloatField(db_column="change_rate")
     volume = models.IntegerField(db_column="volume")
 
+    class Meta:
+        db_table = "company_daily_price"
+
 
 class CompanyIndicator(models.Model):
-    code = models.CharField(db_column="code", primary_key=True, max_length=6)
+    id = models.CharField(db_column="id", primary_key=True, max_length=15)
+    code = models.CharField(db_column="code", max_length=6)
     date = models.DateField(db_column="date")
     eps = models.FloatField(db_column="eps")
     per = models.FloatField(db_column="per")
-    iper = models.FloatField(db_column="iper")
     bps = models.FloatField(db_column="bps")
     pbr = models.FloatField(db_column="pbr")
     roe = models.FloatField(db_column="roe")
     roa = models.FloatField(db_column="roa")
+    iper = models.FloatField(db_column="iper")
 
     class Meta:
         db_table = "company_indicator"
-        unique_together = (("code", "date"),)
