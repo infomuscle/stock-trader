@@ -14,8 +14,6 @@ urlpatterns = [
 
     url(r'^api/companies/list', views.companies),
 
-    url(r'^api/test/g', views.test_get),
-    url(r'^api/test/p', views.test_post),
     url(r'^api/current', views.current)
 
     # url(r'^api/daily/(?P<date>.+)/price', views.daily),

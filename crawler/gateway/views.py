@@ -1,9 +1,7 @@
-import json
-
 from django.core import serializers
 from django.http import HttpResponse
 
-from gateway import crawler
+from gateway.crawler import *
 from gateway.models import Company
 
 
@@ -21,12 +19,8 @@ def daily_price(request):
     else:
         codes.append(code)
 
-    daily_price_crawler = crawler.DailyPriceCrawler()
-    prices = []
-    for code in codes:
-        prices.extend(daily_price_crawler.get_daily_prices_of_company(code, start_dt, end_dt))
-
-    return HttpResponse(serializers.serialize("json", prices))
+    daily_prices = DailyPriceCrawler().crawl_daily_prices(codes, start_dt, end_dt)
+    return HttpResponse(serializers.serialize("json", daily_prices))
 
 
 def daily_indicator(request):
@@ -39,9 +33,7 @@ def daily_indicator(request):
     else:
         codes.append(code)
 
-    daily_indicator_crawler = crawler.DailyIndicatorCrawler()
-    indicators = daily_indicator_crawler.crawl_daily_indicators(codes)
-
+    indicators = DailyIndicatorCrawler().crawl_daily_indicators(codes)
     return HttpResponse(serializers.serialize("json", indicators))
 
 
@@ -57,26 +49,12 @@ def companies(request):
     else:
         markets.append(market)
 
-    companies_crawler = crawler.CompanyCrawler()
-    companies = []
-    for market in markets:
-        companies.extend(companies_crawler.crawl_companies(market))
+    companies = CompanyCrawler().crawl_companies(markets)
     return HttpResponse(serializers.serialize("json", companies))
-
-
-def test_get(request):
-    req_dict = request.GET.dict()
-    return HttpResponse(str(req_dict))
-
-
-def test_post(request):
-    req_dict = json.loads(request.body)
-    return HttpResponse(str(req_dict))
 
 
 def current(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
-    current_price_crawler = crawler.CurrentPriceCrawler()
-    c_price = current_price_crawler.get_current_price(code)
+    c_price = CurrentPriceCrawler().get_current_price(code)
     return HttpResponse(c_price)

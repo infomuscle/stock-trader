@@ -14,16 +14,36 @@ logger = logging.getLogger()
 
 class DailyPriceCrawler:
 
-    def get_daily_prices_of_company(self, code: str, start_dt_str: str, end_dt_str: str):
-
+    def crawl_daily_prices(self, codes: list, start_dt_str: str, end_dt_str: str):
+        """
+        리스트의 각 종목코드 데이터 조회
+        @param codes:
+        @param start_dt_str:
+        @param end_dt_str:
+        @return:
+        """
         start_dt = datetime.strptime(start_dt_str, "%Y.%m.%d")
         end_dt = datetime.strptime(end_dt_str, "%Y.%m.%d")
 
+        daily_prices = []
+        for code in codes:
+            daily_prices.extend(self.__crawl_daily_prices_of_company(code, start_dt, end_dt))
+
+        return daily_prices
+
+    def __crawl_daily_prices_of_company(self, code: str, start_dt, end_dt):
+        """
+        종목코드의 데이터 리턴
+        @param code:
+        @param start_dt:
+        @param end_dt:
+        @return:
+        """
         tmp_daily_prices = list()
         page = 0
         while True:
             page += 1
-            daily_prices_of_page = self.__get_daily_prices_of_page(code, page)
+            daily_prices_of_page = self.__crawl_daily_prices_of_page(code, page)
             tmp_daily_prices.extend(daily_prices_of_page)
             if start_dt >= daily_prices_of_page[-1].date:
                 break
@@ -37,10 +57,12 @@ class DailyPriceCrawler:
 
         return daily_prices
 
-    def __get_daily_prices_of_page(self, code, page):
+    def __crawl_daily_prices_of_page(self, code: str, page: int):
         """
-        종목코드의 n 페이지의 {"날짜": {가격 정보}} 조회
-        @return daily_price_info: dict
+        종목코드의 n 페이지의 데이터 조회
+        @param code:
+        @param page:
+        @return:
         """
         url = self.__get_url_for_daily_price(code, page)
         soup = _get_soup(url)
@@ -59,7 +81,13 @@ class DailyPriceCrawler:
 
         return daily_prices
 
-    def __get_url_for_daily_price(self, code, page):
+    def __get_url_for_daily_price(self, code: str, page: int):
+        """
+        URL 생성
+        @param code:
+        @param page:
+        @return:
+        """
         params = dict()
         params["code"] = code
         params["page"] = str(page)
@@ -70,8 +98,12 @@ class DailyPriceCrawler:
 
     def __get_daily_price(self, price_data, code, date_str, img):
         """
-        일간 정보를 딕셔너리로 생성: 종가, 시가, 고가, 저가, 거래량
-        @return price_info: dict
+        오브젝트에 데이터 저장: 종가, 시가, 고가, 저가, 거래량
+        @param price_data:
+        @param code:
+        @param date_str:
+        @param img:
+        @return:
         """
         daily_price = DailyPrice()
 
@@ -93,7 +125,8 @@ class DailyPriceCrawler:
     def __get_rate_sign(self, img):
         """
         상승/하락 기호 표시
-        @return sign: str
+        @param img:
+        @return:
         """
         sign = ""
         if "ico_up" in img:
@@ -106,16 +139,26 @@ class DailyPriceCrawler:
 
 class DailyIndicatorCrawler:
 
-    def crawl_daily_indicators(self, codes):
+    def crawl_daily_indicators(self, codes: list):
+        """
+        리스트 내 각 종목코도의 일간 지표 크롤링
+        @param codes:
+        @return:
+        """
         daily_indicators = []
         for i, code in enumerate(codes):
-            daily_indicators.append(self.crawl_daily_indicators_of_company(code))
+            daily_indicators.append(self.__crawl_daily_indicators_of_company(code))
             print("PROGRESS: %d / %d" % (i, len(codes)))
         DailyIndicator.objects.bulk_create(daily_indicators, ignore_conflicts=True)
 
         return daily_indicators
 
-    def crawl_daily_indicators_of_company(self, code: str):
+    def __crawl_daily_indicators_of_company(self, code: str):
+        """
+        종목 코드의 일간 지표 크롤링
+        @param code:
+        @return:
+        """
         daily_indicator = DailyIndicator()
         daily_indicator.code = code
         daily_indicator.date = date.today()
@@ -140,7 +183,13 @@ class DailyIndicatorCrawler:
 
         return daily_indicator
 
-    def __get_indicators_dict(self, lines, code):
+    def __get_indicators_dict(self, lines, code: str):
+        """
+        크롤링한 각 라인에서 {"지표":"값"} 포맷의 딕셔너리 리턴
+        @param lines:
+        @param code:
+        @return:
+        """
         indicators_dict = dict()
         for line in lines:
             indicator = line.text.split(" ")
@@ -155,8 +204,22 @@ class DailyIndicatorCrawler:
 
 
 class CompanyCrawler:
+    def crawl_companies(self, markets: list):
+        """
+        리스트 내 각 시장의 종목 데이터 크롤링
+        @param markets:
+        @return:
+        """
+        companies = []
+        for market in markets:
+            companies.extend(self.__crawl_companies_of_market(market))
 
-    def crawl_companies(self, market: str):
+    def __crawl_companies_of_market(self, market: str):
+        """
+        해당 시장의 종목 데이터 크롤링: 코드, 이름
+        @param market:
+        @return:
+        """
         companies = []
         page = 0
         while True:
@@ -169,8 +232,13 @@ class CompanyCrawler:
 
         return companies
 
-    def __crawl_companies_of_page(self, market, page):
-
+    def __crawl_companies_of_page(self, market: str, page: int):
+        """
+        n 페이지의 종목 데이터 크롤링
+        @param market:
+        @param page:
+        @return:
+        """
         url = self.__get_url_for_company(market, page)
         soup = _get_soup(url)
 
@@ -191,7 +259,13 @@ class CompanyCrawler:
 
         return companies
 
-    def __get_url_for_company(self, market, page):
+    def __get_url_for_company(self, market: str, page: int):
+        """
+        URL 생성
+        @param market:
+        @param page:
+        @return:
+        """
         params = dict()
         if market == "kospi":
             params["sosok"] = "0"
@@ -209,7 +283,8 @@ class CurrentPriceCrawler:
     def get_current_price(self, code: str):
         """
         종목코드의 현재 가격 조회
-        @return current_price: str
+        @param code:
+        @return:
         """
         params = dict()
         params["code"] = code
@@ -224,8 +299,10 @@ class CurrentPriceCrawler:
 
 def _generate_url(tab_name: str, params: dict):
     """
-    네이버 증권 URI에 탭 이름과 파라미터를 붙어 네이버 증권 URL 생성
-    @return url: str
+    네이버 증권 URL에 탭 이름과 파라미터를 붙어 네이버 증권 URL 생성
+    @param tab_name:
+    @param params:
+    @return:
     """
     url = consts.URL_BODY_NAVER
     url += tab_name + ".nhn"
@@ -238,10 +315,11 @@ def _generate_url(tab_name: str, params: dict):
     return url
 
 
-def _get_soup(url):
+def _get_soup(url: str):
     """
     User-Agent가 포함된 HTTP 헤더와 URL로 BeautifulSoup 생성
-    @return soup: BeautifulSoup
+    @param url:
+    @return:
     """
     headers = {"User-Agent": consts.HEADER_VALUE_USER_AGENT}
     html_doc = requests.get(url, headers=headers)
