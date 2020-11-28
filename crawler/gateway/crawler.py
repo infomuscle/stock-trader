@@ -12,11 +12,11 @@ from gateway.models import *
 logger = logging.getLogger()
 
 
-class IndicatorCrawler:
+class DailyIndicatorCrawler:
 
-    def get_indicators(self, code: str):
+    def crawl_daily_indicators_of_company(self, code: str):
 
-        url = consts.URL_BODY_NAVER_COMPANY + code
+        url = consts.URL_BODY_NAVER_REPORT + code
         soup = _get_soup(url)
 
         table = soup.find("td", {"class": "td0301"})
@@ -29,30 +29,18 @@ class IndicatorCrawler:
             if indicator[0] in indicators_to_bring:
                 indicators[indicator[0]] = float(indicator[1].replace(",", ""))
 
-        company_indicator = CompanyIndicator()
-        company_indicator.code = code
-        company_indicator.date = date.today()
-        company_indicator.eps = indicators["EPS"]
-        company_indicator.per = indicators["PER"]
-        company_indicator.iper = indicators["업종PER"]
-        company_indicator.bps = indicators["BPS"]
-        company_indicator.pbr = indicators["PBR"]
-        company_indicator.save()
+        daily_indicator = CompanyDailyIndicator()
+        daily_indicator.code = code
+        daily_indicator.date = date.today()
+        daily_indicator.id = code + "-" + str(daily_indicator.date).replace("-", "")
+        daily_indicator.eps = indicators["EPS"]
+        daily_indicator.per = indicators["PER"]
+        daily_indicator.bps = indicators["BPS"]
+        daily_indicator.pbr = indicators["PBR"]
+        daily_indicator.iper = indicators["업종PER"]
+        daily_indicator.save()
 
-        return indicators
-
-    def __get_price_info(self, price_data):
-        """
-        일간 정보를 딕셔너리로 생성: 종가, 시가, 고가, 저가, 거래량
-        @return price_info: dict
-        """
-        price_info = dict()
-        price_info["eps"] = price_data[1].text
-        price_info["per"] = price_data[3].text
-        price_info["bps"] = price_data[4].text
-        price_info["pbr"] = price_data[5].text
-        price_info["roe"] = price_data[6].text
-        price_info["rob"] = price_data[6].text
+        return daily_indicator
 
 
 class DailyPriceCrawler:

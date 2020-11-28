@@ -30,15 +30,21 @@ def daily_price(request):
 
 
 def daily_indicator(request):
-    # 수정 필요
     req_json = request.GET.dict()
     code = req_json.get("code")
-    date = req_json.get("date")
 
-    daily_crawler = crawler.DailyPriceCrawler()
-    # prices = daily_crawler.get_daily_prices_to_page(code, 5)
-    return HttpResponse("success")
-    # return HttpResponse(json.dumps(prices))
+    codes = []
+    if code == "all":
+        codes.extend(list(Company.objects.all().values_list('code', flat=True)))
+    else:
+        codes.append(code)
+
+    daily_indicator_crawler = crawler.DailyIndicatorCrawler()
+    indicators = []
+    for code in codes:
+        indicators.append(daily_indicator_crawler.crawl_daily_indicators_of_company(code))
+
+    return HttpResponse(serializers.serialize("json", indicators))
 
 
 def companies(request):
