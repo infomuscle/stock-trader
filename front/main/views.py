@@ -2,6 +2,7 @@ import requests
 from django.http import HttpResponse
 from django.shortcuts import render
 
+import main.constants as consts
 from main.models import *
 
 
@@ -54,7 +55,7 @@ def crawl_daily_price(request):
     start_dt = req_json.get("start_dt")
     end_dt = req_json.get("end_dt")
 
-    url = "http://localhost:8001/api/daily/price"
+    url = consts.URL_BODY_CRAWLER + "/api/daily/price"
     url += '?code=' + code
     url += '&start_dt=' + start_dt
     url += '&end_dt=' + end_dt
@@ -67,7 +68,7 @@ def crawl_daily_indicator(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
 
-    url = "http://localhost:8001/api/daily/indicator"
+    url = consts.URL_BODY_CRAWLER + "/api/daily/indicator"
     url += '?code=' + code
 
     response = requests.get(url)
@@ -77,7 +78,7 @@ def crawl_daily_indicator(request):
 def crawl_company(request):
     req_json = request.GET.dict()
     market = req_json.get("market")
-    url = "http://localhost:8001/api/companies/list"
+    url = consts.URL_BODY_CRAWLER + "/api/companies/list"
     url += "?market=" + market
     print(url)
 
