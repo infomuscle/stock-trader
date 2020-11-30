@@ -203,6 +203,17 @@ class DailyIndicatorCrawler:
         return indicators_dict
 
 
+class QuaterlyIndicatorCrawler:
+    def crawl_quarterly_indicators(self, codes: list):
+        quarterly_indicators = []
+        for i, code in enumerate(codes):
+            # daily_indicators.append(self.__crawl_daily_indicators_of_company(code))
+            print("PROGRESS: %d / %d" % (i, len(codes)))
+        DailyIndicator.objects.bulk_create(quarterly_indicators, ignore_conflicts=True)
+
+        return quarterly_indicators
+
+
 class CompanyCrawler:
     def crawl_companies(self, markets: list):
         """
