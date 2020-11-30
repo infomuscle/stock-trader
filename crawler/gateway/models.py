@@ -6,6 +6,7 @@ class Company(models.Model):
     name = models.CharField(db_column="name", max_length=30)
     market = models.CharField(db_column="market", max_length=10)
     starred = models.CharField(db_column="starred", max_length=1, default="N")
+    corp_code = models.CharField(db_column="corp_code", max_length=8)
 
     class Meta:
         db_table = "company"

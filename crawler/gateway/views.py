@@ -48,7 +48,7 @@ def quarterly_indicator(request):
         codes.append(code)
 
     indicators = QuaterlyIndicatorCrawler().crawl_quarterly_indicators(codes)
-    return HttpResponse(serializers.serialize("json", indicators))
+    return HttpResponse("SUCCESS")
 
 
 def companies(request):
@@ -72,3 +72,13 @@ def current(request):
     code = req_json.get("code")
     c_price = CurrentPriceCrawler().get_current_price(code)
     return HttpResponse(c_price)
+
+
+def dart_companies(request):
+    companies = DartCrawler().crawl_companies()
+    return HttpResponse(serializers.serialize("json", companies))
+
+
+def dart_test(request):
+    result = DartCrawler().dart_test()
+    return HttpResponse(result)

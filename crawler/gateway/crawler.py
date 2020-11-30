@@ -3,6 +3,7 @@ import re
 from datetime import date
 from datetime import datetime
 
+import dart_fss as dart
 import requests
 from bs4 import BeautifulSoup
 
@@ -207,11 +208,24 @@ class QuaterlyIndicatorCrawler:
     def crawl_quarterly_indicators(self, codes: list):
         quarterly_indicators = []
         for i, code in enumerate(codes):
-            # daily_indicators.append(self.__crawl_daily_indicators_of_company(code))
+            quarterly_indicators.append(self.__crawl_quarterly_indicators_by_code(code))
             print("PROGRESS: %d / %d" % (i, len(codes)))
-        DailyIndicator.objects.bulk_create(quarterly_indicators, ignore_conflicts=True)
+        # DailyIndicator.objects.bulk_create(quarterly_indicators, ignore_conflicts=True)
 
         return quarterly_indicators
+
+    def __crawl_quarterly_indicators_by_code(self, code):
+        url = consts.URL_BODY_NAVER_REPORT + code
+        soup = _get_soup(url)
+        print(url)
+
+        table = soup.find("table", {"class": "gHead01 all-width"})
+        print(table)
+        # thead = soup.find_all("thead")
+        # tbody = soup.find_all("tbody")
+        # print(len(thead), len(tbody))
+
+        return
 
 
 class CompanyCrawler:
@@ -337,3 +351,45 @@ def _get_soup(url: str):
     soup = BeautifulSoup(html_doc.content, "html.parser")
 
     return soup
+
+
+class DartCrawler:
+    def crawl_companies(self):
+        dart.set_api_key(consts.DART_KEY)
+
+        corporations = dart.get_corp_list()
+
+        companies = []
+        for corporation in corporations:
+            code = corporation.info["stock_code"]
+            if code != None:
+                company = Company()
+                company.code = code
+                company.corp_code = corporation.info["corp_code"]
+                companies.append(company)
+        Company.objects.all().bulk_update(companies, fields=["corp_code"])
+
+        return companies
+
+    def dart_test(self):
+        dart.set_api_key(consts.DART_KEY)
+
+        se = Company.objects.get(code="005930").corp_code
+
+        fs = dart.fs.extract(corp_code=se, bgn_de='20200101', report_tp="quarter")
+        df_bs = fs['bs']
+        df_is = fs['is']
+
+        columns = df_bs.columns
+        print(type(columns))
+        print(list(columns))
+        cols = list(l[0] for l in list(columns))[8:]
+        print(cols)
+        df_bs_new = df_bs.loc[[53, 54], cols]
+        print(df_bs_new)
+        labels_bs = fs.labels['bs']
+        # 레이블을 이용해서 더 예쁘게 해보자
+
+        # fs.save()
+
+        return fs
