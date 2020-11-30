@@ -74,6 +74,11 @@ def current(request):
     return HttpResponse(c_price)
 
 
+def dart_companies(request):
+    companies = DartCrawler().crawl_companies()
+    return HttpResponse(serializers.serialize("json", companies))
+
+
 def dart_test(request):
     result = DartCrawler().dart_test()
     return HttpResponse(result)

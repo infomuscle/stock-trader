@@ -354,17 +354,38 @@ def _get_soup(url: str):
 
 
 class DartCrawler:
+    def crawl_companies(self):
+        dart.set_api_key(consts.DART_KEY)
+
+        corporations = dart.get_corp_list()
+
+        companies = []
+        for corporation in corporations:
+            code = corporation.info["stock_code"]
+            if code != None:
+                company = Company()
+                company.code = code
+                company.corp_code = corporation.info["corp_code"]
+                companies.append(company)
+        Company.objects.all().bulk_update(companies, fields=["corp_code"])
+
+        return companies
+
     def dart_test(self):
         dart.set_api_key(consts.DART_KEY)
 
         crp_list = dart.get_corp_list()
         se = crp_list.find_by_stock_code("005930")
-        print(se)
+        # print(se.info)
 
-        fs = se.extract_fs(bgn_de='20200101')
-        d_bs = fs['bs']
-        print(d_bs)
-        d_is = fs['is']
-        print(d_is)
+        fs = dart.fs.extract(corp_code=se.info["corp_code"], bgn_de='20200101', report_tp="quarter")
+        df_bs = fs['bs']
+        df_is = fs['is']
+
+        print(list(df_bs.columns))
+        # df_bs_new = df_bs.loc[[consts.DART_LABLE_TOTAL_ASSETS, consts.DART_LABLE_TOTAL_EQUITY], list(df_bs.columns)]
+        # print(df_bs_new)
+
+        # fs.save()
 
         return fs
