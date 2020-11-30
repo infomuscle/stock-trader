@@ -37,6 +37,20 @@ def daily_indicator(request):
     return HttpResponse(serializers.serialize("json", indicators))
 
 
+def quarterly_indicator(request):
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+
+    codes = []
+    if code == "all":
+        codes.extend(list(Company.objects.all().values_list('code', flat=True)))
+    else:
+        codes.append(code)
+
+    indicators = QuaterlyIndicatorCrawler().crawl_quarterly_indicators(codes)
+    return HttpResponse(serializers.serialize("json", indicators))
+
+
 def companies(request):
     req_json = request.GET.dict()
     market = req_json.get("market")

@@ -12,6 +12,8 @@ urlpatterns = [
     url(r'^api/daily/price', views.daily_price),
     url(r'^api/daily/indicator', views.daily_indicator),
 
+    url(r'^api/quarterly/indicator', views.quarterly_indicator),
+
     url(r'^api/companies/list', views.companies),
 
     url(r'^api/current', views.current)
