@@ -3,6 +3,7 @@ import re
 from datetime import date
 from datetime import datetime
 
+import dart_fss as dart
 import requests
 from bs4 import BeautifulSoup
 
@@ -207,11 +208,24 @@ class QuaterlyIndicatorCrawler:
     def crawl_quarterly_indicators(self, codes: list):
         quarterly_indicators = []
         for i, code in enumerate(codes):
-            # daily_indicators.append(self.__crawl_daily_indicators_of_company(code))
+            quarterly_indicators.append(self.__crawl_quarterly_indicators_by_code(code))
             print("PROGRESS: %d / %d" % (i, len(codes)))
-        DailyIndicator.objects.bulk_create(quarterly_indicators, ignore_conflicts=True)
+        # DailyIndicator.objects.bulk_create(quarterly_indicators, ignore_conflicts=True)
 
         return quarterly_indicators
+
+    def __crawl_quarterly_indicators_by_code(self, code):
+        url = consts.URL_BODY_NAVER_REPORT + code
+        soup = _get_soup(url)
+        print(url)
+
+        table = soup.find("table", {"class": "gHead01 all-width"})
+        print(table)
+        # thead = soup.find_all("thead")
+        # tbody = soup.find_all("tbody")
+        # print(len(thead), len(tbody))
+
+        return
 
 
 class CompanyCrawler:
@@ -337,3 +351,20 @@ def _get_soup(url: str):
     soup = BeautifulSoup(html_doc.content, "html.parser")
 
     return soup
+
+
+class DartCrawler:
+    def dart_test(self):
+        dart.set_api_key(consts.DART_KEY)
+
+        crp_list = dart.get_corp_list()
+        se = crp_list.find_by_stock_code("005930")
+        print(se)
+
+        fs = se.extract_fs(bgn_de='20200101')
+        d_bs = fs['bs']
+        print(d_bs)
+        d_is = fs['is']
+        print(d_is)
+
+        return fs
