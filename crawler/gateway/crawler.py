@@ -378,22 +378,28 @@ class DartCrawler:
         se = Company.objects.get(code="005930").corp_code
         fs = dart.fs.extract(corp_code=se, bgn_de='20200101', report_tp="quarter")
 
+        balance_sheet = self.__get_balance_sheet(fs)
+        balance_sheet.to_excel("./fsdata/test.xlsx")
+
+        # fs.save()
+
+        return fs
+
+    def __get_balance_sheet(self, fs):
+
         df_bs_labels = fs.labels['bs']
         df_bs_labels = df_bs_labels[df_bs_labels["default"]['concept_id'].isin(consts.DART_LABLES)]
 
         df_bs = fs['bs']
         indices = list(df_bs_labels.index)
         columns = list(col[0] for col in df_bs_labels.columns.values)[1:]
-        print(df_bs_labels.columns.values)
 
         df_bs_head = df_bs_labels.loc[indices, ["default"]]
         df_bs_body = df_bs.loc[indices, columns]
-        print(df_bs_head)
-        print(df_bs_body)
 
-        df_merge = pd.merge(df_bs_head, df_bs_body, left_index=True, right_index=True, how="left")
-        print(df_merge)
+        balance_sheet = pd.merge(df_bs_head, df_bs_body, left_index=True, right_index=True, how="left")
+        for idx in indices:
+            concept_id = balance_sheet.loc[idx, "default"]["concept_id"]
+            balance_sheet.loc[idx, ["default"]] = consts.DART_LABLES[concept_id]
 
-        # fs.save()
-
-        return fs
+        return balance_sheet
