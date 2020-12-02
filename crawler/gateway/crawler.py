@@ -378,13 +378,19 @@ class DartCrawler:
         corp_code = Company.objects.get(code=code).corp_code
         fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
 
-        balance_sheet = self.__get_financial_statement(fss, "bs")
-        balance_sheet.to_excel("./fsdata/test_bs.xlsx")
+        financial_statements = dict()
+        financial_statements["bs"] = self.__get_financial_statement(fss, "bs")
+        financial_statements["is"] = self.__get_financial_statement(fss, "is")
+        # print(financial_statements["bs"])
+        # print(financial_statements["is"])
 
-        income_statement = self.__get_financial_statement(fss, "is")
-        income_statement.to_excel("./fsdata/test_is.xlsx")
+        # balance_sheet = self.__get_financial_statement(fss, "bs")
+        # balance_sheet.to_excel("./fsdata/test_bs.xlsx")
 
-        return fss
+        # income_statement = self.__get_financial_statement(fss, "is")
+        # income_statement.to_excel("./fsdata/test_is.xlsx")
+
+        return financial_statements
 
     def __get_financial_statement(self, fss, fs_name):
 
