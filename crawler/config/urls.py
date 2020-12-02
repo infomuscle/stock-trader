@@ -18,9 +18,8 @@ urlpatterns = [
 
     url(r'^api/current', views.current),
 
-
     url(r'^api/dart/companies', views.dart_companies),
-    url(r'^api/dart/test', views.dart_test)
+    url(r'^api/dart/fss', views.dart_financial_statements)
 
     # url(r'^api/daily/(?P<date>.+)/price', views.daily),
 ]
