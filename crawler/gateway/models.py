@@ -44,7 +44,7 @@ class DailyIndicator(models.Model):
         db_table = "daily_indicator"
 
 
-class QuarterlyIndicator:
+class QuarterlyIndicator(models.Model):
     id = models.CharField(db_column="id", primary_key=True, max_length=15)
     code = models.CharField(db_column="code", max_length=6)
     quarter_start = models.DateField(db_column="quarter_start")
@@ -58,3 +58,10 @@ class QuarterlyIndicator:
     stock_amount = models.IntegerField(db_column="stock_amount")
     total_equity = models.IntegerField(db_column="total_equity")
     total_assets = models.IntegerField(db_column="total_assets")
+
+
+class BalanceSheet(models.Model):
+    quarter_end = models.DateField()
+    total_assets = models.IntegerField()
+    total_liabilities = models.IntegerField()
+    total_equity = models.IntegerField()

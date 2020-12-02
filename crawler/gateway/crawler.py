@@ -378,22 +378,29 @@ class DartCrawler:
         corp_code = Company.objects.get(code=code).corp_code
         fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
 
-        financial_statements = dict()
-        financial_statements["bs"] = self.__get_financial_statement(fss, "bs")
-        financial_statements["is"] = self.__get_financial_statement(fss, "is")
-        # print(financial_statements["bs"])
-        # print(financial_statements["is"])
+        df_bs = self.__get_financial_statement(fss, "bs")
+        print(df_bs)
+        print(list(df_bs["default"]["concept_id"]))
+        df_bs.index = list(df_bs["default"]["concept_id"])
 
-        # balance_sheet = self.__get_financial_statement(fss, "bs")
-        # balance_sheet.to_excel("./fsdata/test_bs.xlsx")
+        balance_sheets = []
+        df_bs_cols = list(c[0] for c in df_bs.columns.values)[1:]
+        print(df_bs_cols)
+        for col in df_bs_cols:
+            balance_sheet = BalanceSheet()
+            balance_sheet.code = code
 
-        # income_statement = self.__get_financial_statement(fss, "is")
-        # income_statement.to_excel("./fsdata/test_is.xlsx")
+            print(df_bs.loc["total_assets", col])
 
-        return financial_statements
+            # datetime.strptime(end_dt_str, "%Y.%m.%d")
+
+
+
+
+
+        return balance_sheets
 
     def __get_financial_statement(self, fss, fs_name):
-
         labels = consts.DART_LABELS[fs_name]
 
         df_fs_labels = fss.labels[fs_name]
