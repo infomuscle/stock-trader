@@ -4,7 +4,6 @@ from datetime import date
 from datetime import datetime
 
 import dart_fss as dart
-import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
@@ -380,23 +379,19 @@ class DartCrawler:
 
         df_bs = self.__get_financial_statement(fss, "bs")
         print(df_bs)
-        print(list(df_bs["default"]["concept_id"]))
-        df_bs.index = list(df_bs["default"]["concept_id"])
+        # print(list(df_bs["default"]["concept_id"]))
+        # df_bs.index = list(df_bs["default"]["concept_id"])
 
         balance_sheets = []
-        df_bs_cols = list(c[0] for c in df_bs.columns.values)[1:]
-        print(df_bs_cols)
-        for col in df_bs_cols:
-            balance_sheet = BalanceSheet()
-            balance_sheet.code = code
+        # df_bs_cols = list(c[0] for c in df_bs.columns.values)[1:]
+        # print(df_bs_cols)
+        # for col in df_bs_cols:
+        #     balance_sheet = BalanceSheet()
+        #     balance_sheet.code = code
 
-            print(df_bs.loc["total_assets", col])
+        # print(df_bs.loc["total_assets", col])
 
-            # datetime.strptime(end_dt_str, "%Y.%m.%d")
-
-
-
-
+        # datetime.strptime(end_dt_str, "%Y.%m.%d")
 
         return balance_sheets
 
@@ -406,16 +401,13 @@ class DartCrawler:
         df_fs_labels = fss.labels[fs_name]
         df_fs_labels = df_fs_labels[df_fs_labels["default"]["concept_id"].isin(labels)]
 
-        df_fs = fss[fs_name]
         indices = list(df_fs_labels.index)
         columns = list(col[0] for col in df_fs_labels.columns.values)[1:]
 
-        df_fs_head = df_fs_labels.loc[indices, ["default"]]
-        df_fs_body = df_fs.loc[indices, columns]
+        financial_statement = fss[fs_name].loc[indices, columns]
 
-        financial_statement = pd.merge(df_fs_head, df_fs_body, left_index=True, right_index=True, how="left")
-        for idx in indices:
-            concept_id = financial_statement.loc[idx, "default"]["concept_id"]
-            financial_statement.loc[idx, ["default"]] = labels[concept_id]
+        keys = list(df_fs_labels["default"]["concept_id"])
+        keys = list(labels[key] for key in keys)
+        financial_statement.index = keys
 
         return financial_statement
