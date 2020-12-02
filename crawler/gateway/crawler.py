@@ -378,16 +378,15 @@ class DartCrawler:
         fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
 
         balance_sheets = self.__get_balance_sheets(fss, code)
+        income_statements = self.__get_income_statement(fss, code)
 
         return balance_sheets
 
     def __get_balance_sheets(self, fss, code):
         df_bs = self.__get_financial_statement(fss, "bs")
-        print(df_bs)
 
         balance_sheets = []
         df_bs_cols = list(c[0] for c in df_bs.columns.values)[1:]
-        print(df_bs_cols)
         for col in df_bs_cols:
             balance_sheet = BalanceSheet()
             balance_sheet.id = code + "-" + col[:4] + "-" + consts.QUARTER_MAPPER[col[4:]]
@@ -396,19 +395,24 @@ class DartCrawler:
             balance_sheet.total_assets = df_bs.loc["total_assets", col][0]
             balance_sheet.total_liabilities = df_bs.loc["total_liabilities", col][0]
             balance_sheet.total_equity = df_bs.loc["total_equity", col][0]
-            print(balance_sheet.id, balance_sheet.total_assets, balance_sheet.total_liabilities, balance_sheet.total_equity)
             balance_sheets.append(balance_sheet)
 
         return balance_sheets
 
     def __get_income_statement(self, fss, code):
         df_is = self.__get_financial_statement(fss, "is")
-        print(df_is)
 
         income_statements = []
         df_is_cols = list(c[0] for c in df_is.columns.values)[1:]
-        print(df_is_cols)
-        # for col in df_is_cols:
+        for col in df_is_cols:
+            quarter_dates = col.split("-")
+            income_statement = IncomeStatement()
+            income_statement.id = code + "-" + quarter_dates[1][:4] + "-" + consts.QUARTER_MAPPER[quarter_dates[1][4:]]
+            income_statement.code = code
+            income_statement.quarter_start = datetime.strptime(quarter_dates[0], "%Y%m%d")
+            income_statement.quarter_end = datetime.strptime(quarter_dates[1], "%Y%m%d")
+            income_statement.net_income = df_is.loc["net_income", col][0]
+            income_statements.append(income_statement)
 
         return income_statements
 

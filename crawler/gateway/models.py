@@ -67,3 +67,11 @@ class BalanceSheet(models.Model):
     total_assets = models.IntegerField()
     total_liabilities = models.IntegerField()
     total_equity = models.IntegerField()
+
+
+class IncomeStatement(models.Model):
+    id = models.CharField(primary_key=True, max_length=13)
+    code = models.CharField(max_length=6)
+    quarter_start = models.DateField()
+    quarter_end = models.DateField()
+    net_income = models.IntegerField()
