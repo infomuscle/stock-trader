@@ -377,23 +377,40 @@ class DartCrawler:
         corp_code = Company.objects.get(code=code).corp_code
         fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
 
-        df_bs = self.__get_financial_statement(fss, "bs")
-        print(df_bs)
-        # print(list(df_bs["default"]["concept_id"]))
-        # df_bs.index = list(df_bs["default"]["concept_id"])
-
-        balance_sheets = []
-        # df_bs_cols = list(c[0] for c in df_bs.columns.values)[1:]
-        # print(df_bs_cols)
-        # for col in df_bs_cols:
-        #     balance_sheet = BalanceSheet()
-        #     balance_sheet.code = code
-
-        # print(df_bs.loc["total_assets", col])
-
-        # datetime.strptime(end_dt_str, "%Y.%m.%d")
+        balance_sheets = self.__get_balance_sheets(fss, code)
 
         return balance_sheets
+
+    def __get_balance_sheets(self, fss, code):
+        df_bs = self.__get_financial_statement(fss, "bs")
+        print(df_bs)
+
+        balance_sheets = []
+        df_bs_cols = list(c[0] for c in df_bs.columns.values)[1:]
+        print(df_bs_cols)
+        for col in df_bs_cols:
+            balance_sheet = BalanceSheet()
+            balance_sheet.id = code + "-" + col[:4] + "-" + consts.QUARTER_MAPPER[col[4:]]
+            balance_sheet.code = code
+            balance_sheet.quarter_end = datetime.strptime(col, "%Y%m%d")
+            balance_sheet.total_assets = df_bs.loc["total_assets", col][0]
+            balance_sheet.total_liabilities = df_bs.loc["total_liabilities", col][0]
+            balance_sheet.total_equity = df_bs.loc["total_equity", col][0]
+            print(balance_sheet.id, balance_sheet.total_assets, balance_sheet.total_liabilities, balance_sheet.total_equity)
+            balance_sheets.append(balance_sheet)
+
+        return balance_sheets
+
+    def __get_income_statement(self, fss, code):
+        df_is = self.__get_financial_statement(fss, "is")
+        print(df_is)
+
+        income_statements = []
+        df_is_cols = list(c[0] for c in df_is.columns.values)[1:]
+        print(df_is_cols)
+        # for col in df_is_cols:
+
+        return income_statements
 
     def __get_financial_statement(self, fss, fs_name):
         labels = consts.DART_LABELS[fs_name]

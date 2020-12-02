@@ -61,6 +61,8 @@ class QuarterlyIndicator(models.Model):
 
 
 class BalanceSheet(models.Model):
+    id = models.CharField(primary_key=True, max_length=13)
+    code = models.CharField(max_length=6)
     quarter_end = models.DateField()
     total_assets = models.IntegerField()
     total_liabilities = models.IntegerField()

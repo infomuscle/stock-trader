@@ -11,6 +11,8 @@ DART_BS_LABELS = {"ifrsfullAssets": "total_assets", "ifrsfullLiabilities": "tota
 DART_IS_LABELS = {"ifrsfullProfitLoss": "net_income"}
 DART_LABELS = {"bs": DART_BS_LABELS, "is": DART_IS_LABELS}
 
+QUARTER_MAPPER = {"0331": "1", "0630": "2", "0930": "3", "1231": "4"}
+
 ## HEADER VALUE
 HEADER_VALUE_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36"
 
