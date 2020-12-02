@@ -375,8 +375,8 @@ class DartCrawler:
     def crawl_financial_statements(self, code):
         dart.set_api_key(consts.DART_KEY)
 
-        se = Company.objects.get(code=code).corp_code
-        fss = dart.fs.extract(corp_code=se, bgn_de="20200101", report_tp="quarter")
+        corp_code = Company.objects.get(code=code).corp_code
+        fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
 
         balance_sheet = self.__get_financial_statement(fss, "bs")
         balance_sheet.to_excel("./fsdata/test_bs.xlsx")
