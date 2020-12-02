@@ -376,30 +376,33 @@ class DartCrawler:
         dart.set_api_key(consts.DART_KEY)
 
         se = Company.objects.get(code="005930").corp_code
-        fs = dart.fs.extract(corp_code=se, bgn_de='20200101', report_tp="quarter")
+        fss = dart.fs.extract(corp_code=se, bgn_de="20200101", report_tp="quarter")
 
-        balance_sheet = self.__get_balance_sheet(fs)
-        balance_sheet.to_excel("./fsdata/test.xlsx")
+        balance_sheet = self.__get_financial_statement(fss, "bs")
+        balance_sheet.to_excel("./fsdata/test_bs.xlsx")
 
-        # fs.save()
+        income_statement = self.__get_financial_statement(fss, "is")
+        income_statement.to_excel("./fsdata/test_is.xlsx")
 
-        return fs
+        return fss
 
-    def __get_balance_sheet(self, fs):
+    def __get_financial_statement(self, fss, fs_name):
 
-        df_bs_labels = fs.labels['bs']
-        df_bs_labels = df_bs_labels[df_bs_labels["default"]['concept_id'].isin(consts.DART_LABLES)]
+        labels = consts.DART_LABELS[fs_name]
 
-        df_bs = fs['bs']
-        indices = list(df_bs_labels.index)
-        columns = list(col[0] for col in df_bs_labels.columns.values)[1:]
+        df_fs_labels = fss.labels[fs_name]
+        df_fs_labels = df_fs_labels[df_fs_labels["default"]["concept_id"].isin(labels)]
 
-        df_bs_head = df_bs_labels.loc[indices, ["default"]]
-        df_bs_body = df_bs.loc[indices, columns]
+        df_fs = fss[fs_name]
+        indices = list(df_fs_labels.index)
+        columns = list(col[0] for col in df_fs_labels.columns.values)[1:]
 
-        balance_sheet = pd.merge(df_bs_head, df_bs_body, left_index=True, right_index=True, how="left")
+        df_fs_head = df_fs_labels.loc[indices, ["default"]]
+        df_fs_body = df_fs.loc[indices, columns]
+
+        financial_statement = pd.merge(df_fs_head, df_fs_body, left_index=True, right_index=True, how="left")
         for idx in indices:
-            concept_id = balance_sheet.loc[idx, "default"]["concept_id"]
-            balance_sheet.loc[idx, ["default"]] = consts.DART_LABLES[concept_id]
+            concept_id = financial_statement.loc[idx, "default"]["concept_id"]
+            financial_statement.loc[idx, ["default"]] = labels[concept_id]
 
-        return balance_sheet
+        return financial_statement
