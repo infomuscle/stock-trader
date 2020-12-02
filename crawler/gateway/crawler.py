@@ -10,8 +10,6 @@ from bs4 import BeautifulSoup
 from gateway import constants as consts
 from gateway.models import *
 
-import pandas as pd
-
 logger = logging.getLogger()
 
 
@@ -356,9 +354,11 @@ def _get_soup(url: str):
 
 
 class DartCrawler:
-    def crawl_companies(self):
+
+    def __init__(self):
         dart.set_api_key(consts.DART_KEY)
 
+    def crawl_companies(self):
         corporations = dart.get_corp_list()
 
         companies = []
@@ -373,28 +373,62 @@ class DartCrawler:
 
         return companies
 
-    def dart_test(self):
-        dart.set_api_key(consts.DART_KEY)
-        se = Company.objects.get(code="005930").corp_code
-        fs = dart.fs.extract(corp_code=se, bgn_de='20200101', report_tp="quarter")
+    def crawl_financial_statements(self, code):
+        corp_code = Company.objects.get(code=code).corp_code
+        fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
 
-        df_labels_bs = fs.labels['bs']
-        df_labels_bs = df_labels_bs[df_labels_bs["default"]['concept_id'].isin(consts.DART_LABLES)]
+        balance_sheets = self.__get_balance_sheets(fss, code)
+        income_statements = self.__get_income_statement(fss, code)
 
-        df_bs = fs['bs']
-        indices = list(df_labels_bs.index)
-        columns = list(l[0] for l in list(df_labels_bs.columns))[1:]
-        print(df_labels_bs.columns.values)
+        return balance_sheets
 
-        df_bs_head = df_labels_bs.loc[indices]["default"]
-        df_bs = df_bs.loc[indices, columns]
+    def __get_balance_sheets(self, fss, code):
+        df_bs = self.__get_financial_statement(fss, "bs")
 
-        print(df_bs_head)
-        print(type(df_bs_head))
-        print(df_bs)
-        print(type(df_bs))
-        # print(pd.concat([df_bs_head, df_bs]))
+        balance_sheets = []
+        df_bs_cols = list(c[0] for c in df_bs.columns.values)[1:]
+        for col in df_bs_cols:
+            balance_sheet = BalanceSheet()
+            balance_sheet.id = code + "-" + col[:4] + "-" + consts.QUARTER_MAPPER[col[4:]]
+            balance_sheet.code = code
+            balance_sheet.quarter_end = datetime.strptime(col, "%Y%m%d")
+            balance_sheet.total_assets = df_bs.loc["total_assets", col][0]
+            balance_sheet.total_liabilities = df_bs.loc["total_liabilities", col][0]
+            balance_sheet.total_equity = df_bs.loc["total_equity", col][0]
+            balance_sheets.append(balance_sheet)
 
-        # fs.save()
+        return balance_sheets
 
-        return fs
+    def __get_income_statement(self, fss, code):
+        df_is = self.__get_financial_statement(fss, "is")
+
+        income_statements = []
+        df_is_cols = list(c[0] for c in df_is.columns.values)[1:]
+        for col in df_is_cols:
+            quarter_dates = col.split("-")
+            income_statement = IncomeStatement()
+            income_statement.id = code + "-" + quarter_dates[1][:4] + "-" + consts.QUARTER_MAPPER[quarter_dates[1][4:]]
+            income_statement.code = code
+            income_statement.quarter_start = datetime.strptime(quarter_dates[0], "%Y%m%d")
+            income_statement.quarter_end = datetime.strptime(quarter_dates[1], "%Y%m%d")
+            income_statement.net_income = df_is.loc["net_income", col][0]
+            income_statements.append(income_statement)
+
+        return income_statements
+
+    def __get_financial_statement(self, fss, fs_name):
+        labels = consts.DART_LABELS[fs_name]
+
+        df_fs_labels = fss.labels[fs_name]
+        df_fs_labels = df_fs_labels[df_fs_labels["default"]["concept_id"].isin(labels)]
+
+        indices = list(df_fs_labels.index)
+        columns = list(col[0] for col in df_fs_labels.columns.values)[1:]
+
+        financial_statement = fss[fs_name].loc[indices, columns]
+
+        keys = list(df_fs_labels["default"]["concept_id"])
+        keys = list(labels[key] for key in keys)
+        financial_statement.index = keys
+
+        return financial_statement

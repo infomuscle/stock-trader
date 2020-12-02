@@ -79,6 +79,8 @@ def dart_companies(request):
     return HttpResponse(serializers.serialize("json", companies))
 
 
-def dart_test(request):
-    result = DartCrawler().dart_test()
+def dart_financial_statements(request):
+    req_json = request.GET.dict()
+    code = req_json.get("code")
+    result = DartCrawler().crawl_financial_statements(code)
     return HttpResponse(result)

@@ -42,3 +42,36 @@ class DailyIndicator(models.Model):
 
     class Meta:
         db_table = "daily_indicator"
+
+
+class QuarterlyIndicator(models.Model):
+    id = models.CharField(db_column="id", primary_key=True, max_length=15)
+    code = models.CharField(db_column="code", max_length=6)
+    quarter_start = models.DateField(db_column="quarter_start")
+    quarter_end = models.DateField(db_column="quarter_end")
+    eps = models.FloatField(db_column="eps")
+    bps = models.FloatField(db_column="bps")
+    roe = models.FloatField(db_column="roe")
+    roa = models.FloatField(db_column="roa")
+    net_income = models.IntegerField(db_column="net_income")
+    net_worth = models.IntegerField(db_column="net_worth")
+    stock_amount = models.IntegerField(db_column="stock_amount")
+    total_equity = models.IntegerField(db_column="total_equity")
+    total_assets = models.IntegerField(db_column="total_assets")
+
+
+class BalanceSheet(models.Model):
+    id = models.CharField(primary_key=True, max_length=13)
+    code = models.CharField(max_length=6)
+    quarter_end = models.DateField()
+    total_assets = models.IntegerField()
+    total_liabilities = models.IntegerField()
+    total_equity = models.IntegerField()
+
+
+class IncomeStatement(models.Model):
+    id = models.CharField(primary_key=True, max_length=13)
+    code = models.CharField(max_length=6)
+    quarter_start = models.DateField()
+    quarter_end = models.DateField()
+    net_income = models.IntegerField()
