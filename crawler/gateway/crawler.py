@@ -355,9 +355,11 @@ def _get_soup(url: str):
 
 
 class DartCrawler:
-    def crawl_companies(self):
+
+    def __init__(self):
         dart.set_api_key(consts.DART_KEY)
 
+    def crawl_companies(self):
         corporations = dart.get_corp_list()
 
         companies = []
@@ -373,8 +375,6 @@ class DartCrawler:
         return companies
 
     def crawl_financial_statements(self, code):
-        dart.set_api_key(consts.DART_KEY)
-
         corp_code = Company.objects.get(code=code).corp_code
         fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
 
