@@ -4,13 +4,12 @@ from datetime import date
 from datetime import datetime
 
 import dart_fss as dart
+import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
 from gateway import constants as consts
 from gateway.models import *
-
-import pandas as pd
 
 logger = logging.getLogger()
 
@@ -375,25 +374,25 @@ class DartCrawler:
 
     def dart_test(self):
         dart.set_api_key(consts.DART_KEY)
+
         se = Company.objects.get(code="005930").corp_code
         fs = dart.fs.extract(corp_code=se, bgn_de='20200101', report_tp="quarter")
 
-        df_labels_bs = fs.labels['bs']
-        df_labels_bs = df_labels_bs[df_labels_bs["default"]['concept_id'].isin(consts.DART_LABLES)]
+        df_bs_labels = fs.labels['bs']
+        df_bs_labels = df_bs_labels[df_bs_labels["default"]['concept_id'].isin(consts.DART_LABLES)]
 
         df_bs = fs['bs']
-        indices = list(df_labels_bs.index)
-        columns = list(l[0] for l in list(df_labels_bs.columns))[1:]
-        print(df_labels_bs.columns.values)
+        indices = list(df_bs_labels.index)
+        columns = list(col[0] for col in df_bs_labels.columns.values)[1:]
+        print(df_bs_labels.columns.values)
 
-        df_bs_head = df_labels_bs.loc[indices]["default"]
-        df_bs = df_bs.loc[indices, columns]
-
+        df_bs_head = df_bs_labels.loc[indices, ["default"]]
+        df_bs_body = df_bs.loc[indices, columns]
         print(df_bs_head)
-        print(type(df_bs_head))
-        print(df_bs)
-        print(type(df_bs))
-        # print(pd.concat([df_bs_head, df_bs]))
+        print(df_bs_body)
+
+        df_merge = pd.merge(df_bs_head, df_bs_body, left_index=True, right_index=True, how="left")
+        print(df_merge)
 
         # fs.save()
 
