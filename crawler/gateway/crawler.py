@@ -373,22 +373,24 @@ class DartCrawler:
 
     def dart_test(self):
         dart.set_api_key(consts.DART_KEY)
-
         se = Company.objects.get(code="005930").corp_code
-
         fs = dart.fs.extract(corp_code=se, bgn_de='20200101', report_tp="quarter")
-        df_bs = fs['bs']
-        df_is = fs['is']
 
-        columns = df_bs.columns
-        print(type(columns))
-        print(list(columns))
-        cols = list(l[0] for l in list(columns))[8:]
-        print(cols)
-        df_bs_new = df_bs.loc[[53, 54], cols]
-        print(df_bs_new)
-        labels_bs = fs.labels['bs']
-        # 레이블을 이용해서 더 예쁘게 해보자
+        df_labels_bs = fs.labels['bs']
+        print(type(df_labels_bs))
+        print(df_labels_bs)
+        print(df_labels_bs["default"]['concept_id'])
+        print(df_labels_bs[df_labels_bs["default"]['concept_id'].isin(consts.DART_LABLES)])
+
+        # lable_cols = list(l[0] for l in list(labels_bs.columns))
+        # print(lable_cols)
+
+        # df_bs = fs['bs']
+        # cols = list(l[0] for l in list(df_bs.columns))[8:]
+        # print(cols)
+        #
+        # df_bs_new = df_bs.loc[[53, 54], cols]
+        # print(df_bs_new)
 
         # fs.save()
 
