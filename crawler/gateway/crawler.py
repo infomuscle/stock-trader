@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import date
+from datetime import date, timedelta
 from datetime import datetime
 
 import dart_fss as dart
@@ -322,6 +322,98 @@ class CurrentPriceCrawler:
         return current_price.text
 
 
+class DartCrawler:
+
+    def __init__(self):
+        dart.set_api_key(consts.DART_KEY)
+
+    def crawl_companies(self):
+        corporations = dart.get_corp_list()
+
+        companies = []
+        for corporation in corporations:
+            code = corporation.info["stock_code"]
+            if code != None:
+                company = Company()
+                company.code = code
+                company.corp_code = corporation.info["corp_code"]
+                companies.append(company)
+        Company.objects.all().bulk_update(companies, fields=["corp_code"])
+
+        return companies
+
+    def crawl_financial_statements(self):
+
+        return
+
+    def crawl_quarterly_indicators_by_code(self, code):
+        corp_code = Company.objects.get(code=code).corp_code
+        fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
+
+        balance_sheets = self.__get_balance_sheets(fss, code)
+        income_statements = self.__get_income_statement(fss, code)
+
+        quarterly_indicators = []
+
+        return quarterly_indicators
+
+    def __get_balance_sheets(self, fss, code):
+        df_bs = self.__get_financial_statement(fss, "bs")
+
+        balance_sheets = []
+        df_bs_cols = list(c[0] for c in df_bs.columns.values)
+        for col in df_bs_cols:
+            balance_sheet = BalanceSheet()
+            balance_sheet.id = code + "-" + col[:4] + "-" + consts.QUARTER_MAPPER[col[4:]]
+            balance_sheet.code = code
+            balance_sheet.quarter_end = datetime.strptime(col, "%Y%m%d")
+            balance_sheet.total_assets = df_bs.loc["total_assets", col][0]
+            balance_sheet.total_liabilities = df_bs.loc["total_liabilities", col][0]
+            balance_sheet.total_equity = df_bs.loc["total_equity", col][0]
+            balance_sheets.append(balance_sheet)
+
+        return balance_sheets
+
+    def __get_income_statement(self, fss, code):
+        df_is = self.__get_financial_statement(fss, "is")
+
+        income_statements = []
+        df_is_cols = list(c[0] for c in df_is.columns.values)
+        for col in df_is_cols:
+            quarter_dates = col.split("-")
+            quarter_start = datetime.strptime(quarter_dates[0], "%Y%m%d")
+            quarter_end = datetime.strptime(quarter_dates[1], "%Y%m%d")
+            if quarter_end - quarter_start > timedelta(days=91):
+                continue
+
+            income_statement = IncomeStatement()
+            income_statement.id = code + "-" + quarter_dates[1][:4] + "-" + consts.QUARTER_MAPPER[quarter_dates[1][4:]]
+            income_statement.code = code
+            income_statement.quarter_start = quarter_start
+            income_statement.quarter_end = quarter_end
+            income_statement.net_income = df_is.loc["net_income", col][0]
+            income_statements.append(income_statement)
+
+        return income_statements
+
+    def __get_financial_statement(self, fss, fs_name):
+        labels = consts.DART_LABELS[fs_name]
+
+        df_fs_labels = fss.labels[fs_name]
+        df_fs_labels = df_fs_labels[df_fs_labels["default"]["concept_id"].isin(labels)]
+
+        indices = list(df_fs_labels.index)
+        columns = list(col[0] for col in df_fs_labels.columns.values)[1:]
+
+        financial_statement = fss[fs_name].loc[indices, columns]
+
+        keys = list(df_fs_labels["default"]["concept_id"])
+        keys = list(labels[key] for key in keys)
+        financial_statement.index = keys
+
+        return financial_statement
+
+
 def _generate_url(tab_name: str, params: dict):
     """
     네이버 증권 URL에 탭 이름과 파라미터를 붙어 네이버 증권 URL 생성
@@ -353,82 +445,13 @@ def _get_soup(url: str):
     return soup
 
 
-class DartCrawler:
-
-    def __init__(self):
-        dart.set_api_key(consts.DART_KEY)
-
-    def crawl_companies(self):
-        corporations = dart.get_corp_list()
-
-        companies = []
-        for corporation in corporations:
-            code = corporation.info["stock_code"]
-            if code != None:
-                company = Company()
-                company.code = code
-                company.corp_code = corporation.info["corp_code"]
-                companies.append(company)
-        Company.objects.all().bulk_update(companies, fields=["corp_code"])
-
-        return companies
-
-    def crawl_financial_statements(self, code):
-        corp_code = Company.objects.get(code=code).corp_code
-        fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
-
-        balance_sheets = self.__get_balance_sheets(fss, code)
-        income_statements = self.__get_income_statement(fss, code)
-
-        return balance_sheets
-
-    def __get_balance_sheets(self, fss, code):
-        df_bs = self.__get_financial_statement(fss, "bs")
-
-        balance_sheets = []
-        df_bs_cols = list(c[0] for c in df_bs.columns.values)[1:]
-        for col in df_bs_cols:
-            balance_sheet = BalanceSheet()
-            balance_sheet.id = code + "-" + col[:4] + "-" + consts.QUARTER_MAPPER[col[4:]]
-            balance_sheet.code = code
-            balance_sheet.quarter_end = datetime.strptime(col, "%Y%m%d")
-            balance_sheet.total_assets = df_bs.loc["total_assets", col][0]
-            balance_sheet.total_liabilities = df_bs.loc["total_liabilities", col][0]
-            balance_sheet.total_equity = df_bs.loc["total_equity", col][0]
-            balance_sheets.append(balance_sheet)
-
-        return balance_sheets
-
-    def __get_income_statement(self, fss, code):
-        df_is = self.__get_financial_statement(fss, "is")
-
-        income_statements = []
-        df_is_cols = list(c[0] for c in df_is.columns.values)[1:]
-        for col in df_is_cols:
-            quarter_dates = col.split("-")
-            income_statement = IncomeStatement()
-            income_statement.id = code + "-" + quarter_dates[1][:4] + "-" + consts.QUARTER_MAPPER[quarter_dates[1][4:]]
-            income_statement.code = code
-            income_statement.quarter_start = datetime.strptime(quarter_dates[0], "%Y%m%d")
-            income_statement.quarter_end = datetime.strptime(quarter_dates[1], "%Y%m%d")
-            income_statement.net_income = df_is.loc["net_income", col][0]
-            income_statements.append(income_statement)
-
-        return income_statements
-
-    def __get_financial_statement(self, fss, fs_name):
-        labels = consts.DART_LABELS[fs_name]
-
-        df_fs_labels = fss.labels[fs_name]
-        df_fs_labels = df_fs_labels[df_fs_labels["default"]["concept_id"].isin(labels)]
-
-        indices = list(df_fs_labels.index)
-        columns = list(col[0] for col in df_fs_labels.columns.values)[1:]
-
-        financial_statement = fss[fs_name].loc[indices, columns]
-
-        keys = list(df_fs_labels["default"]["concept_id"])
-        keys = list(labels[key] for key in keys)
-        financial_statement.index = keys
-
-        return financial_statement
+def test():
+    gap1 = datetime.strptime("20200331", "%Y%m%d") - datetime.strptime("20200101", "%Y%m%d")
+    gap2 = datetime.strptime("20200630", "%Y%m%d") - datetime.strptime("20200401", "%Y%m%d")
+    gap3 = datetime.strptime("20200930", "%Y%m%d") - datetime.strptime("20200701", "%Y%m%d")
+    gap4 = datetime.strptime("20201231", "%Y%m%d") - datetime.strptime("20201001", "%Y%m%d")
+    print(gap1 > timedelta(days=91), gap1)
+    print(gap2 > timedelta(days=91), gap2)
+    print(gap3 > timedelta(days=91), gap3)
+    print(gap4 > timedelta(days=91), gap4)
+    return
