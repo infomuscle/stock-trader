@@ -83,7 +83,7 @@ def dart_companies(request):
 def dart_financial_statements(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
-    result = DartCrawler().crawl_financial_statements()
+    result = DartCrawler().crawl_quarterly_indicators()
     return HttpResponse(result)
 
 
