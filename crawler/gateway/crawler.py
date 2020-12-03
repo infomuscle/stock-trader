@@ -342,14 +342,20 @@ class DartCrawler:
 
         return companies
 
-    def crawl_financial_statements(self, code):
+    def crawl_financial_statements(self):
+
+        return
+
+    def crawl_quarterly_indicators_by_code(self, code):
         corp_code = Company.objects.get(code=code).corp_code
         fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
 
         balance_sheets = self.__get_balance_sheets(fss, code)
         income_statements = self.__get_income_statement(fss, code)
 
-        return balance_sheets
+        quarterly_indicators = []
+
+        return quarterly_indicators
 
     def __get_balance_sheets(self, fss, code):
         df_bs = self.__get_financial_statement(fss, "bs")
