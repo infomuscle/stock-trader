@@ -6,6 +6,7 @@ from datetime import datetime
 import dart_fss as dart
 import requests
 from bs4 import BeautifulSoup
+from dart_fss.api import filings as dart_filings
 
 from gateway import constants as consts
 from gateway.models import *
@@ -338,15 +339,15 @@ class DartCrawler:
 
         @return:
         """
-        corporations = dart.get_corp_list()
-
+        corporations = dart_filings.get_corp_code()
         companies = []
         for corporation in corporations:
-            code = corporation.info["stock_code"]
+            code = corporation["stock_code"]
             if code != None:
                 company = Company()
                 company.code = code
-                company.corp_code = corporation.info["corp_code"]
+                company.corp_code = corporation["corp_code"]
+                company.name = corporation["corp_name"]
                 companies.append(company)
         Company.objects.all().bulk_update(companies, fields=["corp_code"])
 
