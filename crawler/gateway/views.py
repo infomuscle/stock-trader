@@ -1,6 +1,7 @@
 from django.core import serializers
 from django.http import HttpResponse
 
+from gateway import crawler
 from gateway.crawler import *
 from gateway.models import Company
 
@@ -83,4 +84,9 @@ def dart_financial_statements(request):
     req_json = request.GET.dict()
     code = req_json.get("code")
     result = DartCrawler().crawl_financial_statements(code)
+    return HttpResponse(result)
+
+
+def test(request):
+    result = crawler.test()
     return HttpResponse(result)

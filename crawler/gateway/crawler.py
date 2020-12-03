@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import date
+from datetime import date, timedelta
 from datetime import datetime
 
 import dart_fss as dart
@@ -322,37 +322,6 @@ class CurrentPriceCrawler:
         return current_price.text
 
 
-def _generate_url(tab_name: str, params: dict):
-    """
-    네이버 증권 URL에 탭 이름과 파라미터를 붙어 네이버 증권 URL 생성
-    @param tab_name:
-    @param params:
-    @return:
-    """
-    url = consts.URL_BODY_NAVER
-    url += tab_name + ".nhn"
-
-    if (len(params.keys()) > 0):
-        for i, k in enumerate(params.keys()):
-            url += "?" if i == 0 else "&"
-            url += k + "=" + params[k]
-
-    return url
-
-
-def _get_soup(url: str):
-    """
-    User-Agent가 포함된 HTTP 헤더와 URL로 BeautifulSoup 생성
-    @param url:
-    @return:
-    """
-    headers = {"User-Agent": consts.HEADER_VALUE_USER_AGENT}
-    html_doc = requests.get(url, headers=headers)
-    soup = BeautifulSoup(html_doc.content, "html.parser")
-
-    return soup
-
-
 class DartCrawler:
 
     def __init__(self):
@@ -386,7 +355,7 @@ class DartCrawler:
         df_bs = self.__get_financial_statement(fss, "bs")
 
         balance_sheets = []
-        df_bs_cols = list(c[0] for c in df_bs.columns.values)[1:]
+        df_bs_cols = list(c[0] for c in df_bs.columns.values)
         for col in df_bs_cols:
             balance_sheet = BalanceSheet()
             balance_sheet.id = code + "-" + col[:4] + "-" + consts.QUARTER_MAPPER[col[4:]]
@@ -403,14 +372,19 @@ class DartCrawler:
         df_is = self.__get_financial_statement(fss, "is")
 
         income_statements = []
-        df_is_cols = list(c[0] for c in df_is.columns.values)[1:]
+        df_is_cols = list(c[0] for c in df_is.columns.values)
         for col in df_is_cols:
             quarter_dates = col.split("-")
+            quarter_start = datetime.strptime(quarter_dates[0], "%Y%m%d")
+            quarter_end = datetime.strptime(quarter_dates[1], "%Y%m%d")
+            if quarter_end - quarter_start > timedelta(days=91):
+                continue
+
             income_statement = IncomeStatement()
             income_statement.id = code + "-" + quarter_dates[1][:4] + "-" + consts.QUARTER_MAPPER[quarter_dates[1][4:]]
             income_statement.code = code
-            income_statement.quarter_start = datetime.strptime(quarter_dates[0], "%Y%m%d")
-            income_statement.quarter_end = datetime.strptime(quarter_dates[1], "%Y%m%d")
+            income_statement.quarter_start = quarter_start
+            income_statement.quarter_end = quarter_end
             income_statement.net_income = df_is.loc["net_income", col][0]
             income_statements.append(income_statement)
 
@@ -432,3 +406,46 @@ class DartCrawler:
         financial_statement.index = keys
 
         return financial_statement
+
+
+def _generate_url(tab_name: str, params: dict):
+    """
+    네이버 증권 URL에 탭 이름과 파라미터를 붙어 네이버 증권 URL 생성
+    @param tab_name:
+    @param params:
+    @return:
+    """
+    url = consts.URL_BODY_NAVER
+    url += tab_name + ".nhn"
+
+    if (len(params.keys()) > 0):
+        for i, k in enumerate(params.keys()):
+            url += "?" if i == 0 else "&"
+            url += k + "=" + params[k]
+
+    return url
+
+
+def _get_soup(url: str):
+    """
+    User-Agent가 포함된 HTTP 헤더와 URL로 BeautifulSoup 생성
+    @param url:
+    @return:
+    """
+    headers = {"User-Agent": consts.HEADER_VALUE_USER_AGENT}
+    html_doc = requests.get(url, headers=headers)
+    soup = BeautifulSoup(html_doc.content, "html.parser")
+
+    return soup
+
+
+def test():
+    gap1 = datetime.strptime("20200331", "%Y%m%d") - datetime.strptime("20200101", "%Y%m%d")
+    gap2 = datetime.strptime("20200630", "%Y%m%d") - datetime.strptime("20200401", "%Y%m%d")
+    gap3 = datetime.strptime("20200930", "%Y%m%d") - datetime.strptime("20200701", "%Y%m%d")
+    gap4 = datetime.strptime("20201231", "%Y%m%d") - datetime.strptime("20201001", "%Y%m%d")
+    print(gap1 > timedelta(days=91), gap1)
+    print(gap2 > timedelta(days=91), gap2)
+    print(gap3 > timedelta(days=91), gap3)
+    print(gap4 > timedelta(days=91), gap4)
+    return
