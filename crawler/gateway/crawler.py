@@ -206,25 +206,9 @@ class DailyIndicatorCrawler:
 
 class QuaterlyIndicatorCrawler:
     def crawl_quarterly_indicators(self, codes: list):
-        quarterly_indicators = []
-        for i, code in enumerate(codes):
-            quarterly_indicators.append(self.__crawl_quarterly_indicators_by_code(code))
-            print("PROGRESS: %d / %d" % (i, len(codes)))
-        # DailyIndicator.objects.bulk_create(quarterly_indicators, ignore_conflicts=True)
-
-        return quarterly_indicators
+        return
 
     def __crawl_quarterly_indicators_by_code(self, code):
-        url = consts.URL_BODY_NAVER_REPORT + code
-        soup = _get_soup(url)
-        print(url)
-
-        table = soup.find("table", {"class": "gHead01 all-width"})
-        print(table)
-        # thead = soup.find_all("thead")
-        # tbody = soup.find_all("tbody")
-        # print(len(thead), len(tbody))
-
         return
 
 
@@ -342,19 +326,35 @@ class DartCrawler:
 
         return companies
 
-    def crawl_financial_statements(self):
-
+    def crawl_quarterly_indicators(self, codes):
         return
 
     def crawl_quarterly_indicators_by_code(self, code):
         corp_code = Company.objects.get(code=code).corp_code
         fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
 
+        qi_dict = {}
         balance_sheets = self.__get_balance_sheets(fss, code)
+        for balance_sheet in balance_sheets:
+            if balance_sheet.id not in qi_dict:
+                qi_dict[balance_sheet.id] = QuarterlyIndicator()
+            qi_dict[balance_sheet.id].id = balance_sheet.id
+            qi_dict[balance_sheet.id].code = balance_sheet.code
+            qi_dict[balance_sheet.id].quarter_end = balance_sheet.quarter_end
+            qi_dict[balance_sheet.id].total_equity = balance_sheet.total_equity
+            qi_dict[balance_sheet.id].total_assets = balance_sheet.total_assets
+
         income_statements = self.__get_income_statement(fss, code)
+        for income_statement in income_statements:
+            if income_statement.id not in qi_dict:
+                qi_dict[income_statement.id] = QuarterlyIndicator()
+            qi_dict[income_statement.id].id = income_statement.id
+            qi_dict[income_statement.id].code = income_statement.code
+            qi_dict[income_statement.id].quarter_start = income_statement.quarter_start
+            qi_dict[income_statement.id].quarter_end = income_statement.quarter_end
+            qi_dict[income_statement.id].net_income = income_statement.net_income
 
-        quarterly_indicators = []
-
+        quarterly_indicators = qi_dict.values()
         return quarterly_indicators
 
     def __get_balance_sheets(self, fss, code):
