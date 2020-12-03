@@ -57,6 +57,9 @@ class QuarterlyIndicator(models.Model):
     def __init__(self):
         super().__init__()
 
+    # def __init__(self, balance_sheet):
+    #     super().__init__()
+
     id = models.CharField(db_column="id", primary_key=True, max_length=15)
     code = models.CharField(db_column="code", max_length=6)
     quarter_start = models.DateField(db_column="quarter_start")

@@ -206,9 +206,28 @@ class DailyIndicatorCrawler:
 
 class QuaterlyIndicatorCrawler:
     def crawl_quarterly_indicators(self, codes: list):
-        return
+        """
+
+        @param codes:
+        @return:
+        """
+        quarterly_indicators = list()
+        for code in codes:
+            quarterly_indicators.append(self.__crawl_quarterly_indicators_by_code(code))
+
+        return quarterly_indicators
 
     def __crawl_quarterly_indicators_by_code(self, code):
+        """
+
+        @param code:
+        @return:
+        """
+        # Gather Balance Sheet, Income Statement by DartCrawler
+        # Gather Stock Amount
+        # Compute and Set All into QuarterlyIndicator Model
+        # -> EPS, BPS, ROE, ROA
+
         return
 
 
@@ -309,9 +328,16 @@ class CurrentPriceCrawler:
 class DartCrawler:
 
     def __init__(self):
+        """
+
+        """
         dart.set_api_key(consts.DART_KEY)
 
     def crawl_companies(self):
+        """
+
+        @return:
+        """
         corporations = dart.get_corp_list()
 
         companies = []
@@ -327,9 +353,15 @@ class DartCrawler:
         return companies
 
     def crawl_quarterly_indicators(self, codes):
+
         return
 
-    def crawl_quarterly_indicators_by_code(self, code):
+    def crawl_balance_sheets_by_code(self, code):
+        """
+
+        @param code:
+        @return:
+        """
         corp_code = Company.objects.get(code=code).corp_code
         fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
 
@@ -358,6 +390,12 @@ class DartCrawler:
         return quarterly_indicators
 
     def __get_balance_sheets(self, fss, code):
+        """
+
+        @param fss:
+        @param code:
+        @return:
+        """
         df_bs = self.__get_financial_statement(fss, "bs")
 
         balance_sheets = []
@@ -375,6 +413,12 @@ class DartCrawler:
         return balance_sheets
 
     def __get_income_statement(self, fss, code):
+        """
+
+        @param fss:
+        @param code:
+        @return:
+        """
         df_is = self.__get_financial_statement(fss, "is")
 
         income_statements = []
@@ -397,6 +441,12 @@ class DartCrawler:
         return income_statements
 
     def __get_financial_statement(self, fss, fs_name):
+        """
+
+        @param fss:
+        @param fs_name:
+        @return:
+        """
         labels = consts.DART_LABELS[fs_name]
 
         df_fs_labels = fss.labels[fs_name]
@@ -446,6 +496,10 @@ def _get_soup(url: str):
 
 
 def test():
+    """
+
+    @return:
+    """
     gap1 = datetime.strptime("20200331", "%Y%m%d") - datetime.strptime("20200101", "%Y%m%d")
     gap2 = datetime.strptime("20200630", "%Y%m%d") - datetime.strptime("20200401", "%Y%m%d")
     gap3 = datetime.strptime("20200930", "%Y%m%d") - datetime.strptime("20200701", "%Y%m%d")
