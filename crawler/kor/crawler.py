@@ -434,4 +434,4 @@ def test():
     Simple Test Code
     @return:
     """
-    return
+    return "TEST"
