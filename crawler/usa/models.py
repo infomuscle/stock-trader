@@ -10,3 +10,19 @@ class Company(models.Model):
 
     class Meta:
         db_table = "company_usa"
+
+
+class DailyPrice(models.Model):
+    id = models.CharField(db_column="id", primary_key=True, max_length=15)
+    symbol = models.CharField(db_column="symbol", max_length=6)
+    date = models.DateField(db_column="date")
+    open = models.FloatField(db_column="open")
+    close = models.FloatField(db_column="close")
+    high = models.FloatField(db_column="high")
+    low = models.FloatField(db_column="low")
+    change = models.FloatField(db_column="change")
+    change_percent = models.FloatField(db_column="change_percent")
+    volume = models.IntegerField(db_column="volume")
+
+    class Meta:
+        db_table = "daily_price_usa"
