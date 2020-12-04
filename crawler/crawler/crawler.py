@@ -232,24 +232,38 @@ class QuaterlyIndicatorCrawler:
 
         dart.set_api_key(consts.DART_KEY)
         corp_code = Company.objects.get(code=code).corp_code
-        # single_corp4 = dart_finance.get_single_corp(corp_code=corp_code, bsns_year="2019", reprt_code="11011")
-        # single_corp = self.__crawl_simple_financial_statements(corp_code, "2019", "11011")
-        # single_corp = self.__crawl_simple_financial_statements(corp_code, "2019", "11014")
-        single_corp = self.__crawl_simple_financial_statements(corp_code, "2019", "11012")
-        # single_corp = self.__crawl_simple_financial_statements(corp_code, "2019", "11013")
+        # single_corp = self.__crawl_simple_financial_statements(corp_code, "2019", 4)
+        # single_corp = self.__crawl_simple_financial_statements(corp_code, "2019", 3)
+        # single_corp = self.__crawl_simple_financial_statements(corp_code, "2019", 2)
+        # single_corp = self.__crawl_simple_financial_statements(corp_code, "2019", 1)
+        # single_corp = self.__crawl_quarterly(corp_code, "2019", 4)
 
+        # single_corp = dart_finance.get_single_corp(corp_code=corp_code, bsns_year="2019", reprt_code=consts.REPORT_CODE_MAPPER["1"])
+        # single_corp = dart_finance.get_single_corp(corp_code=corp_code, bsns_year="2019", reprt_code=consts.REPORT_CODE_MAPPER["3"])
+        single_corp = dart_finance.get_single_corp(corp_code=corp_code, bsns_year="2019", reprt_code=consts.REPORT_CODE_MAPPER["2"])
+        # single_corp = dart_finance.get_single_corp(corp_code=corp_code, bsns_year="2019", reprt_code=consts.REPORT_CODE_MAPPER["1"])
         print(type(single_corp))
-
 
         return single_corp
 
-    def __crawl_simple_financial_statements(self, corp_code, bsns_year, reprt_code):
-        single_corp = dart_finance.get_single_corp(corp_code=corp_code, bsns_year=bsns_year, reprt_code=reprt_code)
+    def __crawl_quarterly(self, corp_code, year, quarter):
+
+        org = self.__crawl_simple_financial_statements(corp_code, year, quarter)
+        if quarter > 1:
+            bf = self.__crawl_simple_financial_statements(corp_code, year, quarter - 1)
+            print(org["net_income"], bf["net_income"])
+            org["net_income"] = int(org["net_income"]) - int(bf["net_income"])
+
+        return org
+
+    def __crawl_simple_financial_statements(self, corp_code, year, quarter):
+        report_code = consts.REPORT_CODE_MAPPER[str(quarter)]
+        single_corp = dart_finance.get_single_corp(corp_code=corp_code, bsns_year=year, reprt_code=report_code)
         simple_financial_statements = dict()
 
         simple_financial_statements["corp_code"] = corp_code
-        simple_financial_statements["start_dt"] = bsns_year + "0101"
-        simple_financial_statements["end_dt"] = bsns_year + consts.END_DATE_MAPPER[reprt_code]
+        simple_financial_statements["start_dt"] = year + "0101"
+        simple_financial_statements["end_dt"] = year + consts.END_DATE_MAPPER[report_code]
 
         if single_corp["status"] == "000":
             accounts = single_corp["list"]
