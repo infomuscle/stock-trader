@@ -1,3 +1,8 @@
-from django.shortcuts import render
+from django.http import HttpResponse
 
-# Create your views here.
+from usa.crawler import *
+
+
+def companies(request):
+    result = SymbolCrawler().crawl_companies()
+    return HttpResponse(result)
