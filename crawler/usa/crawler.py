@@ -2,8 +2,8 @@ import json
 
 import requests
 
-import usa.constants as consts
-from usa.models import Company
+from usa import constants as consts
+from usa.models import *
 
 
 class CompanyCrawler:
@@ -19,8 +19,7 @@ class CompanyCrawler:
             company.iex_id = company_json["iexId"]
             company.name = company_json["name"]
             company.exchange = company_json["exchange"]
-            # company.save()
-            companies.append(companies)
-        print(type(companies))
+            company.save()
+            companies.append(company)
 
         return companies

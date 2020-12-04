@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from usa import views
 
 app_name = "usa"
 
