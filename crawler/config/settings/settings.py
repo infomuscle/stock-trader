@@ -29,7 +29,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'crawler',
+    'kor',
+    'usa',
     'rest_framework',
     'pandas',
     'numpy',

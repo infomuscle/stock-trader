@@ -9,8 +9,8 @@ from bs4 import BeautifulSoup
 from dart_fss.api import filings as dart_filings
 from dart_fss.api import finance as dart_finance
 
-from crawler import constants as consts
-from crawler.models import *
+from kor import constants as consts
+from kor.models import *
 
 logger = logging.getLogger()
 
@@ -434,4 +434,4 @@ def test():
     Simple Test Code
     @return:
     """
-    return
+    return "TEST"

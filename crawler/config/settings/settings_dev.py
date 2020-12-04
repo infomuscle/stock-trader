@@ -5,7 +5,7 @@ from config.settings.settings import *
 logger = logging.getLogger()
 logger.info(LANGUAGE_CODE, TIME_ZONE)
 
-ALLOWED_HOSTS = ["crawler", "localhost", "127.0.0.1", "0.0.0.0"]
+ALLOWED_HOSTS = ["kor", "localhost", "127.0.0.1", "0.0.0.0"]
 
 DATABASES = {
     'default': {

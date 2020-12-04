@@ -3,9 +3,9 @@ import json
 from django.core import serializers
 from django.http import HttpResponse
 
-from crawler import crawler
-from crawler.crawler import *
-from crawler.models import Company
+from kor import crawler
+from kor.crawler import *
+from kor.models import Company
 
 
 def daily_price(request):
