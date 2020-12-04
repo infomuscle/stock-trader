@@ -12,7 +12,16 @@ def companies(request):
 def daily_price(request):
     req_json = request.GET.dict()
     symbol = req_json.get("symbol")
+    range = req_json.get("range")
 
-    daily_prices = DailyPriceCrawler().crawl_daily_prices(symbol)
+    if symbol == "test":
+        return HttpResponse("SUCCESS")
 
+    symbols = []
+    if symbol == "all":
+        symbols.extend(list(Company.objects.all().values_list('symbol', flat=True)))
+    else:
+        symbols.append(symbol)
+
+    daily_prices = DailyPriceCrawler().crawl_daily_prices(symbols, range)
     return HttpResponse(serializers.serialize("json", daily_prices))
