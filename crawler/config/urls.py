@@ -1,12 +1,12 @@
 # from django.conf.urls import url, include
 # from rest_framework import routers
 #
-# from crawler import views
+# from kor import views
 #
-# app_name = 'crawler'
+# app_name = 'kor'
 #
 # router = routers.DefaultRouter()
-# # router.register('crawler', views.CrawlerViewSet)
+# # router.register('kor', views.CrawlerViewSet)
 # urlpatterns = [
 #     url(r'^', include(router.urls)),
 #     url(r'^api/daily/price', views.daily_price),
@@ -24,6 +24,6 @@
 from django.urls import path, include
 
 urlpatterns = [
-    # path('', include('crawler.urls')),
+    # path('', include('kor.urls')),
     path('usa/', include('usa.urls'))
 ]
