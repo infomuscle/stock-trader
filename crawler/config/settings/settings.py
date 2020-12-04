@@ -30,6 +30,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'kor',
+    'usa',
     'rest_framework',
     'pandas',
     'numpy',
