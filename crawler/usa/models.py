@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class USACompany(models.Model):
+class Company(models.Model):
     symbol = models.CharField(db_column="symbol", primary_key=True, max_length=6)
     iex_id = models.CharField(db_column="iex_id", max_length=20)
     name = models.CharField(db_column="name", max_length=100)

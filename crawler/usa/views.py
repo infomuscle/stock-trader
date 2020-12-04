@@ -7,6 +7,6 @@ from usa.crawler import *
 
 
 def companies(request):
-    companies = SymbolCrawler().crawl_companies()
-    return HttpResponse("SUCCESS")
+    companies = CompanyCrawler().crawl_companies()
+    return HttpResponse(serializers.serialize("json", companies))
 
