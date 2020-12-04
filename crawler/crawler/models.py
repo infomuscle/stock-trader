@@ -2,9 +2,6 @@ from django.db import models
 
 
 class Company(models.Model):
-    def __init__(self):
-        super().__init__()
-
     code = models.CharField(db_column="code", primary_key=True, max_length=6)
     name = models.CharField(db_column="name", max_length=30)
     market = models.CharField(db_column="market", max_length=10)
@@ -16,9 +13,6 @@ class Company(models.Model):
 
 
 class DailyPrice(models.Model):
-    def __init__(self):
-        super().__init__()
-
     id = models.CharField(db_column="id", primary_key=True, max_length=15)
     code = models.CharField(db_column="code", max_length=6)
     date = models.DateField(db_column="date")
@@ -35,9 +29,6 @@ class DailyPrice(models.Model):
 
 
 class DailyIndicator(models.Model):
-    def __init__(self):
-        super().__init__()
-
     id = models.CharField(db_column="id", primary_key=True, max_length=15)
     code = models.CharField(db_column="code", max_length=6)
     date = models.DateField(db_column="date")
@@ -54,12 +45,6 @@ class DailyIndicator(models.Model):
 
 
 class QuarterlyIndicator(models.Model):
-    def __init__(self):
-        super().__init__()
-
-    # def __init__(self, balance_sheet):
-    #     super().__init__()
-
     id = models.CharField(db_column="id", primary_key=True, max_length=15)
     code = models.CharField(db_column="code", max_length=6)
     quarter_start = models.DateField(db_column="quarter_start")
@@ -76,9 +61,6 @@ class QuarterlyIndicator(models.Model):
 
 
 class BalanceSheet(models.Model):
-    def __init__(self):
-        super().__init__()
-
     id = models.CharField(primary_key=True, max_length=13)
     code = models.CharField(max_length=6)
     quarter_end = models.DateField()
@@ -88,9 +70,6 @@ class BalanceSheet(models.Model):
 
 
 class IncomeStatement(models.Model):
-    def __init__(self):
-        super().__init__()
-
     id = models.CharField(primary_key=True, max_length=13)
     code = models.CharField(max_length=6)
     quarter_start = models.DateField()

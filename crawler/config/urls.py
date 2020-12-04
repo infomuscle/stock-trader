@@ -1,12 +1,12 @@
 from django.conf.urls import url, include
 from rest_framework import routers
 
-from gateway import views
+from crawler import views
 
-app_name = 'gateway'
+app_name = 'crawler'
 
 router = routers.DefaultRouter()
-# router.register('gateway', views.GatewayViewSet)
+# router.register('crawler', views.CrawlerViewSet)
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^api/daily/price', views.daily_price),
@@ -17,9 +17,6 @@ urlpatterns = [
     url(r'^api/companies/list', views.companies),
 
     url(r'^api/current', views.current),
-
-    url(r'^api/dart/companies', views.dart_companies),
-    url(r'^api/dart/fss', views.dart_financial_statements),
 
     url(r'^api/test', views.test)
     # url(r'^api/daily/(?P<date>.+)/price', views.daily),

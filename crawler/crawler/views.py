@@ -1,9 +1,11 @@
+import json
+
 from django.core import serializers
 from django.http import HttpResponse
 
-from gateway import crawler
-from gateway.crawler import *
-from gateway.models import Company
+from crawler import crawler
+from crawler.crawler import *
+from crawler.models import Company
 
 
 def daily_price(request):
@@ -49,7 +51,8 @@ def quarterly_indicator(request):
         codes.append(code)
 
     indicators = QuaterlyIndicatorCrawler().crawl_quarterly_indicators(codes)
-    return HttpResponse("SUCCESS")
+    return HttpResponse(json.dumps(indicators))
+    # return HttpResponse(serializers.serialize("json", indicators))
 
 
 def companies(request):
@@ -73,18 +76,6 @@ def current(request):
     code = req_json.get("code")
     c_price = CurrentPriceCrawler().get_current_price(code)
     return HttpResponse(c_price)
-
-
-def dart_companies(request):
-    companies = DartCrawler().crawl_companies()
-    return HttpResponse(serializers.serialize("json", companies))
-
-
-def dart_financial_statements(request):
-    req_json = request.GET.dict()
-    code = req_json.get("code")
-    result = DartCrawler().crawl_quarterly_indicators()
-    return HttpResponse(result)
 
 
 def test(request):
