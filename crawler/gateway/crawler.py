@@ -7,6 +7,7 @@ import dart_fss as dart
 import requests
 from bs4 import BeautifulSoup
 from dart_fss.api import filings as dart_filings
+from dart_fss.api import finance as dart_finance
 
 from gateway import constants as consts
 from gateway.models import *
@@ -228,6 +229,10 @@ class QuaterlyIndicatorCrawler:
         # Gather Stock Amount
         # Compute and Set All into QuarterlyIndicator Model
         # -> EPS, BPS, ROE, ROA
+
+        dart.set_api_key(consts.DART_KEY)
+        financial_statements = dart_finance.get_single_corp(corp_code="00126380", bsns_year="2019", reprt_code="11011")
+        print(financial_statements)
 
         return
 
@@ -498,15 +503,7 @@ def _get_soup(url: str):
 
 def test():
     """
-
+    Simple Test Code
     @return:
     """
-    gap1 = datetime.strptime("20200331", "%Y%m%d") - datetime.strptime("20200101", "%Y%m%d")
-    gap2 = datetime.strptime("20200630", "%Y%m%d") - datetime.strptime("20200401", "%Y%m%d")
-    gap3 = datetime.strptime("20200930", "%Y%m%d") - datetime.strptime("20200701", "%Y%m%d")
-    gap4 = datetime.strptime("20201231", "%Y%m%d") - datetime.strptime("20201001", "%Y%m%d")
-    print(gap1 > timedelta(days=91), gap1)
-    print(gap2 > timedelta(days=91), gap2)
-    print(gap3 > timedelta(days=91), gap3)
-    print(gap4 > timedelta(days=91), gap4)
     return
