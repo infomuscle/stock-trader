@@ -1,12 +1,13 @@
 import logging
 import re
-from datetime import date, timedelta
+from datetime import date
 from datetime import datetime
 
 import dart_fss as dart
 import requests
 from bs4 import BeautifulSoup
 from dart_fss.api import filings as dart_filings
+from dart_fss.api import finance as dart_finance
 
 from crawler import constants as consts
 from crawler.models import *
@@ -231,15 +232,34 @@ class QuaterlyIndicatorCrawler:
 
         dart.set_api_key(consts.DART_KEY)
         corp_code = Company.objects.get(code=code).corp_code
-        fss = dart.fs.extract(corp_code=corp_code, bgn_de="20190101", report_tp=["quarter", "half", "annual"])
-        fss.save()
+        # single_corp4 = dart_finance.get_single_corp(corp_code=corp_code, bsns_year="2019", reprt_code="11011")
+        # single_corp = self.__crawl_simple_financial_statements(corp_code, "2019", "11011")
+        # single_corp = self.__crawl_simple_financial_statements(corp_code, "2019", "11014")
+        single_corp = self.__crawl_simple_financial_statements(corp_code, "2019", "11012")
+        # single_corp = self.__crawl_simple_financial_statements(corp_code, "2019", "11013")
 
-        balance_sheets = DartCrawler().crawl_balance_sheets_by_code(fss, code)
-        income_statements = DartCrawler().crawl_income_statement_by_code(fss, code)
-        print(balance_sheets)
-        print(income_statements)
+        print(type(single_corp))
 
-        return
+
+        return single_corp
+
+    def __crawl_simple_financial_statements(self, corp_code, bsns_year, reprt_code):
+        single_corp = dart_finance.get_single_corp(corp_code=corp_code, bsns_year=bsns_year, reprt_code=reprt_code)
+        simple_financial_statements = dict()
+
+        simple_financial_statements["corp_code"] = corp_code
+        simple_financial_statements["start_dt"] = bsns_year + "0101"
+        simple_financial_statements["end_dt"] = bsns_year + consts.END_DATE_MAPPER[reprt_code]
+
+        if single_corp["status"] == "000":
+            accounts = single_corp["list"]
+            for account in accounts:
+                account_nm = account["account_nm"]
+                fs_nm = account["fs_nm"]
+                if account_nm in consts.ACCOUNT_MAPPER and fs_nm in ["연결재무제표"]:
+                    simple_financial_statements[consts.ACCOUNT_MAPPER[account_nm]] = account["thstrm_amount"]
+
+        return simple_financial_statements
 
 
 class CompanyCrawler:
@@ -343,82 +363,6 @@ class DartCrawler:
         Company.objects.all().bulk_update(companies, fields=["corp_code"])
 
         return companies
-
-    def crawl_balance_sheets_by_code(self, fss, code):
-        """
-
-        @param fss:
-        @param code:
-        @return:
-        """
-        df_bs = self.__get_financial_statement(fss, "bs")
-        df_bs.to_excel("./fsdata/test_bs.xlsx")
-
-        balance_sheets = []
-        df_bs_cols = list(c[0] for c in df_bs.columns.values)
-        for col in df_bs_cols:
-            balance_sheet = BalanceSheet()
-            balance_sheet.id = code + "-" + col[:4] + "-" + consts.QUARTER_MAPPER[col[4:]]
-            balance_sheet.code = code
-            balance_sheet.quarter_end = datetime.strptime(col, "%Y%m%d")
-            balance_sheet.total_assets = df_bs.loc["total_assets", col][0]
-            balance_sheet.total_liabilities = df_bs.loc["total_liabilities", col][0]
-            balance_sheet.total_equity = df_bs.loc["total_equity", col][0]
-            balance_sheets.append(balance_sheet)
-
-        return balance_sheets
-
-    def crawl_income_statement_by_code(self, fss, code):
-        """
-
-        @param fss:
-        @param code:
-        @return:
-        """
-        df_is = self.__get_financial_statement(fss, "is")
-        df_is.to_excel("./fsdata/test_is.xlsx")
-
-        income_statements = []
-        df_is_cols = list(c[0] for c in df_is.columns.values)
-        for col in df_is_cols:
-            quarter_dates = col.split("-")
-            quarter_start = datetime.strptime(quarter_dates[0], "%Y%m%d")
-            quarter_end = datetime.strptime(quarter_dates[1], "%Y%m%d")
-            if quarter_end - quarter_start > timedelta(days=91):
-                continue
-
-            income_statement = IncomeStatement()
-            income_statement.id = code + "-" + quarter_dates[1][:4] + "-" + consts.QUARTER_MAPPER[quarter_dates[1][4:]]
-            income_statement.code = code
-            income_statement.quarter_start = quarter_start
-            income_statement.quarter_end = quarter_end
-            income_statement.net_income = df_is.loc["net_income", col][0]
-            income_statements.append(income_statement)
-
-        return income_statements
-
-    def __get_financial_statement(self, fss, fs_name):
-        """
-
-        @param fss:
-        @param fs_name:
-        @return:
-        """
-        labels = consts.DART_LABELS[fs_name]
-
-        df_fs_labels = fss.labels[fs_name]
-        df_fs_labels = df_fs_labels[df_fs_labels["default"]["concept_id"].isin(labels)]
-
-        indices = list(df_fs_labels.index)
-        columns = list(col[0] for col in df_fs_labels.columns.values)[1:]
-
-        financial_statement = fss[fs_name].loc[indices, columns]
-
-        keys = list(df_fs_labels["default"]["concept_id"])
-        keys = list(labels[key] for key in keys)
-        financial_statement.index = keys
-
-        return financial_statement
 
 
 class CurrentPriceCrawler:

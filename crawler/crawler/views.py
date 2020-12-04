@@ -1,3 +1,5 @@
+import json
+
 from django.core import serializers
 from django.http import HttpResponse
 
@@ -49,7 +51,8 @@ def quarterly_indicator(request):
         codes.append(code)
 
     indicators = QuaterlyIndicatorCrawler().crawl_quarterly_indicators(codes)
-    return HttpResponse(indicators)
+    return HttpResponse(json.dumps(indicators))
+    # return HttpResponse(serializers.serialize("json", indicators))
 
 
 def companies(request):
