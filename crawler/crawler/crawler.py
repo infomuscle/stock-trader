@@ -231,7 +231,8 @@ class QuaterlyIndicatorCrawler:
 
         dart.set_api_key(consts.DART_KEY)
         corp_code = Company.objects.get(code=code).corp_code
-        fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
+        fss = dart.fs.extract(corp_code=corp_code, bgn_de="20190101", report_tp=["quarter", "half", "annual"])
+        fss.save()
 
         balance_sheets = DartCrawler().crawl_balance_sheets_by_code(fss, code)
         income_statements = DartCrawler().crawl_income_statement_by_code(fss, code)
@@ -351,6 +352,7 @@ class DartCrawler:
         @return:
         """
         df_bs = self.__get_financial_statement(fss, "bs")
+        df_bs.to_excel("./fsdata/test_bs.xlsx")
 
         balance_sheets = []
         df_bs_cols = list(c[0] for c in df_bs.columns.values)
@@ -374,6 +376,7 @@ class DartCrawler:
         @return:
         """
         df_is = self.__get_financial_statement(fss, "is")
+        df_is.to_excel("./fsdata/test_is.xlsx")
 
         income_statements = []
         df_is_cols = list(c[0] for c in df_is.columns.values)
