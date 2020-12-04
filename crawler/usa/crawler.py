@@ -49,19 +49,25 @@ class DailyPriceCrawler:
             daily_prices_json = json.loads(response)
 
             for daily_price_json in daily_prices_json:
-                daily_price = DailyPrice()
-                daily_price.id = daily_price_json["symbol"] + "-" + daily_price_json["date"].replace("-", "")
-                daily_price.symbol = daily_price_json["symbol"]
-                daily_price.date = datetime.strptime(daily_price_json["date"], "%Y-%m-%d")
-                daily_price.close = daily_price_json["close"]
-                daily_price.open = daily_price_json["open"]
-                daily_price.high = daily_price_json["high"]
-                daily_price.low = daily_price_json["low"]
-                daily_price.change = daily_price_json["change"]
-                daily_price.change_percent = daily_price_json["changePercent"]
-                daily_price.volume = daily_price_json["volume"]
+                daily_price = self.__get_daily_price(daily_price_json)
                 daily_price.save()
                 daily_prices.append(daily_price)
         except Exception as e:
             logger.error(e)
+
         return daily_prices
+
+    def __get_daily_price(self, daily_price_json):
+        daily_price = DailyPrice()
+        daily_price.id = daily_price_json["symbol"] + "-" + daily_price_json["date"].replace("-", "")
+        daily_price.symbol = daily_price_json["symbol"]
+        daily_price.date = datetime.strptime(daily_price_json["date"], "%Y-%m-%d")
+        daily_price.close = daily_price_json["close"]
+        daily_price.open = daily_price_json["open"]
+        daily_price.high = daily_price_json["high"]
+        daily_price.low = daily_price_json["low"]
+        daily_price.change = daily_price_json["change"]
+        daily_price.change_percent = daily_price_json["changePercent"]
+        daily_price.volume = daily_price_json["volume"]
+
+        return daily_price
