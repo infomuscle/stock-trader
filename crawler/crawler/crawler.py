@@ -7,7 +7,6 @@ import dart_fss as dart
 import requests
 from bs4 import BeautifulSoup
 from dart_fss.api import filings as dart_filings
-from dart_fss.api import finance as dart_finance
 
 from crawler import constants as consts
 from crawler.models import *
@@ -231,8 +230,13 @@ class QuaterlyIndicatorCrawler:
         # -> EPS, BPS, ROE, ROA
 
         dart.set_api_key(consts.DART_KEY)
-        financial_statements = dart_finance.get_single_corp(corp_code="00126380", bsns_year="2019", reprt_code="11011")
-        print(financial_statements)
+        corp_code = Company.objects.get(code=code).corp_code
+        fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
+
+        balance_sheets = DartCrawler().crawl_balance_sheets_by_code(fss, code)
+        income_statements = DartCrawler().crawl_income_statement_by_code(fss, code)
+        print(balance_sheets)
+        print(income_statements)
 
         return
 
@@ -312,25 +316,6 @@ class CompanyCrawler:
         return url
 
 
-class CurrentPriceCrawler:
-
-    def get_current_price(self, code: str):
-        """
-        종목코드의 현재 가격 조회
-        @param code:
-        @return:
-        """
-        params = dict()
-        params["code"] = code
-
-        url = _generate_url("item/sise", params)
-        soup = _get_soup(url)
-
-        current_price = soup.find("strong", {"id": "_nowVal"})
-
-        return current_price.text
-
-
 class DartCrawler:
 
     def __init__(self):
@@ -358,44 +343,7 @@ class DartCrawler:
 
         return companies
 
-    def crawl_quarterly_indicators(self, codes):
-
-        return
-
-    def crawl_balance_sheets_by_code(self, code):
-        """
-
-        @param code:
-        @return:
-        """
-        corp_code = Company.objects.get(code=code).corp_code
-        fss = dart.fs.extract(corp_code=corp_code, bgn_de="20200101", report_tp="quarter")
-
-        qi_dict = {}
-        balance_sheets = self.__get_balance_sheets(fss, code)
-        for balance_sheet in balance_sheets:
-            if balance_sheet.id not in qi_dict:
-                qi_dict[balance_sheet.id] = QuarterlyIndicator()
-            qi_dict[balance_sheet.id].id = balance_sheet.id
-            qi_dict[balance_sheet.id].code = balance_sheet.code
-            qi_dict[balance_sheet.id].quarter_end = balance_sheet.quarter_end
-            qi_dict[balance_sheet.id].total_equity = balance_sheet.total_equity
-            qi_dict[balance_sheet.id].total_assets = balance_sheet.total_assets
-
-        income_statements = self.__get_income_statement(fss, code)
-        for income_statement in income_statements:
-            if income_statement.id not in qi_dict:
-                qi_dict[income_statement.id] = QuarterlyIndicator()
-            qi_dict[income_statement.id].id = income_statement.id
-            qi_dict[income_statement.id].code = income_statement.code
-            qi_dict[income_statement.id].quarter_start = income_statement.quarter_start
-            qi_dict[income_statement.id].quarter_end = income_statement.quarter_end
-            qi_dict[income_statement.id].net_income = income_statement.net_income
-
-        quarterly_indicators = qi_dict.values()
-        return quarterly_indicators
-
-    def __get_balance_sheets(self, fss, code):
+    def crawl_balance_sheets_by_code(self, fss, code):
         """
 
         @param fss:
@@ -418,7 +366,7 @@ class DartCrawler:
 
         return balance_sheets
 
-    def __get_income_statement(self, fss, code):
+    def crawl_income_statement_by_code(self, fss, code):
         """
 
         @param fss:
@@ -468,6 +416,25 @@ class DartCrawler:
         financial_statement.index = keys
 
         return financial_statement
+
+
+class CurrentPriceCrawler:
+
+    def get_current_price(self, code: str):
+        """
+        종목코드의 현재 가격 조회
+        @param code:
+        @return:
+        """
+        params = dict()
+        params["code"] = code
+
+        url = _generate_url("item/sise", params)
+        soup = _get_soup(url)
+
+        current_price = soup.find("strong", {"id": "_nowVal"})
+
+        return current_price.text
 
 
 def _generate_url(tab_name: str, params: dict):
