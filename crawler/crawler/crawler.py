@@ -9,8 +9,8 @@ from bs4 import BeautifulSoup
 from dart_fss.api import filings as dart_filings
 from dart_fss.api import finance as dart_finance
 
-from gateway import constants as consts
-from gateway.models import *
+from crawler import constants as consts
+from crawler.models import *
 
 logger = logging.getLogger()
 

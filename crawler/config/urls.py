@@ -1,12 +1,12 @@
 from django.conf.urls import url, include
 from rest_framework import routers
 
-from gateway import views
+from crawler import views
 
-app_name = 'gateway'
+app_name = 'crawler'
 
 router = routers.DefaultRouter()
-# router.register('gateway', views.GatewayViewSet)
+# router.register('crawler', views.CrawlerViewSet)
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^api/daily/price', views.daily_price),

@@ -1,9 +1,9 @@
 from django.core import serializers
 from django.http import HttpResponse
 
-from gateway import crawler
-from gateway.crawler import *
-from gateway.models import Company
+from crawler import crawler
+from crawler.crawler import *
+from crawler.models import Company
 
 
 def daily_price(request):
