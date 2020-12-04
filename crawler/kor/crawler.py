@@ -287,6 +287,8 @@ class CompanyCrawler:
         for market in markets:
             companies.extend(self.__crawl_companies_of_market(market))
 
+        return companies
+
     def __crawl_companies_of_market(self, market: str):
         """
         해당 시장의 종목 데이터 크롤링: 코드, 이름
