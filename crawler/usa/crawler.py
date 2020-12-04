@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 import requests
 
@@ -23,3 +24,28 @@ class CompanyCrawler:
             companies.append(company)
 
         return companies
+
+
+class DailyPriceCrawler:
+    def crawl_daily_prices(self, symbol):
+        url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/{range}/{date}".format(symbol=symbol, range="5d", date="")
+        url += "?token=" + consts.IEX_KEYS
+        daily_prices_json = json.loads(requests.get(url).text)
+
+        daily_prices = []
+        for daily_price_json in daily_prices_json:
+            daily_price = DailyPrice()
+            daily_price.id = daily_price_json["symbol"] + "-" + daily_price_json["date"].replace("-", "")
+            daily_price.symbol = daily_price_json["symbol"]
+            daily_price.date = datetime.strptime(daily_price_json["date"], "%Y-%m-%d")
+            daily_price.close = daily_price_json["close"]
+            daily_price.open = daily_price_json["open"]
+            daily_price.high = daily_price_json["high"]
+            daily_price.low = daily_price_json["low"]
+            daily_price.change = daily_price_json["change"]
+            daily_price.change_percent = daily_price_json["changePercent"]
+            daily_price.volume = daily_price_json["volume"]
+            daily_price.save()
+            daily_prices.append(daily_price)
+
+        return daily_prices
