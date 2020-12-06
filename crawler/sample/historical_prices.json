@@ -1,0 +1,30 @@
+[
+  {
+    "close": 122.25,
+    "high": 122.8608,
+    "low": 121.52,
+    "open": 122.6,
+    "symbol": "AAPL",
+    "volume": 78260421,
+    "id": "HISTORICAL_PRICES",
+    "key": "AAPL",
+    "subkey": "",
+    "date": "2020-12-04",
+    "updated": 1607134564000,
+    "changeOverTime": 0,
+    "marketChangeOverTime": 0,
+    "uOpen": 122.6,
+    "uClose": 122.25,
+    "uHigh": 122.8608,
+    "uLow": 121.52,
+    "uVolume": 78260421,
+    "fOpen": 122.6,
+    "fClose": 122.25,
+    "fHigh": 122.8608,
+    "fLow": 121.52,
+    "fVolume": 78260421,
+    "label": "Dec 4, 20",
+    "change": 0,
+    "changePercent": 0
+  }
+]

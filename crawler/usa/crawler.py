@@ -35,7 +35,7 @@ class CompanyCrawler:
 
 
 class DailyPriceCrawler:
-    def crawl_daily_prices(self, symbols, range):
+    def crawl_daily_prices(self, symbols, date):
 
         daily_prices = []
         for symbol in symbols:
@@ -43,13 +43,15 @@ class DailyPriceCrawler:
 
         return daily_prices
 
-    def __crawl_daily_prices_by_symbol(self, symbol, range):
-        url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/{range}".format(symbol=symbol, range=range)
+    def __crawl_daily_prices_by_symbol(self, symbol, date):
+        url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/date/{date}".format(symbol=symbol, date=date)
         url += "?token=" + consts.IEX_KEYS
+        url += "&chartByDay=" + "true"
 
         daily_prices = []
 
         response = requests.get(url).text
+        print(response)
         daily_prices_json = json.loads(response)
 
         for daily_price_json in daily_prices_json:

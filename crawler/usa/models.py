@@ -22,7 +22,7 @@ class DailyPrice(models.Model):
     low = models.FloatField(db_column="low")
     change = models.FloatField(db_column="change")
     change_percent = models.FloatField(db_column="change_percent")
-    volume = models.IntegerField(db_column="volume")
+    volume = models.BigIntegerField(db_column="volume")
 
     class Meta:
         db_table = "usa_daily_price"
