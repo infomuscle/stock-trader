@@ -12,7 +12,8 @@ def companies(request):
 def daily_price(request):
     req_json = request.GET.dict()
     symbol = req_json.get("symbol")
-    date = req_json.get("date")
+    start_date = req_json.get("start_date")
+    end_date = req_json.get("end_date")
 
     if symbol == "test":
         return HttpResponse("SUCCESS")
@@ -23,7 +24,7 @@ def daily_price(request):
     else:
         symbols.append(symbol)
 
-    daily_prices = DailyPriceCrawler().crawl_daily_prices(symbols, date)
+    daily_prices = DailyPriceCrawler().crawl_daily_prices(symbols, start_date, end_date)
     return HttpResponse(serializers.serialize("json", daily_prices))
 
 
