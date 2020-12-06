@@ -18,15 +18,20 @@ class CompanyCrawler:
 
         companies = []
         for company_json in companies_json:
-            company = Company()
-            company.symbol = company_json["symbol"]
-            company.iex_id = company_json["iexId"]
-            company.name = company_json["name"]
-            company.exchange = company_json["exchange"]
+            company = self.__get_company(company_json)
             company.save()
             companies.append(company)
 
         return companies
+
+    def __get_company(self, company_json):
+        company = Company()
+        company.symbol = company_json["symbol"]
+        company.iex_id = company_json["iexId"]
+        company.name = company_json["name"]
+        company.exchange = company_json["exchange"]
+
+        return company
 
 
 class DailyPriceCrawler:
@@ -44,23 +49,19 @@ class DailyPriceCrawler:
 
         daily_prices = []
 
-        try:
-            response = requests.get(url).text
-            print(response)
-            daily_prices_json = json.loads(response)
+        response = requests.get(url).text
+        daily_prices_json = json.loads(response)
 
-            for daily_price_json in daily_prices_json:
-                daily_price = self.__get_daily_price(daily_price_json)
-                daily_price.save()
-                daily_prices.append(daily_price)
-        except Exception as e:
-            logger.error(e)
+        for daily_price_json in daily_prices_json:
+            daily_price = self.__get_daily_price(daily_price_json)
+            daily_price.save()
+            daily_prices.append(daily_price)
 
         return daily_prices
 
     def __get_daily_price(self, daily_price_json):
         daily_price = DailyPrice()
-        daily_price.id = daily_price_json["symbol"] + "-" + daily_price_json["date"].replace("-", "")
+        daily_price.id = "{symbol}-{date}".format(symbol=daily_price_json["symbol"], date=daily_price_json["date"].replace("-", ""))
         daily_price.symbol = daily_price_json["symbol"]
         daily_price.date = datetime.strptime(daily_price_json["date"], "%Y-%m-%d")
         daily_price.close = daily_price_json["close"]
@@ -83,37 +84,37 @@ class QuarterlyIndicatorCrawler:
         return quarterly_indicators
 
     def __crawl_quarterly_indicator_by_symbol(self, symbol):
-        fundamentals_json = self.__crawl_fundamentals(symbol)
-        quarterly_indicators = []
-        for fundamental_json in fundamentals_json:
-            quarterly_indicator = QuarteryIndicator()
-
-            quarterly_indicator.symbol = symbol
-            quarterly_indicator.fiscal_year = fundamental_json["fiscalYear"]
-            quarterly_indicator.fiscal_quarter = fundamental_json["fiscalQuarter"]
-            quarterly_indicator.id = "{symbol}-{fiscal_year}-{fiscal_quarter}".format(symbol=symbol, fiscal_year=quarterly_indicator.fiscal_year, fiscal_quarter=quarterly_indicator.fiscal_quarter)
-
-            quarterly_indicator.total_assets = fundamental_json["assetsUnadjusted"]
-            quarterly_indicator.total_equity = fundamental_json["assetsUnadjusted"]
-            quarterly_indicator.net_income = fundamental_json["incomeNet"]
-            quarterly_indicator.shares_issued = fundamental_json["sharesIssued"]
-
-            quarterly_indicator.eps = quarterly_indicator.net_income / quarterly_indicator.shares_issued
-            quarterly_indicator.bps = quarterly_indicator.total_assets / quarterly_indicator.shares_issued
-            quarterly_indicator.roe = (quarterly_indicator.net_income / quarterly_indicator.total_equity) * 100
-            quarterly_indicator.roa = (quarterly_indicator.net_income / quarterly_indicator.total_assets) * 100
-
-            quarterly_indicator.save()
-            quarterly_indicators.append(quarterly_indicator)
-
-        return quarterly_indicators
-
-    def __crawl_fundamentals(self, symbol):
         url = consts.URL_BODY_IEX + "/time-series/fundamentals/{symbol}/{period}".format(symbol=symbol, period="quarterly")
         url += "?token=" + consts.IEX_KEYS
 
         response = requests.get(url).text
         fundamentals_json = json.loads(response)
-        print(type(fundamentals_json))
 
-        return fundamentals_json
+        quarterly_indicators = []
+        for fundamental_json in fundamentals_json:
+            quarterly_indicator = self.__get_quarterly_indicator(symbol, fundamental_json)
+            quarterly_indicator.save()
+            quarterly_indicators.append(quarterly_indicator)
+
+        return quarterly_indicators
+
+    def __get_quarterly_indicator(self, symbol, fundamental_json):
+        quarterly_indicator = QuarteryIndicator()
+
+        keys = [symbol, fundamental_json["fiscalYear"], fundamental_json["fiscalQuarter"]]
+        quarterly_indicator.id = "{symbol}-{fiscal_year}-{fiscal_quarter}".format(symbol=keys[0], fiscal_year=keys[1], fiscal_quarter=keys[2])
+        quarterly_indicator.symbol = keys[0]
+        quarterly_indicator.fiscal_year = keys[1]
+        quarterly_indicator.fiscal_quarter = keys[2]
+
+        quarterly_indicator.total_assets = fundamental_json["assetsUnadjusted"]
+        quarterly_indicator.total_equity = fundamental_json["assetsUnadjusted"]
+        quarterly_indicator.net_income = fundamental_json["incomeNet"]
+        quarterly_indicator.shares_issued = fundamental_json["sharesIssued"]
+
+        quarterly_indicator.eps = quarterly_indicator.net_income / quarterly_indicator.shares_issued
+        quarterly_indicator.bps = quarterly_indicator.total_assets / quarterly_indicator.shares_issued
+        quarterly_indicator.roe = (quarterly_indicator.net_income / quarterly_indicator.total_equity) * 100
+        quarterly_indicator.roa = (quarterly_indicator.net_income / quarterly_indicator.total_assets) * 100
+
+        return quarterly_indicator
