@@ -12,18 +12,27 @@ def companies(request):
 def daily_price(request):
     req_json = request.GET.dict()
     symbol = req_json.get("symbol")
-    range = req_json.get("range")
+    start_date = req_json.get("start_date")
+    end_date = req_json.get("end_date")
 
     if symbol == "test":
         return HttpResponse("SUCCESS")
 
     symbols = []
     if symbol == "all":
-        symbols.extend(list(Company.objects.all().values_list('symbol', flat=True)))
+        # symbols.extend(list(Company.objects.all().values_list('symbol', flat=True)))
+        dataset = list(Company.objects.all().values_list('symbol', flat=True))
+        for i, data in enumerate(dataset):
+            print(i)
+            if len(DailyPrice.objects.filter(symbol=data, date=datetime.strptime("20200908", "%Y%m%d"))) == 0:
+                print(data)
+                symbols.append(data)
+        print(symbols)
+        print(len(symbols))
     else:
         symbols.append(symbol)
 
-    daily_prices = DailyPriceCrawler().crawl_daily_prices(symbols, range)
+    daily_prices = DailyPriceCrawler().crawl_daily_prices(symbols, start_date, end_date)
     return HttpResponse(serializers.serialize("json", daily_prices))
 
 

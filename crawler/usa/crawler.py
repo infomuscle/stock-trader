@@ -1,6 +1,6 @@
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 
@@ -30,28 +30,49 @@ class CompanyCrawler:
         company.iex_id = company_json["iexId"]
         company.name = company_json["name"]
         company.exchange = company_json["exchange"]
+        if company_json["isEnabled"] == False:
+            company.enabled = "N"
 
         return company
 
 
 class DailyPriceCrawler:
-    def crawl_daily_prices(self, symbols, range):
+    def crawl_daily_prices(self, symbols, start_date_str, end_date_str):
+
+        start_date = datetime.strptime(start_date_str, "%Y%m%d")
+        end_date = datetime.strptime(end_date_str, "%Y%m%d")
 
         daily_prices = []
         for symbol in symbols:
-            daily_prices.extend(self.__crawl_daily_prices_by_symbol(symbol, range))
+            daily_prices.extend(self.__crawl_daily_prices_of_range(symbol, start_date, end_date))
 
         return daily_prices
 
-    def __crawl_daily_prices_by_symbol(self, symbol, range):
-        url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/{range}".format(symbol=symbol, range=range)
-        url += "?token=" + consts.IEX_KEYS
+    def __crawl_daily_prices_of_range(self, symbol, start_date, end_date):
 
+        search_date = start_date
         daily_prices = []
+        while search_date <= end_date:
+            try:
+                daily_prices.extend(self.__crawl_daily_price_by_symbol(symbol, search_date))
+            except Exception as e:
+                logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=symbol, error=e))
+            search_date += timedelta(days=1)
+
+        return daily_prices
+
+    def __crawl_daily_price_by_symbol(self, symbol, date):
+        # url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/date/{date}".format(symbol=symbol, date=date.strftime("%Y%m%d"))
+        url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/{date}".format(symbol=symbol, date="3m")
+        url += "?token=" + consts.IEX_KEYS
+        url += "&chartByDay=" + "true"
+        url += "&changeFromClose=" + "true"
 
         response = requests.get(url).text
+        print(response)
         daily_prices_json = json.loads(response)
 
+        daily_prices = []
         for daily_price_json in daily_prices_json:
             daily_price = self.__get_daily_price(daily_price_json)
             daily_price.save()
