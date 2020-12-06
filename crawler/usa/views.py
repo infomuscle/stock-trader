@@ -25,3 +25,21 @@ def daily_price(request):
 
     daily_prices = DailyPriceCrawler().crawl_daily_prices(symbols, range)
     return HttpResponse(serializers.serialize("json", daily_prices))
+
+
+def quarterly_indicator(request):
+    req_json = request.GET.dict()
+    symbol = req_json.get("symbol")
+
+    if symbol == "test":
+        return HttpResponse("QUARTERLY INDICATOR USA")
+
+    symbols = []
+    if symbol == "all":
+        symbols.extend(list(Company.objects.all().values_list('symbol', flat=True)))
+    else:
+        symbols.append(symbol)
+
+    responses = QuarterlyIndicatorCrawler().crawl_quarterly_indicator(symbols)
+
+    return HttpResponse(responses)

@@ -7,5 +7,6 @@ app_name = "usa"
 urlpatterns = [
     path("companies/list", views.companies, name="companies"),
     path('daily/price', views.daily_price, name="daily_price"),
+    path('quarterly/indicator', views.quarterly_indicator, name="quarterly_indicator"),
 
 ]

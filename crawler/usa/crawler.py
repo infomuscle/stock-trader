@@ -46,6 +46,7 @@ class DailyPriceCrawler:
 
         try:
             response = requests.get(url).text
+            print(response)
             daily_prices_json = json.loads(response)
 
             for daily_price_json in daily_prices_json:
@@ -71,3 +72,27 @@ class DailyPriceCrawler:
         daily_price.volume = daily_price_json["volume"]
 
         return daily_price
+
+
+class QuarterlyIndicatorCrawler:
+    def crawl_quarterly_indicator(self, symbols):
+        responses = []
+        for symbol in symbols:
+            responses.append(self.__crawl_quarterly_indicator_by_symbol(symbol))
+
+        return responses
+
+    def __crawl_quarterly_indicator_by_symbol(self, symbol):
+        response = self.__crawl_fundamentals(symbol)
+
+        return response
+
+    def __crawl_fundamentals(self, symbol):
+        url = consts.URL_BODY_IEX + "/time-series/fundamentals/{symbol}/{period}".format(symbol=symbol, period="quarterly")
+        url += "?token=" + consts.IEX_KEYS
+
+        response = requests.get(url).text
+        # daily_prices_json = json.loads(response)
+
+        return response
+
