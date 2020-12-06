@@ -30,6 +30,8 @@ class CompanyCrawler:
         company.iex_id = company_json["iexId"]
         company.name = company_json["name"]
         company.exchange = company_json["exchange"]
+        if company_json["isEnabled"] == False:
+            company.enabled = "N"
 
         return company
 
