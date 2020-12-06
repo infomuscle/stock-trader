@@ -76,23 +76,44 @@ class DailyPriceCrawler:
 
 class QuarterlyIndicatorCrawler:
     def crawl_quarterly_indicator(self, symbols):
-        responses = []
+        quarterly_indicators = []
         for symbol in symbols:
-            responses.append(self.__crawl_quarterly_indicator_by_symbol(symbol))
+            quarterly_indicators.extend(self.__crawl_quarterly_indicator_by_symbol(symbol))
 
-        return responses
+        return quarterly_indicators
 
     def __crawl_quarterly_indicator_by_symbol(self, symbol):
-        response = self.__crawl_fundamentals(symbol)
+        fundamentals_json = self.__crawl_fundamentals(symbol)
+        quarterly_indicators = []
+        for fundamental_json in fundamentals_json:
+            quarterly_indicator = QuarteryIndicator()
 
-        return response
+            quarterly_indicator.symbol = symbol
+            quarterly_indicator.fiscal_year = fundamental_json["fiscalYear"]
+            quarterly_indicator.fiscal_quarter = fundamental_json["fiscalQuarter"]
+            quarterly_indicator.id = "{symbol}-{fiscal_year}-{fiscal_quarter}".format(symbol=symbol, fiscal_year=quarterly_indicator.fiscal_year, fiscal_quarter=quarterly_indicator.fiscal_quarter)
+
+            quarterly_indicator.total_assets = fundamental_json["assetsUnadjusted"]
+            quarterly_indicator.total_equity = fundamental_json["assetsUnadjusted"]
+            quarterly_indicator.net_income = fundamental_json["incomeNet"]
+            quarterly_indicator.shares_issued = fundamental_json["sharesIssued"]
+
+            quarterly_indicator.eps = quarterly_indicator.net_income / quarterly_indicator.shares_issued
+            quarterly_indicator.bps = quarterly_indicator.total_assets / quarterly_indicator.shares_issued
+            quarterly_indicator.roe = (quarterly_indicator.net_income / quarterly_indicator.total_equity) * 100
+            quarterly_indicator.roa = (quarterly_indicator.net_income / quarterly_indicator.total_assets) * 100
+
+            quarterly_indicator.save()
+            quarterly_indicators.append(quarterly_indicator)
+
+        return quarterly_indicators
 
     def __crawl_fundamentals(self, symbol):
         url = consts.URL_BODY_IEX + "/time-series/fundamentals/{symbol}/{period}".format(symbol=symbol, period="quarterly")
         url += "?token=" + consts.IEX_KEYS
 
         response = requests.get(url).text
-        # daily_prices_json = json.loads(response)
+        fundamentals_json = json.loads(response)
+        print(type(fundamentals_json))
 
-        return response
-
+        return fundamentals_json
