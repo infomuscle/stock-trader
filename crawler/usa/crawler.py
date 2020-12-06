@@ -51,15 +51,20 @@ class DailyPriceCrawler:
         search_date = start_date
         daily_prices = []
         while search_date <= end_date:
-            daily_prices.extend(self.__crawl_daily_price_by_symbol(symbol, search_date))
+            try:
+                daily_prices.extend(self.__crawl_daily_price_by_symbol(symbol, search_date))
+            except Exception as e:
+                logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=symbol, error=e))
             search_date += timedelta(days=1)
 
         return daily_prices
 
     def __crawl_daily_price_by_symbol(self, symbol, date):
-        url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/date/{date}".format(symbol=symbol, date=date.strftime("%Y%m%d"))
+        # url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/date/{date}".format(symbol=symbol, date=date.strftime("%Y%m%d"))
+        url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/{date}".format(symbol=symbol, date="5d")
         url += "?token=" + consts.IEX_KEYS
         url += "&chartByDay=" + "true"
+        url += "&changeFromClose=" + "true"
 
         response = requests.get(url).text
         daily_prices_json = json.loads(response)
