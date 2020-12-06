@@ -60,8 +60,7 @@ class DailyPriceCrawler:
         return daily_prices
 
     def __crawl_daily_price_by_symbol(self, symbol, date):
-        # url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/date/{date}".format(symbol=symbol, date=date.strftime("%Y%m%d"))
-        url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/{date}".format(symbol=symbol, date="5d")
+        url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/date/{date}".format(symbol=symbol, date=date.strftime("%Y%m%d"))
         url += "?token=" + consts.IEX_KEYS
         url += "&chartByDay=" + "true"
         url += "&changeFromClose=" + "true"
