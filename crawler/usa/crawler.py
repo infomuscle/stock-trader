@@ -72,7 +72,7 @@ class DailyPriceCrawler:
                 daily_prices.extend(self.__crawl_daily_prices_by_symbol(symbol, start_date, end_date))
             except Exception as e:
                 logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=symbol, error=e))
-            logger.info("{progress} / {total}".format(progress=i, total=total_length))
+            print("{progress} / {total}".format(progress=i, total=total_length))
 
         return daily_prices
 

@@ -20,9 +20,10 @@ def daily_price(request):
 
     symbols = []
     if symbol == "all":
-        symbols.extend(list(Company.objects.all().order_by().values_list('symbol', flat=True)))
+        symbols.extend(list(Company.objects.filter(exchange__in=["NAS", "NYS", "USAMEX"]).order_by().values_list('symbol', flat=True)))
     else:
         symbols.append(symbol)
+    print(len(symbols))
 
     daily_prices = DailyPriceCrawler().crawl_daily_prices(symbols, start_date, end_date)
     return HttpResponse(serializers.serialize("json", daily_prices))
