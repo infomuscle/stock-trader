@@ -17,6 +17,11 @@ class CompanyCrawler:
         nasdaq = fdr.StockListing('NASDAQ')  # 3210
         nyse = fdr.StockListing('NYSE')  # 3100
         amex = fdr.StockListing('AMEX')  # 286
+        # sp500 = fdr.StockListing('SP500')
+
+        print(nasdaq.head())
+        print(nyse.head())
+        print(amex.head())
 
         companies = []
 
@@ -41,8 +46,6 @@ class CompanyCrawler:
         company.iex_id = company_json["iexId"]
         company.name = company_json["name"]
         company.exchange = company_json["exchange"]
-        if company_json["isEnabled"] == False:
-            company.enabled = "N"
 
         return company
 
