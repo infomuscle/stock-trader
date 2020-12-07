@@ -13,18 +13,28 @@ logger.setLevel(logging.INFO)
 
 class CompanyCrawler:
     def crawl_companies(self):
-        nasdaq = fdr.StockListing('NASDAQ')  # 3210
-        nyse = fdr.StockListing('NYSE')  # 3100
-        amex = fdr.StockListing('AMEX')  # 286
-        # sp500 = fdr.StockListing('SP500')
 
-        print(nasdaq.head())
-        print(nyse.head())
-        print(amex.head())
+        dataframes = [fdr.StockListing('NASDAQ'), fdr.StockListing('NYSE'), fdr.StockListing('AMEX')]  # 3213 3100 286
+        exchanges = ["NAS", "NYS", "USAMEX"]
 
         companies = []
+        for ex, df in enumerate(dataframes):
+            for idx, row in df.iterrows():
+                try:
+                    company = self.__get_companies(df, idx, exchanges[ex])
+                    company.save()
+                    companies.append(company)
+                except Exception as e:
+                    logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=df.loc[idx, "Symbol"], error=e))
 
         return companies
+
+    def __get_companies(self, df, idx, exchange):
+        company = Company()
+        company.symbol = df.loc[idx, "Symbol"]
+        company.name = df.loc[idx, "Name"]
+        company.exchange = exchange
+        return company
 
 
 class DailyPriceCrawler:
