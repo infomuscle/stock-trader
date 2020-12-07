@@ -1,17 +1,42 @@
 import json
 import logging
-from datetime import datetime, timedelta
 
+import FinanceDataReader as fdr
 import requests
 
 from usa import constants as consts
 from usa.models import *
 
 logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 class CompanyCrawler:
     def crawl_companies(self):
+
+        dataframes = [fdr.StockListing('NASDAQ'), fdr.StockListing('NYSE'), fdr.StockListing('AMEX')]  # 3213 3100 286
+        exchanges = ["NAS", "NYS", "USAMEX"]
+
+        companies = []
+        for ex, df in enumerate(dataframes):
+            for idx, row in df.iterrows():
+                try:
+                    company = self.__get_companies(df, idx, exchanges[ex])
+                    company.save()
+                    companies.append(company)
+                except Exception as e:
+                    logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=df.loc[idx, "Symbol"], error=e))
+
+        return companies
+
+    def __get_companies(self, df, idx, exchange):
+        company = Company()
+        company.symbol = df.loc[idx, "Symbol"]
+        company.name = df.loc[idx, "Name"]
+        company.exchange = exchange
+        return company
+
+    def crawl_companies_iex(self):
         url = consts.URL_BODY_IEX + "/ref-data/symbols"
         url += "?token=" + consts.IEX_KEYS
         companies_json = json.loads(requests.get(url).text)
@@ -30,70 +55,46 @@ class CompanyCrawler:
         company.iex_id = company_json["iexId"]
         company.name = company_json["name"]
         company.exchange = company_json["exchange"]
-        if company_json["isEnabled"] == False:
-            company.enabled = "N"
 
         return company
 
 
 class DailyPriceCrawler:
-    def crawl_daily_prices(self, symbols, start_date_str, end_date_str):
 
-        start_date = datetime.strptime(start_date_str, "%Y%m%d")
-        end_date = datetime.strptime(end_date_str, "%Y%m%d")
+    def crawl_daily_prices(self, symbols: list, start_date: str, end_date: str):
+        start_date = "{year}-{month}-{day}".format(year=start_date[:4], month=start_date[4:6], day=start_date[6:])
+        end_date = "{year}-{month}-{day}".format(year=end_date[:4], month=end_date[4:6], day=end_date[6:])
 
         daily_prices = []
-        for symbol in symbols:
-            daily_prices.extend(self.__crawl_daily_prices_of_range(symbol, start_date, end_date))
-
-        return daily_prices
-
-    def __crawl_daily_prices_of_range(self, symbol, start_date, end_date):
-
-        search_date = start_date
-        daily_prices = []
-        while search_date <= end_date:
+        total_length = len(symbols)
+        for i, symbol in enumerate(symbols):
             try:
-                daily_prices.extend(self.__crawl_daily_price_by_symbol(symbol, search_date))
+                daily_prices.extend(self.__crawl_daily_prices_by_symbol(symbol, start_date, end_date))
             except Exception as e:
                 logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=symbol, error=e))
-            search_date += timedelta(days=1)
+            print("{progress} / {total}".format(progress=i, total=total_length))
 
         return daily_prices
 
-    def __crawl_daily_price_by_symbol(self, symbol, date):
-        # url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/date/{date}".format(symbol=symbol, date=date.strftime("%Y%m%d"))
-        url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/{date}".format(symbol=symbol, date="3m")
-        url += "?token=" + consts.IEX_KEYS
-        url += "&chartByDay=" + "true"
-        url += "&changeFromClose=" + "true"
-
-        response = requests.get(url).text
-        print(response)
-        daily_prices_json = json.loads(response)
+    def __crawl_daily_prices_by_symbol(self, symbol: str, start_date: str, end_date: str):
+        df_daily_prices = fdr.DataReader(symbol, start_date, end_date)
 
         daily_prices = []
-        for daily_price_json in daily_prices_json:
-            daily_price = self.__get_daily_price(daily_price_json)
+        for date, row in df_daily_prices.iterrows():
+            daily_price = DailyPrice()
+            daily_price.id = "{symbol}-{date}".format(symbol=symbol, date=str(date).split(" ")[0].replace("-", ""))
+            daily_price.symbol = symbol
+            daily_price.date = date
+            daily_price.close = df_daily_prices.loc[date, "Close"]
+            daily_price.open = df_daily_prices.loc[date, "Open"]
+            daily_price.high = df_daily_prices.loc[date, "High"]
+            daily_price.low = df_daily_prices.loc[date, "Low"]
+            daily_price.volume = df_daily_prices.loc[date, "Volume"]
+            daily_price.change = df_daily_prices.loc[date, "Change"]
             daily_price.save()
             daily_prices.append(daily_price)
 
         return daily_prices
-
-    def __get_daily_price(self, daily_price_json):
-        daily_price = DailyPrice()
-        daily_price.id = "{symbol}-{date}".format(symbol=daily_price_json["symbol"], date=daily_price_json["date"].replace("-", ""))
-        daily_price.symbol = daily_price_json["symbol"]
-        daily_price.date = datetime.strptime(daily_price_json["date"], "%Y-%m-%d")
-        daily_price.close = daily_price_json["close"]
-        daily_price.open = daily_price_json["open"]
-        daily_price.high = daily_price_json["high"]
-        daily_price.low = daily_price_json["low"]
-        daily_price.change = daily_price_json["change"]
-        daily_price.change_percent = daily_price_json["changePercent"]
-        daily_price.volume = daily_price_json["volume"]
-
-        return daily_price
 
 
 class QuarterlyIndicatorCrawler:

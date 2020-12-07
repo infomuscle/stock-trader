@@ -7,7 +7,6 @@ class Company(models.Model):
     name = models.CharField(db_column="name", max_length=100)
     exchange = models.CharField(db_column="exchange", max_length=6)
     starred = models.CharField(db_column="starred", max_length=1, default="N")
-    enabled = models.CharField(db_column="enabled", max_length=1, default="N")
 
     class Meta:
         db_table = "usa_company"
