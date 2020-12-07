@@ -20,15 +20,7 @@ def daily_price(request):
 
     symbols = []
     if symbol == "all":
-        # symbols.extend(list(Company.objects.all().values_list('symbol', flat=True)))
-        dataset = list(Company.objects.all().values_list('symbol', flat=True))
-        for i, data in enumerate(dataset):
-            print(i)
-            if len(DailyPrice.objects.filter(symbol=data, date=datetime.strptime("20200908", "%Y%m%d"))) == 0:
-                print(data)
-                symbols.append(data)
-        print(symbols)
-        print(len(symbols))
+        symbols.extend(list(Company.objects.all().values_list('symbol', flat=True)))
     else:
         symbols.append(symbol)
 
