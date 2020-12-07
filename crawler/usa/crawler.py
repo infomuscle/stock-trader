@@ -49,23 +49,26 @@ class CompanyCrawler:
 
 class DailyPriceCrawler:
 
-    def crawl_daily_prices(self, symbols, start_date, end_date):
-
-        start_date = start_date[:4] + "-" + start_date[4:6] + "-" + start_date[6:]
-        end_date = end_date[:4] + "-" + end_date[4:6] + "-" + end_date[6:]
+    def crawl_daily_prices(self, symbols: list, start_date: str, end_date: str):
+        start_date = "{year}-{month}-{day}".format(year=start_date[:4], month=start_date[4:6], day=start_date[6:])
+        end_date = "{year}-{month}-{day}".format(year=end_date[:4], month=end_date[4:6], day=end_date[6:])
 
         daily_prices = []
-        for symbol in symbols:
-            daily_prices.extend(self.__crawl_daily_prices_by_symbol(symbol, start_date, end_date))
+        total_length = len(symbols)
+        for i, symbol in enumerate(symbols):
+            try:
+                daily_prices.extend(self.__crawl_daily_prices_by_symbol(symbol, start_date, end_date))
+            except Exception as e:
+                logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=symbol, error=e))
+            print("{progress} / {total}".format(progress=i, total=total_length))
 
         return daily_prices
 
-    def __crawl_daily_prices_by_symbol(self, symbol, start_date, end_date):
-
+    def __crawl_daily_prices_by_symbol(self, symbol: str, start_date: str, end_date: str):
         df_daily_prices = fdr.DataReader(symbol, start_date, end_date)
 
         daily_prices = []
-        for date in df_daily_prices.iterrows():
+        for date, row in df_daily_prices.iterrows():
             daily_price = DailyPrice()
             daily_price.id = "{symbol}-{date}".format(symbol=symbol, date=str(date).split(" ")[0].replace("-", ""))
             daily_price.symbol = symbol

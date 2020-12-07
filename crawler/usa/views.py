@@ -20,7 +20,7 @@ def daily_price(request):
 
     symbols = []
     if symbol == "all":
-        symbols.extend(list(Company.objects.all().values_list('symbol', flat=True)))
+        symbols.extend(list(Company.objects.all().order_by().values_list('symbol', flat=True)))
     else:
         symbols.append(symbol)
 
