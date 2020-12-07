@@ -2,6 +2,7 @@ import json
 import logging
 from datetime import datetime, timedelta
 
+import FinanceDataReader as fdr
 import requests
 
 from usa import constants as consts
@@ -12,6 +13,16 @@ logger = logging.getLogger()
 
 class CompanyCrawler:
     def crawl_companies(self):
+
+        nasdaq = fdr.StockListing('NASDAQ')  # 3210
+        nyse = fdr.StockListing('NYSE')  # 3100
+        amex = fdr.StockListing('AMEX')  # 286
+
+        companies = []
+
+        return companies
+
+    def crawl_companies_iex(self):
         url = consts.URL_BODY_IEX + "/ref-data/symbols"
         url += "?token=" + consts.IEX_KEYS
         companies_json = json.loads(requests.get(url).text)
@@ -37,33 +48,65 @@ class CompanyCrawler:
 
 
 class DailyPriceCrawler:
-    def crawl_daily_prices(self, symbols, start_date_str, end_date_str):
+
+    def crawl_daily_prices(self, symbols, start_date, end_date):
+
+        start_date = start_date[:4] + "-" + start_date[4:6] + "-" + start_date[6:]
+        end_date = end_date[:4] + "-" + end_date[4:6] + "-" + end_date[6:]
+
+        daily_prices = []
+        for symbol in symbols:
+            daily_prices.extend(self.__crawl_daily_prices_by_symbol(symbol, start_date, end_date))
+
+        return daily_prices
+
+    def __crawl_daily_prices_by_symbol(self, symbol, start_date, end_date):
+
+        df_daily_prices = fdr.DataReader(symbol, start_date, end_date)
+
+        daily_prices = []
+        for date in df_daily_prices.iterrows():
+            daily_price = DailyPrice()
+            daily_price.id = "{symbol}-{date}".format(symbol=symbol, date=str(date).split(" ")[0].replace("-", ""))
+            daily_price.symbol = symbol
+            daily_price.date = date
+            daily_price.close = df_daily_prices.loc[date, "Close"]
+            daily_price.open = df_daily_prices.loc[date, "Open"]
+            daily_price.high = df_daily_prices.loc[date, "High"]
+            daily_price.low = df_daily_prices.loc[date, "Low"]
+            daily_price.volume = df_daily_prices.loc[date, "Volume"]
+            daily_price.change = df_daily_prices.loc[date, "Change"]
+            daily_price.save()
+            daily_prices.append(daily_price)
+
+        return daily_prices
+
+    def crawl_daily_prices_iex(self, symbols, start_date_str, end_date_str):
 
         start_date = datetime.strptime(start_date_str, "%Y%m%d")
         end_date = datetime.strptime(end_date_str, "%Y%m%d")
 
         daily_prices = []
         for symbol in symbols:
-            daily_prices.extend(self.__crawl_daily_prices_of_range(symbol, start_date, end_date))
+            daily_prices.extend(self.__crawl_daily_prices_of_range_iex(symbol, start_date, end_date))
 
         return daily_prices
 
-    def __crawl_daily_prices_of_range(self, symbol, start_date, end_date):
+    def __crawl_daily_prices_of_range_iex(self, symbol, start_date, end_date):
 
         search_date = start_date
         daily_prices = []
         while search_date <= end_date:
             try:
-                daily_prices.extend(self.__crawl_daily_price_by_symbol(symbol, search_date))
+                daily_prices.extend(self.__crawl_daily_price_by_symbol_iex(symbol, search_date))
             except Exception as e:
                 logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=symbol, error=e))
             search_date += timedelta(days=1)
 
         return daily_prices
 
-    def __crawl_daily_price_by_symbol(self, symbol, date):
-        # url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/date/{date}".format(symbol=symbol, date=date.strftime("%Y%m%d"))
-        url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/{date}".format(symbol=symbol, date="3m")
+    def __crawl_daily_price_by_symbol_iex(self, symbol, date):
+        url = consts.URL_BODY_IEX + "/stock/{symbol}/chart/date/{date}".format(symbol=symbol, date=date.strftime("%Y%m%d"))
         url += "?token=" + consts.IEX_KEYS
         url += "&chartByDay=" + "true"
         url += "&changeFromClose=" + "true"
@@ -74,13 +117,13 @@ class DailyPriceCrawler:
 
         daily_prices = []
         for daily_price_json in daily_prices_json:
-            daily_price = self.__get_daily_price(daily_price_json)
+            daily_price = self.__get_daily_price_iex(daily_price_json)
             daily_price.save()
             daily_prices.append(daily_price)
 
         return daily_prices
 
-    def __get_daily_price(self, daily_price_json):
+    def __get_daily_price_iex(self, daily_price_json):
         daily_price = DailyPrice()
         daily_price.id = "{symbol}-{date}".format(symbol=daily_price_json["symbol"], date=daily_price_json["date"].replace("-", ""))
         daily_price.symbol = daily_price_json["symbol"]
