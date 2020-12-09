@@ -18,12 +18,7 @@ def daily_price(request):
     if symbol == "test":
         return HttpResponse("SUCCESS")
 
-    symbols = []
-    if symbol == "all":
-        symbols.extend(list(Company.objects.filter(exchange__in=["NAS", "NYS", "USAMEX"]).order_by().values_list('symbol', flat=True)))
-    else:
-        symbols.append(symbol)
-    print(len(symbols))
+    symbols = __get_symbols(symbol)
 
     daily_prices = DailyPriceCrawler().crawl_daily_prices(symbols, start_date, end_date)
     return HttpResponse(serializers.serialize("json", daily_prices))
@@ -36,12 +31,18 @@ def quarterly_indicator(request):
     if symbol == "test":
         return HttpResponse("QUARTERLY INDICATOR USA")
 
-    symbols = []
-    if symbol == "all":
-        symbols.extend(list(Company.objects.all().values_list('symbol', flat=True)))
-    else:
-        symbols.append(symbol)
+    symbols = __get_symbols(symbol)
 
     responses = QuarterlyIndicatorCrawler().crawl_quarterly_indicator(symbols)
 
     return HttpResponse(responses)
+
+
+def __get_symbols(symbol: str):
+    symbols = []
+    if symbol == "all":
+        symbols.extend(list(Company.objects.filter(exchange__in=["NAS", "NYS", "USAMEX"]).order_by().values_list('symbol', flat=True)))
+    else:
+        symbols.append(symbol)
+
+    return symbols
