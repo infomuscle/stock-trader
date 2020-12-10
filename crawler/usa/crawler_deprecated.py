@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import requests
 
 from usa import constants as consts
-from usa.models import Company, DailyPrice
+from usa.models import DailyPrice, QuarteryIndicator
 
 logger = logging.getLogger()
 
@@ -67,3 +67,48 @@ class DailyPriceCrawler:
         daily_price.volume = daily_price_json["volume"]
 
         return daily_price
+
+
+class QuarterlyIndicatorCrawler:
+    def crawl_quarterly_indicator_iex(self, symbols):
+        quarterly_indicators = []
+        for symbol in symbols:
+            quarterly_indicators.extend(self.__crawl_quarterly_indicator_by_symbol_iex(symbol))
+
+        return quarterly_indicators
+
+    def __crawl_quarterly_indicator_by_symbol_iex(self, symbol):
+        url = consts.URL_BODY_IEX + "/time-series/fundamentals/{symbol}/{period}".format(symbol=symbol, period="quarterly")
+        url += "?token=" + consts.IEX_KEYS
+
+        response = requests.get(url).text
+        fundamentals_json = json.loads(response)
+
+        quarterly_indicators = []
+        for fundamental_json in fundamentals_json:
+            quarterly_indicator = self.__get_quarterly_indicator_iex(symbol, fundamental_json)
+            quarterly_indicator.save()
+            quarterly_indicators.append(quarterly_indicator)
+
+        return quarterly_indicators
+
+    def __get_quarterly_indicator_iex(self, symbol, fundamental_json):
+        quarterly_indicator = QuarteryIndicator()
+
+        keys = [symbol, fundamental_json["fiscalYear"], fundamental_json["fiscalQuarter"]]
+        quarterly_indicator.id = "{symbol}-{fiscal_year}-{fiscal_quarter}".format(symbol=keys[0], fiscal_year=keys[1], fiscal_quarter=keys[2])
+        quarterly_indicator.symbol = keys[0]
+        quarterly_indicator.fiscal_year = keys[1]
+        quarterly_indicator.fiscal_quarter = keys[2]
+
+        quarterly_indicator.total_assets = fundamental_json["assetsUnadjusted"]
+        quarterly_indicator.total_equity = fundamental_json["assetsUnadjusted"]
+        quarterly_indicator.net_income = fundamental_json["incomeNet"]
+        quarterly_indicator.shares_issued = fundamental_json["sharesIssued"]
+
+        quarterly_indicator.eps = quarterly_indicator.net_income / quarterly_indicator.shares_issued
+        quarterly_indicator.bps = quarterly_indicator.total_assets / quarterly_indicator.shares_issued
+        quarterly_indicator.roe = (quarterly_indicator.net_income / quarterly_indicator.total_equity) * 100
+        quarterly_indicator.roa = (quarterly_indicator.net_income / quarterly_indicator.total_assets) * 100
+
+        return quarterly_indicator
