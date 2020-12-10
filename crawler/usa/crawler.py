@@ -130,11 +130,15 @@ class DailyPriceCrawler:
 
 class QuarterlyIndicatorCrawler:
     def crawl_quarterly_indicator(self, symbols: list):
-        response = ""
-        for symbol in symbols:
-            response = self.__crawl_quarterly_indicator_by_symbol(symbol)
 
-        return response
+        quarterly_indicators = list()
+        for symbol in symbols:
+            try:
+                quarterly_indicators.extend(self.__crawl_quarterly_indicator_by_symbol(symbol))
+            except Exception as e:
+                logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=symbol, error=e))
+
+        return quarterly_indicators
 
     def __crawl_quarterly_indicator_by_symbol(self, symbol: str):
         # assets               338516000000
@@ -147,11 +151,12 @@ class QuarterlyIndicatorCrawler:
         url = "https://financialmodelingprep.com/api/v3/financial-statement-full-as-reported/"
         url += symbol
         url += "?apikey=" + consts.FMP_KEY
-        url += " &period=quarter"
+        url += "&period=quarter"
         print(url)
 
         response = requests.get(url)
-        print(type(response.text))
-        print(response.text)
+        financial_statements_json = json.loads(response.text)
 
-        return response.text
+
+
+        return financial_statements_json

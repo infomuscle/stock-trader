@@ -46,9 +46,9 @@ def quarterly_indicator(request):
 
     symbols = __get_symbols(symbol)
 
-    responses = QuarterlyIndicatorCrawler().crawl_quarterly_indicator(symbols)
+    result = QuarterlyIndicatorCrawler().crawl_quarterly_indicator(symbols)
 
-    return HttpResponse(responses)
+    return HttpResponse(json.dumps(result))
 
 
 def __get_symbols(symbol: str):
