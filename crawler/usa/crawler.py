@@ -3,7 +3,6 @@ import logging
 
 import FinanceDataReader as fdr
 import requests
-import yfinance as yf
 
 from usa import constants as consts
 from usa.models import *
@@ -131,18 +130,28 @@ class DailyPriceCrawler:
 
 class QuarterlyIndicatorCrawler:
     def crawl_quarterly_indicator(self, symbols: list):
+        response = ""
         for symbol in symbols:
-            self.__crawl_quarterly_indicator_by_symbol(symbol)
+            response = self.__crawl_quarterly_indicator_by_symbol(symbol)
 
-        return
+        return response
 
     def __crawl_quarterly_indicator_by_symbol(self, symbol: str):
-        ticker = yf.Ticker(symbol)
-        print(ticker.balance_sheet)
-        print(ticker.balancesheet)
-        print(ticker.get_balance_sheet())
-        print(ticker.get_balancesheet())
-        print(ticker.quarterly_balance_sheet)
-        print(ticker.quarterly_balancesheet)
+        # assets               338516000000
+        # liabilities          248028000000
+        # stockholdersequity    90488000000
+        # commonstocksharesauthorized   12600000000
+        # commonstocksharesissued       4443236000
+        print(symbol)
 
-        return
+        url = "https://financialmodelingprep.com/api/v3/financial-statement-full-as-reported/"
+        url += symbol
+        url += "?apikey=" + consts.FMP_KEY
+        url += " &period=quarter"
+        print(url)
+
+        response = requests.get(url)
+        print(type(response.text))
+        print(response.text)
+
+        return response.text
