@@ -97,7 +97,6 @@ class DailyPriceCrawler:
         return daily_prices
 
     def calculate_change_percent(self, symbols: list):
-        # change_percent = ((today / yesterday) - 1) * 100
 
         result = dict()
         for symbol in symbols:
@@ -111,8 +110,15 @@ class DailyPriceCrawler:
         return result
 
     def calculate_change_percent_by_symbols(self, symbol: str):
-        close_prices = DailyPrice.objects.filter(symbol=symbol).order_by("date")
-        print(close_prices)
+        # change_percent = ((today / yesterday) - 1) * 100
+
+        daily_prices = DailyPrice.objects.filter(symbol=symbol).order_by("-date")
+        for i in range(len(daily_prices)):
+            if i == len(daily_prices) - 1:
+                daily_prices[i].change_percent = 0
+            else:
+                daily_prices[i].change_percent = ((daily_prices[i].close / daily_prices[i + 1].close) - 1) * 100
+            print(daily_prices[i].date, daily_prices[i].change_percent)
 
         return
 
