@@ -98,19 +98,22 @@ class DailyPriceCrawler:
 
     def calculate_change_percent(self, symbols: list):
 
+        total_length = len(symbols)
         result = dict()
-        for symbol in symbols:
+        for i, symbol in enumerate(symbols):
             try:
                 result[symbol] = self.calculate_change_percent_by_symbols(symbol)
             except Exception as e:
                 logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=symbol, error=e))
                 result[symbol] = False
+            print("{progress} / {total_length}".format(progress=i+1, total_length=total_length))
 
         return result
 
     def calculate_change_percent_by_symbols(self, symbol: str):
         """
         change_percent = ((today / yesterday) - 1) * 100
+        AONE+, GB, HZAC+, IACA+, NSH+ -> float division by zero
         @param symbol:
         @return:
         """
