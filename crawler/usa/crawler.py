@@ -72,7 +72,7 @@ class DailyPriceCrawler:
                 daily_prices.extend(self.__crawl_daily_prices_by_symbol(symbol, start_date, end_date))
             except Exception as e:
                 logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=symbol, error=e))
-            print("{progress} / {total}".format(progress=i, total=total_length))
+            # print("{progress} / {total}".format(progress=i, total=total_length))
 
         return daily_prices
 
@@ -96,8 +96,23 @@ class DailyPriceCrawler:
 
         return daily_prices
 
-    def calculate_change_percent(self):
+    def calculate_change_percent(self, symbols: list):
         # change_percent = ((today / yesterday) - 1) * 100
+
+        result = dict()
+        for symbol in symbols:
+            try:
+                self.calculate_change_percent_by_symbols(symbol)
+                result[symbol] = True
+            except Exception as e:
+                logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=symbol, error=e))
+                result[symbol] = False
+
+        return result
+
+    def calculate_change_percent_by_symbols(self, symbol: str):
+        close_prices = DailyPrice.objects.filter(symbol=symbol).order_by("date")
+        print(close_prices)
 
         return
 
