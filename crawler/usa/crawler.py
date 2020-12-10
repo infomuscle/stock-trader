@@ -96,6 +96,11 @@ class DailyPriceCrawler:
 
         return daily_prices
 
+    def calculate_change_percent(self):
+        # change_percent = ((today / yesterday) - 1) * 100
+
+        return
+
 
 class QuarterlyIndicatorCrawler:
     def crawl_quarterly_indicator(self, symbols):
