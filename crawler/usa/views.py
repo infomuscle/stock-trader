@@ -24,6 +24,19 @@ def daily_price(request):
     return HttpResponse(serializers.serialize("json", daily_prices))
 
 
+def change_percent(request):
+    req_json = request.GET.dict()
+    symbol = req_json.get("symbol")
+
+    if symbol == "test":
+        return HttpResponse("CHANGE PERCENT SUCCESS")
+
+    symbols = __get_symbols(symbol)
+
+    result = DailyPriceCrawler().calculate_change_percent(symbols)
+    return HttpResponse(json.dumps(result))
+
+
 def quarterly_indicator(request):
     req_json = request.GET.dict()
     symbol = req_json.get("symbol")
