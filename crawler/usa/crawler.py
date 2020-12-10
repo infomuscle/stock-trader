@@ -98,19 +98,22 @@ class DailyPriceCrawler:
 
     def calculate_change_percent(self, symbols: list):
 
+        total_length = len(symbols)
         result = dict()
-        for symbol in symbols:
+        for i, symbol in enumerate(symbols):
             try:
                 result[symbol] = self.calculate_change_percent_by_symbols(symbol)
             except Exception as e:
                 logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=symbol, error=e))
                 result[symbol] = False
+            print("{progress} / {total_length}".format(progress=i + 1, total_length=total_length))
 
         return result
 
     def calculate_change_percent_by_symbols(self, symbol: str):
         """
         change_percent = ((today / yesterday) - 1) * 100
+        AONE+, GB, HZAC+, IACA+, NSH+ -> float division by zero
         @param symbol:
         @return:
         """
@@ -126,45 +129,29 @@ class DailyPriceCrawler:
 
 
 class QuarterlyIndicatorCrawler:
-    def crawl_quarterly_indicator(self, symbols):
-        quarterly_indicators = []
+    def crawl_quarterly_indicator(self, symbols: list):
+        response = ""
         for symbol in symbols:
-            quarterly_indicators.extend(self.__crawl_quarterly_indicator_by_symbol(symbol))
+            response = self.__crawl_quarterly_indicator_by_symbol(symbol)
 
-        return quarterly_indicators
+        return response
 
-    def __crawl_quarterly_indicator_by_symbol(self, symbol):
-        url = consts.URL_BODY_IEX + "/time-series/fundamentals/{symbol}/{period}".format(symbol=symbol, period="quarterly")
-        url += "?token=" + consts.IEX_KEYS
+    def __crawl_quarterly_indicator_by_symbol(self, symbol: str):
+        # assets               338516000000
+        # liabilities          248028000000
+        # stockholdersequity    90488000000
+        # commonstocksharesauthorized   12600000000
+        # commonstocksharesissued       4443236000
+        print(symbol)
 
-        response = requests.get(url).text
-        fundamentals_json = json.loads(response)
+        url = "https://financialmodelingprep.com/api/v3/financial-statement-full-as-reported/"
+        url += symbol
+        url += "?apikey=" + consts.FMP_KEY
+        url += " &period=quarter"
+        print(url)
 
-        quarterly_indicators = []
-        for fundamental_json in fundamentals_json:
-            quarterly_indicator = self.__get_quarterly_indicator(symbol, fundamental_json)
-            quarterly_indicator.save()
-            quarterly_indicators.append(quarterly_indicator)
+        response = requests.get(url)
+        print(type(response.text))
+        print(response.text)
 
-        return quarterly_indicators
-
-    def __get_quarterly_indicator(self, symbol, fundamental_json):
-        quarterly_indicator = QuarteryIndicator()
-
-        keys = [symbol, fundamental_json["fiscalYear"], fundamental_json["fiscalQuarter"]]
-        quarterly_indicator.id = "{symbol}-{fiscal_year}-{fiscal_quarter}".format(symbol=keys[0], fiscal_year=keys[1], fiscal_quarter=keys[2])
-        quarterly_indicator.symbol = keys[0]
-        quarterly_indicator.fiscal_year = keys[1]
-        quarterly_indicator.fiscal_quarter = keys[2]
-
-        quarterly_indicator.total_assets = fundamental_json["assetsUnadjusted"]
-        quarterly_indicator.total_equity = fundamental_json["assetsUnadjusted"]
-        quarterly_indicator.net_income = fundamental_json["incomeNet"]
-        quarterly_indicator.shares_issued = fundamental_json["sharesIssued"]
-
-        quarterly_indicator.eps = quarterly_indicator.net_income / quarterly_indicator.shares_issued
-        quarterly_indicator.bps = quarterly_indicator.total_assets / quarterly_indicator.shares_issued
-        quarterly_indicator.roe = (quarterly_indicator.net_income / quarterly_indicator.total_equity) * 100
-        quarterly_indicator.roa = (quarterly_indicator.net_income / quarterly_indicator.total_assets) * 100
-
-        return quarterly_indicator
+        return response.text
