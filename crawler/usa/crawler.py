@@ -137,7 +137,6 @@ class QuarterlyIndicatorCrawler:
                 quarterly_indicators.extend(self.__crawl_quarterly_indicator_by_symbol(symbol))
             except Exception as e:
                 logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=symbol, error=e))
-        print(quarterly_indicators)
 
         return quarterly_indicators
 
@@ -185,10 +184,11 @@ class QuarterlyIndicatorCrawler:
         return quarterly_indicators
 
     def __crawl_income_statement_by_symbol(self, symbol: str):
-        url = "{fmp_url_body}/income-statement/{symbol}?apikey={key}&period=quarter&limit=8".format(fmp_url_body=consts.FMP_URL_BODY, symbol=symbol, key=consts.FMP_KEY)
+        url = "{fmp_url_body}/income-statement/{symbol}?apikey={key}&period=quarter&limit=12".format(fmp_url_body=consts.FMP_URL_BODY, symbol=symbol, key=consts.FMP_KEY)
 
         response = requests.get(url)
         income_statements = json.loads(response.text)
+        print(json.dumps(income_statements))
 
         is_simple = dict()
         for income_statement in income_statements:
@@ -201,10 +201,11 @@ class QuarterlyIndicatorCrawler:
         return is_simple
 
     def __crawl_balance_sheet_by_symbol(self, symbol: str):
-        url = "{fmp_url_body}/balance-sheet-statement/{symbol}?apikey={key}&period=quarter&limit=8".format(fmp_url_body=consts.FMP_URL_BODY, symbol=symbol, key=consts.FMP_KEY)
+        url = "{fmp_url_body}/balance-sheet-statement/{symbol}?apikey={key}&period=quarter&limit=12".format(fmp_url_body=consts.FMP_URL_BODY, symbol=symbol, key=consts.FMP_KEY)
 
         response = requests.get(url)
         balance_sheets = json.loads(response.text)
+        print(json.dumps(balance_sheets))
 
         bs_simple = dict()
         for balance_sheet in balance_sheets:
