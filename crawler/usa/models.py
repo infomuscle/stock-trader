@@ -28,7 +28,18 @@ class DailyPrice(models.Model):
         db_table = "usa_daily_price"
 
 
-class QuarteryIndicator(models.Model):
+class DailyIndicator(models.Model):
+    id = models.CharField(db_column="id", primary_key=True, max_length=15)
+    symbol = models.CharField(db_column="symbol", max_length=6)
+    date = models.DateField(db_column="date")
+    per = models.FloatField(db_column="per")
+    pbr = models.FloatField(db_column="pbr")
+
+    class Meta:
+        db_table = "usa_daily_indicator"
+
+
+class QuarterlyIndicator(models.Model):
     id = models.CharField(db_column="id", primary_key=True, max_length=14)
     symbol = models.CharField(db_column="symbol", max_length=6)
     fiscal_year = models.CharField(db_column="fiscal_year", max_length=4)

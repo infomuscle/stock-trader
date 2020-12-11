@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import requests
 
 from usa import constants as consts
-from usa.models import DailyPrice, QuarteryIndicator
+from usa.models import DailyPrice, QuarterlyIndicator
 
 logger = logging.getLogger()
 
@@ -93,7 +93,7 @@ class QuarterlyIndicatorCrawler:
         return quarterly_indicators
 
     def __get_quarterly_indicator_iex(self, symbol, fundamental_json):
-        quarterly_indicator = QuarteryIndicator()
+        quarterly_indicator = QuarterlyIndicator()
 
         keys = [symbol, fundamental_json["fiscalYear"], fundamental_json["fiscalQuarter"]]
         quarterly_indicator.id = "{symbol}-{fiscal_year}-{fiscal_quarter}".format(symbol=keys[0], fiscal_year=keys[1], fiscal_quarter=keys[2])

@@ -140,7 +140,7 @@ class QuarterlyIndicatorCrawler:
 
         quarterly_indicators = list()
         for id in combined:
-            quarterly_indicator = QuarteryIndicator()
+            quarterly_indicator = QuarterlyIndicator()
             quarterly_indicator.id = id
 
             id_splits = id.split("-")

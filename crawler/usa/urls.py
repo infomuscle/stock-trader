@@ -8,6 +8,7 @@ urlpatterns = [
     path("companies/list", views.companies, name="companies"),
     path('daily/price', views.daily_price, name="daily_price"),
     path('daily/price/percent', views.change_percent, name="change_percent"),
+    path('daily/indicator', views.daily_indicator, name="daily_indicator"),
     path('quarterly/indicator', views.quarterly_indicator, name="quarterly_indicator"),
 
 ]
