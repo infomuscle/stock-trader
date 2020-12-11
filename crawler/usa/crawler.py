@@ -178,13 +178,13 @@ class QuarterlyIndicatorCrawler:
             quarterly_indicator.roe = (quarterly_indicator.net_income / quarterly_indicator.total_equity) * 100
             quarterly_indicator.roa = (quarterly_indicator.net_income / quarterly_indicator.total_assets) * 100
 
-            quarterly_indicator.save()
+            # quarterly_indicator.save()
             quarterly_indicators.append(quarterly_indicator)
 
         return quarterly_indicators
 
     def __crawl_income_statement_by_symbol(self, symbol: str):
-        url = "{fmp_url_body}/income-statement/{symbol}?apikey={key}&period=quarter&limit=12".format(fmp_url_body=consts.FMP_URL_BODY, symbol=symbol, key=consts.FMP_KEY)
+        url = "{fmp_url_body}/income-statement/{symbol}?apikey={key}&period=quarter&limit=5".format(fmp_url_body=consts.FMP_URL_BODY, symbol=symbol, key=consts.FMP_KEY)
 
         response = requests.get(url)
         income_statements = json.loads(response.text)
@@ -195,13 +195,15 @@ class QuarterlyIndicatorCrawler:
             temp = dict()
             temp["netIncome"] = income_statement.get("netIncome")
             temp["eps"] = income_statement.get("eps")
-            id = "{symbol}-{fiscalYear}-{quarter}".format(symbol=income_statement.get("symbol"), fiscalYear=income_statement.get("fillingDate")[:4], quarter=income_statement.get("period"))
+
+            date_splits = income_statement.get("date").split("-")
+            id = "{symbol}-{fiscalYear}-{quarter}".format(symbol=income_statement.get("symbol"), fiscalYear=date_splits[0], quarter=consts.QUATER_MAPPER[date_splits[1]])
             is_simple[id] = temp
 
         return is_simple
 
     def __crawl_balance_sheet_by_symbol(self, symbol: str):
-        url = "{fmp_url_body}/balance-sheet-statement/{symbol}?apikey={key}&period=quarter&limit=12".format(fmp_url_body=consts.FMP_URL_BODY, symbol=symbol, key=consts.FMP_KEY)
+        url = "{fmp_url_body}/balance-sheet-statement/{symbol}?apikey={key}&period=quarter&limit=5".format(fmp_url_body=consts.FMP_URL_BODY, symbol=symbol, key=consts.FMP_KEY)
 
         response = requests.get(url)
         balance_sheets = json.loads(response.text)
@@ -213,7 +215,9 @@ class QuarterlyIndicatorCrawler:
             temp["totalAssets"] = balance_sheet.get("totalAssets")
             temp["totalEquity"] = balance_sheet.get("totalStockholdersEquity")
             temp["sharesIssued"] = balance_sheet.get("commonStock")
-            id = "{symbol}-{fiscalYear}-{quarter}".format(symbol=balance_sheet.get("symbol"), fiscalYear=balance_sheet.get("fillingDate")[:4], quarter=balance_sheet.get("period"))
+
+            date_splits = balance_sheet.get("date").split("-")
+            id = "{symbol}-{fiscalYear}-{quarter}".format(symbol=balance_sheet.get("symbol"), fiscalYear=date_splits[0], quarter=consts.QUATER_MAPPER[date_splits[1]])
             bs_simple[id] = temp
 
         return bs_simple
