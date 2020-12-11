@@ -1,6 +1,7 @@
 from django.core import serializers
 from django.http import HttpResponse
 
+from usa.calculator import ChangePercentCalculator, DailyIndicatorCalculator
 from usa.crawler import *
 
 
@@ -33,8 +34,21 @@ def change_percent(request):
 
     symbols = __get_symbols(symbol)
 
-    result = DailyPriceCrawler().calculate_change_percent(symbols)
+    result = ChangePercentCalculator().calculate_change_percents(symbols)
     return HttpResponse(json.dumps(result))
+
+
+def daily_indicator(request):
+    req_json = request.GET.dict()
+    symbol = req_json.get("symbol")
+
+    if symbol == "test":
+        return HttpResponse("DAILY INDICATOR USA")
+
+    symbols = __get_symbols(symbol)
+
+    daily_indicators = DailyIndicatorCalculator().calculate_daily_indicators(symbols)
+    return HttpResponse(serializers.serialize("json", daily_indicators))
 
 
 def quarterly_indicator(request):
