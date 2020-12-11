@@ -29,10 +29,10 @@ class DailyPrice(models.Model):
 
 
 class QuarteryIndicator(models.Model):
-    id = models.CharField(db_column="id", primary_key=True, max_length=13)
+    id = models.CharField(db_column="id", primary_key=True, max_length=14)
     symbol = models.CharField(db_column="symbol", max_length=6)
     fiscal_year = models.CharField(db_column="fiscal_year", max_length=4)
-    fiscal_quarter = models.CharField(db_column="fiscal_quarter", max_length=1)
+    fiscal_quarter = models.CharField(db_column="fiscal_quarter", max_length=2)
     eps = models.FloatField(db_column="eps")
     bps = models.FloatField(db_column="bps")
     roe = models.FloatField(db_column="roe")

@@ -1,0 +1,58 @@
+{
+  "AAPL-2020-Q4": {
+    "netIncome": 12673000000,
+    "eps": 0.73,
+    "totalAssets": 323888000000,
+    "totalEquity": 65339000000,
+    "sharesIssued": 16976763000
+  },
+  "AAPL-2020-Q3": {
+    "netIncome": 11253000000,
+    "eps": 0.64601,
+    "totalAssets": 317344000000,
+    "totalEquity": 72282000000,
+    "sharesIssued": 48696000000
+  },
+  "AAPL-2020-Q2": {
+    "netIncome": 11249000000,
+    "eps": 0.63847,
+    "totalAssets": 320400000000,
+    "totalEquity": 78425000000,
+    "sharesIssued": 48032000000
+  },
+  "AAPL-2020-Q1": {
+    "netIncome": 22236000000,
+    "eps": 1.24792,
+    "totalAssets": 340618000000,
+    "totalEquity": 89531000000,
+    "sharesIssued": 45972000000
+  },
+  "AAPL-2019-Q4": {
+    "netIncome": 13686000000,
+    "eps": 0.75691,
+    "totalAssets": 338516000000,
+    "totalEquity": 90488000000,
+    "sharesIssued": 45174000000
+  },
+  "AAPL-2019-Q3": {
+    "netIncome": 10044000000,
+    "eps": 0.54571,
+    "totalAssets": 322239000000,
+    "totalEquity": 96456000000,
+    "sharesIssued": 43371000000
+  },
+  "AAPL-2019-Q2": {
+    "netIncome": 11561000000,
+    "eps": 0.61486,
+    "totalAssets": 341998000000,
+    "totalEquity": 105860000000,
+    "sharesIssued": 42801000000
+  },
+  "AAPL-2019-Q1": {
+    "netIncome": 19965000000,
+    "eps": 1.04567,
+    "totalAssets": 373719000000,
+    "totalEquity": 117892000000,
+    "sharesIssued": 40970000000
+  }
+}

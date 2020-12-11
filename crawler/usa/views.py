@@ -16,7 +16,7 @@ def daily_price(request):
     end_date = req_json.get("end_date")
 
     if symbol == "test":
-        return HttpResponse("SUCCESS")
+        return HttpResponse("DAILY PRICE USA")
 
     symbols = __get_symbols(symbol)
 
@@ -29,7 +29,7 @@ def change_percent(request):
     symbol = req_json.get("symbol")
 
     if symbol == "test":
-        return HttpResponse("CHANGE PERCENT SUCCESS")
+        return HttpResponse("CHANGE PERCENT USA")
 
     symbols = __get_symbols(symbol)
 
@@ -46,9 +46,8 @@ def quarterly_indicator(request):
 
     symbols = __get_symbols(symbol)
 
-    result = QuarterlyIndicatorCrawler().crawl_quarterly_indicator(symbols)
-
-    return HttpResponse(json.dumps(result))
+    quarterly_indicators = QuarterlyIndicatorCrawler().crawl_quarterly_indicator(symbols)
+    return HttpResponse(serializers.serialize("json", quarterly_indicators))
 
 
 def __get_symbols(symbol: str):
