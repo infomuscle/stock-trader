@@ -140,26 +140,29 @@ class QuarterlyIndicatorCrawler:
 
         quarterly_indicators = list()
         for id in combined:
-            quarterly_indicator = QuarterlyIndicator()
-            quarterly_indicator.id = id
+            try:
+                quarterly_indicator = QuarterlyIndicator()
+                quarterly_indicator.id = id
 
-            id_splits = id.split("-")
-            quarterly_indicator.symbol = id_splits[0]
-            quarterly_indicator.fiscal_year = id_splits[1]
-            quarterly_indicator.fiscal_quarter = id_splits[2]
+                id_splits = id.split("-")
+                quarterly_indicator.symbol = id_splits[0]
+                quarterly_indicator.fiscal_year = id_splits[1]
+                quarterly_indicator.fiscal_quarter = id_splits[2]
 
-            quarterly_indicator.total_assets = combined[id].get("totalAssets")
-            quarterly_indicator.total_equity = combined[id].get("totalEquity")
-            quarterly_indicator.shares_issued = combined[id].get("sharesIssued")
-            quarterly_indicator.net_income = combined[id].get("netIncome")
+                quarterly_indicator.total_assets = combined[id].get("totalAssets")
+                quarterly_indicator.total_equity = combined[id].get("totalEquity")
+                quarterly_indicator.shares_issued = combined[id].get("sharesIssued")
+                quarterly_indicator.net_income = combined[id].get("netIncome")
 
-            quarterly_indicator.eps = quarterly_indicator.net_income / quarterly_indicator.shares_issued
-            quarterly_indicator.bps = quarterly_indicator.total_assets / quarterly_indicator.shares_issued
-            quarterly_indicator.roe = (quarterly_indicator.net_income / quarterly_indicator.total_equity) * 100
-            quarterly_indicator.roa = (quarterly_indicator.net_income / quarterly_indicator.total_assets) * 100
+                quarterly_indicator.eps = quarterly_indicator.net_income / quarterly_indicator.shares_issued
+                quarterly_indicator.bps = quarterly_indicator.total_assets / quarterly_indicator.shares_issued
+                quarterly_indicator.roe = (quarterly_indicator.net_income / quarterly_indicator.total_equity) * 100
+                quarterly_indicator.roa = (quarterly_indicator.net_income / quarterly_indicator.total_assets) * 100
 
-            quarterly_indicator.save()
-            quarterly_indicators.append(quarterly_indicator)
+                quarterly_indicator.save()
+                quarterly_indicators.append(quarterly_indicator)
+            except Exception as e:
+                logger.error("ID: {id} ERROR: {error}".format(id=id, error=e))
 
         return quarterly_indicators
 
