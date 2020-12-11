@@ -1,6 +1,7 @@
 from django.core import serializers
 from django.http import HttpResponse
 
+from usa.calculator import ChangePercentCalculator
 from usa.crawler import *
 
 
@@ -33,7 +34,7 @@ def change_percent(request):
 
     symbols = __get_symbols(symbol)
 
-    result = DailyPriceCrawler().calculate_change_percent(symbols)
+    result = ChangePercentCalculator().calculate_change_percent(symbols)
     return HttpResponse(json.dumps(result))
 
 
