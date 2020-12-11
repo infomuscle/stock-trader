@@ -1,0 +1,138 @@
+[
+  {
+    "model": "usa.quarteryindicator",
+    "pk": "AAPL-2020-Q4",
+    "fields": {
+      "symbol": "AAPL",
+      "fiscal_year": "2020",
+      "fiscal_quarter": "Q4",
+      "eps": 0.7464909535463268,
+      "bps": 19.078313103622875,
+      "roe": 19.395766693705138,
+      "roa": 3.9127723163562713,
+      "total_equity": 65339000000,
+      "total_assets": 323888000000,
+      "net_income": 12673000000,
+      "shares_issued": 16976763000
+    }
+  },
+  {
+    "model": "usa.quarteryindicator",
+    "pk": "AAPL-2020-Q3",
+    "fields": {
+      "symbol": "AAPL",
+      "fiscal_year": "2020",
+      "fiscal_quarter": "Q3",
+      "eps": 0.23108674223755546,
+      "bps": 6.516839165434533,
+      "roe": 15.568191250933843,
+      "roa": 3.5459942522940406,
+      "total_equity": 72282000000,
+      "total_assets": 317344000000,
+      "net_income": 11253000000,
+      "shares_issued": 48696000000
+    }
+  },
+  {
+    "model": "usa.quarteryindicator",
+    "pk": "AAPL-2020-Q2",
+    "fields": {
+      "symbol": "AAPL",
+      "fiscal_year": "2020",
+      "fiscal_quarter": "Q2",
+      "eps": 0.23419803464357095,
+      "bps": 6.670552964690207,
+      "roe": 14.34364042078419,
+      "roa": 3.510923845193508,
+      "total_equity": 78425000000,
+      "total_assets": 320400000000,
+      "net_income": 11249000000,
+      "shares_issued": 48032000000
+    }
+  },
+  {
+    "model": "usa.quarteryindicator",
+    "pk": "AAPL-2020-Q1",
+    "fields": {
+      "symbol": "AAPL",
+      "fiscal_year": "2020",
+      "fiscal_quarter": "Q1",
+      "eps": 0.4836857217436701,
+      "bps": 7.409249108152789,
+      "roe": 24.836090292747766,
+      "roa": 6.5281341561514665,
+      "total_equity": 89531000000,
+      "total_assets": 340618000000,
+      "net_income": 22236000000,
+      "shares_issued": 45972000000
+    }
+  },
+  {
+    "model": "usa.quarteryindicator",
+    "pk": "AAPL-2019-Q4",
+    "fields": {
+      "symbol": "AAPL",
+      "fiscal_year": "2019",
+      "fiscal_quarter": "Q4",
+      "eps": 0.3029618807278523,
+      "bps": 7.493602514720857,
+      "roe": 15.124657413137655,
+      "roa": 4.042940363232462,
+      "total_equity": 90488000000,
+      "total_assets": 338516000000,
+      "net_income": 13686000000,
+      "shares_issued": 45174000000
+    }
+  },
+  {
+    "model": "usa.quarteryindicator",
+    "pk": "AAPL-2019-Q3",
+    "fields": {
+      "symbol": "AAPL",
+      "fiscal_year": "2019",
+      "fiscal_quarter": "Q3",
+      "eps": 0.23158331604067234,
+      "bps": 7.429826381683614,
+      "roe": 10.413038069171437,
+      "roa": 3.11694115237448,
+      "total_equity": 96456000000,
+      "total_assets": 322239000000,
+      "net_income": 10044000000,
+      "shares_issued": 43371000000
+    }
+  },
+  {
+    "model": "usa.quarteryindicator",
+    "pk": "AAPL-2019-Q2",
+    "fields": {
+      "symbol": "AAPL",
+      "fiscal_year": "2019",
+      "fiscal_quarter": "Q2",
+      "eps": 0.27011051143664866,
+      "bps": 7.990420784561109,
+      "roe": 10.921027772529756,
+      "roa": 3.3804291253165224,
+      "total_equity": 105860000000,
+      "total_assets": 341998000000,
+      "net_income": 11561000000,
+      "shares_issued": 42801000000
+    }
+  },
+  {
+    "model": "usa.quarteryindicator",
+    "pk": "AAPL-2019-Q1",
+    "fields": {
+      "symbol": "AAPL",
+      "fiscal_year": "2019",
+      "fiscal_quarter": "Q1",
+      "eps": 0.4873077861850134,
+      "bps": 9.1217720283134,
+      "roe": 16.934991348013437,
+      "roa": 5.342249123004182,
+      "total_equity": 117892000000,
+      "total_assets": 373719000000,
+      "net_income": 19965000000,
+      "shares_issued": 40970000000
+    }
+  }
+]

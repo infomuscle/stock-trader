@@ -137,71 +137,82 @@ class QuarterlyIndicatorCrawler:
                 quarterly_indicators.extend(self.__crawl_quarterly_indicator_by_symbol(symbol))
             except Exception as e:
                 logger.error("SYMBOL: {symbol} ERROR: {error}".format(symbol=symbol, error=e))
+        print(quarterly_indicators)
 
         return quarterly_indicators
 
     def __crawl_quarterly_indicator_by_symbol(self, symbol: str):
-        # assets               338516000000
-        # stockholdersequity    90488000000
-        # commonstocksharesoutstanding  16976763000
-
-        # liabilities          248028000000
-        # commonstocksharesissued       16976763000
-
         income_statements = self.__crawl_income_statement_by_symbol(symbol)
         balance_sheets = self.__crawl_balance_sheet_by_symbol(symbol)
 
-        data = dict()
-        for id in income_statements.keys():
-            if id not in data:
-                data[id] = dict()
-            data[id]["netIncome"] = income_statements[id].get("netIncome")
-            data[id]["eps"] = income_statements[id].get("eps")
+        combined = dict()
+        for id in income_statements:
+            if id not in combined:
+                combined[id] = dict()
+            combined[id]["netIncome"] = income_statements[id].get("netIncome")
+            combined[id]["eps"] = income_statements[id].get("eps")
 
-        for id in balance_sheets.keys():
-            if id not in data:
-                data[id] = dict()
-            data[id]["totalAssets"] = balance_sheets[id].get("totalAssets")
-            data[id]["totalEquity"] = balance_sheets[id].get("totalEquity")
-            data[id]["sharesIssued"] = balance_sheets[id].get("sharesIssued")
-        print(json.dumps(data))
+        for id in balance_sheets:
+            if id not in combined:
+                combined[id] = dict()
+            combined[id]["totalAssets"] = balance_sheets[id].get("totalAssets")
+            combined[id]["totalEquity"] = balance_sheets[id].get("totalEquity")
+            combined[id]["sharesIssued"] = balance_sheets[id].get("sharesIssued")
 
-        return []
+        quarterly_indicators = list()
+        for id in combined:
+            quarterly_indicator = QuarteryIndicator()
+            quarterly_indicator.id = id
+
+            id_splits = id.split("-")
+            quarterly_indicator.symbol = id_splits[0]
+            quarterly_indicator.fiscal_year = id_splits[1]
+            quarterly_indicator.fiscal_quarter = id_splits[2]
+
+            quarterly_indicator.total_assets = combined[id].get("totalAssets")
+            quarterly_indicator.total_equity = combined[id].get("totalEquity")
+            quarterly_indicator.shares_issued = combined[id].get("sharesIssued")
+            quarterly_indicator.net_income = combined[id].get("netIncome")
+
+            quarterly_indicator.eps = quarterly_indicator.net_income / quarterly_indicator.shares_issued
+            quarterly_indicator.bps = quarterly_indicator.total_assets / quarterly_indicator.shares_issued
+            quarterly_indicator.roe = (quarterly_indicator.net_income / quarterly_indicator.total_equity) * 100
+            quarterly_indicator.roa = (quarterly_indicator.net_income / quarterly_indicator.total_assets) * 100
+
+            quarterly_indicator.save()
+            quarterly_indicators.append(quarterly_indicator)
+
+        return quarterly_indicators
 
     def __crawl_income_statement_by_symbol(self, symbol: str):
-        url = "https://financialmodelingprep.com/api/v3/income-statement/{symbol}?apikey={key}&period=quarter&limit=8".format(symbol=symbol, key=consts.FMP_KEY)
-        print(url)
+        url = "{fmp_url_body}/income-statement/{symbol}?apikey={key}&period=quarter&limit=8".format(fmp_url_body=consts.FMP_URL_BODY, symbol=symbol, key=consts.FMP_KEY)
 
         response = requests.get(url)
         income_statements = json.loads(response.text)
 
-        # date symbol period netIncome eps
-        result = dict()
+        is_simple = dict()
         for income_statement in income_statements:
             temp = dict()
             temp["netIncome"] = income_statement.get("netIncome")
             temp["eps"] = income_statement.get("eps")
             id = "{symbol}-{fiscalYear}-{quarter}".format(symbol=income_statement.get("symbol"), fiscalYear=income_statement.get("fillingDate")[:4], quarter=income_statement.get("period"))
-            result[id] = temp
+            is_simple[id] = temp
 
-        return result
+        return is_simple
 
     def __crawl_balance_sheet_by_symbol(self, symbol: str):
-        url = "https://financialmodelingprep.com/api/v3/balance-sheet-statement/{symbol}?apikey={key}&period=quarter&limit=8".format(symbol=symbol, key=consts.FMP_KEY)
-        print(url)
+        url = "{fmp_url_body}/balance-sheet-statement/{symbol}?apikey={key}&period=quarter&limit=8".format(fmp_url_body=consts.FMP_URL_BODY, symbol=symbol, key=consts.FMP_KEY)
 
         response = requests.get(url)
         balance_sheets = json.loads(response.text)
-        print(type(balance_sheets))
 
-        # keys_need = ["fillingDate", "symbol", "period", "totalAssets", "totalStockholdersEquity", "commonStock"]
-        result = dict()
+        bs_simple = dict()
         for balance_sheet in balance_sheets:
             temp = dict()
             temp["totalAssets"] = balance_sheet.get("totalAssets")
             temp["totalEquity"] = balance_sheet.get("totalStockholdersEquity")
             temp["sharesIssued"] = balance_sheet.get("commonStock")
             id = "{symbol}-{fiscalYear}-{quarter}".format(symbol=balance_sheet.get("symbol"), fiscalYear=balance_sheet.get("fillingDate")[:4], quarter=balance_sheet.get("period"))
-            result[id] = temp
+            bs_simple[id] = temp
 
-        return result
+        return bs_simple
