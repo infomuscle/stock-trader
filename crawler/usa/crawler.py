@@ -60,6 +60,17 @@ class CompanyCrawler:
 
 
 class DailyPriceCrawler:
+    """
+    SYMBOL: NKTX ERROR: unsupported operand type(s) for /: 'float' and 'NoneType'
+    SYMBOL: NNA ERROR: unsupported operand type(s) for /: 'float' and 'NoneType'
+    SYMBOL: NMI ERROR: '04'
+    SYMBOL: ABM ERROR: '07'
+    SYMBOL: NLSP ERROR: '01'
+    SYMBOL: ABG ERROR: float division by zero
+    SYMBOL: ABCM ERROR: '01'
+    []
+
+    """
 
     def crawl_daily_prices(self, symbols: list, start_date: str, end_date: str):
         start_date = "{year}-{month}-{day}".format(year=start_date[:4], month=start_date[4:6], day=start_date[6:])
@@ -178,7 +189,7 @@ class QuarterlyIndicatorCrawler:
             quarterly_indicator.roe = (quarterly_indicator.net_income / quarterly_indicator.total_equity) * 100
             quarterly_indicator.roa = (quarterly_indicator.net_income / quarterly_indicator.total_assets) * 100
 
-            # quarterly_indicator.save()
+            quarterly_indicator.save()
             quarterly_indicators.append(quarterly_indicator)
 
         return quarterly_indicators
